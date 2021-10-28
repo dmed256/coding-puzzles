@@ -1,0 +1,9 @@
+# Git
+.gitattributes
+
+# Build artifacts
+*.pyc
+
+# Debug
+.DS_Store
+*.dSYM
