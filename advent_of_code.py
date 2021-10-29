@@ -5,6 +5,13 @@ from termcolor import colored
 
 
 # Input
+def multiline_lines(s):
+    return [
+        line.strip()
+        for line in s.splitlines()
+        if line.strip()
+    ]
+
 def get_input_lines():
     frame = traceback.extract_stack()[0]
     filename = os.path.basename(frame.filename)
