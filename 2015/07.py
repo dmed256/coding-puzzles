@@ -14,6 +14,9 @@ def get_value(signals, key):
 def get_wire_value(signals, line):
     [instruction, wire] = line.split(' -> ')
 
+    if wire in signals:
+        return [wire, signals[wire]]
+
     instruction_words = instruction.split(' ')
 
     if len(instruction_words) == 1:
@@ -47,8 +50,8 @@ def get_wire_value(signals, line):
     return [wire, value]
 
 @testable
-def run(lines, output_wire):
-    signals = {}
+def run(lines, output_wire, default_signals=None):
+    signals = default_signals or {}
     definitions = lines
     while len(definitions):
         missing_definitions = []
@@ -85,3 +88,5 @@ run(example, 'y').should_be(456)
 input_lines = get_input_lines()
 
 run(input_lines, 'a').debug('Star 1')
+
+run(input_lines, 'a', {'b': 16076}).debug('Star 2')

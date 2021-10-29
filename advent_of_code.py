@@ -45,15 +45,32 @@ def yellow(value):
 
 
 # Testing
+def get_test_frame():
+    return traceback.extract_stack()[0]
+
+def get_frame_location(frame=None):
+    frame = frame or get_test_frame()
+
+    filename = os.path.basename(frame.filename)
+    location = f'{filename}:{frame.lineno}'
+    line = frame.line
+
+    return f'{blue(location)}  {yellow(line)}'
+
+def print_message(message):
+    print('')
+    print(textwrap.dedent(message).strip())
+    print('')
+
 class Testable:
     def __init__(self, func):
         self.func = func
 
     def __call__(self, *args, **kwargs):
-        result = self.func(*args, **kwargs)
-        frame = traceback.extract_stack()[0]
-
-        return Test(result, frame)
+        return Test(
+            self.func(*args, **kwargs),
+            get_test_frame(),
+        )
 
 
 class Test:
@@ -66,17 +83,7 @@ class Test:
         return self.result
 
     def get_location(self):
-        filename = os.path.basename(self.frame.filename)
-        location = f'{filename}:{self.frame.lineno}'
-        line = self.frame.line
-
-        return f'{blue(location)}  {yellow(line)}'
-
-    def print_message(self, message):
-        print('')
-        print(textwrap.dedent(message).strip())
-        print('')
-
+        return get_frame_location(self.frame)
 
     def debug(self, header=''):
         output = blue(f'{self.result}')
@@ -87,7 +94,7 @@ class Test:
           -> [{output}]
         """
 
-        self.print_message(message)
+        print_message(message)
 
     def should_be(self, expected_result):
         if self.result == expected_result:
@@ -102,8 +109,48 @@ class Test:
           - EXPECTED: [{expected_output}]
         """
 
-        self.print_message(message)
+        print_message(message)
 
-
+# DEPRECATED
 def testable(func):
     return Testable(func)
+
+class Debug:
+    def __init__(self, header):
+        self.header = header
+
+    def __ror__(self, value):
+        output = blue(f'{value}')
+
+        message = f"""
+        {self.header}
+        {get_frame_location()}
+          -> [{output}]
+        """
+
+        print_message(message)
+
+class ShouldBe:
+    def __init__(self, expected_value):
+        self.expected_value = expected_value
+
+    def __ror__(self, value):
+        if value == self.expected_value:
+            return
+
+        output = red(f'{value}')
+        expected_output = green(f'{self.expected_value}')
+
+        message = f"""
+        {self.get_location()}
+          - OUTPUT:   [{output}]
+          - EXPECTED: [{expected_output}]
+        """
+
+        print_message(message)
+
+def debug(header=''):
+    return Debug(header)
+
+def should_be(expected_result):
+    return ShouldBe(expected_result)
