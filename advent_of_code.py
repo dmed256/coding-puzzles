@@ -142,7 +142,7 @@ class ShouldBe:
         expected_output = green(f'{self.expected_value}')
 
         message = f"""
-        {self.get_location()}
+        {get_frame_location()}
           - OUTPUT:   [{output}]
           - EXPECTED: [{expected_output}]
         """
