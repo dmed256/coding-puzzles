@@ -3,6 +3,7 @@
 
 # Build artifacts
 *.pyc
+__pycache__
 
 # Debug
 .DS_Store
