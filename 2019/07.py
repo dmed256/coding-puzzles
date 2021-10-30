@@ -6,14 +6,20 @@ from advent_of_code import *
 POSITION_MODE = 0
 IMMEDIATE_MODE = 1
 
+SINGLE_LOOP_MODE = 0
+FEEDBACK_LOOP_MODE = 1
+
 class IntProcessor:
-    def __init__(self, values):
+    def __init__(self, values, loop_mode):
         if type(values) is str:
             self.original_values = split_comma_ints(values)
         else:
             self.original_values = values
 
+        self.is_done = False
+        self.loop_mode = loop_mode
         self.values = self.original_values.copy()
+        self.original_input_values = {}
         self.input_values = []
         self.ptr = 0
         self.stack = []
@@ -90,6 +96,9 @@ class IntProcessor:
         output_index = values1[ptr2 - 1]
 
         for i in range(frame_count):
+            if i in self.original_input_values:
+                print(yellow(f'inputs -> {self.original_input_values[i]}'))
+
             [ptr, values1] = self.stack[i]
             [ptr2, values2] = self.stack[i + 1]
 
@@ -118,16 +127,18 @@ class IntProcessor:
         if op == 99:
             return True
 
-        # self.debug_stack()
+        self.debug_stack()
 
         return False
 
-    def unsafe_run(self, input_values,*, reset):
-        if reset:
+    def unsafe_run(self, input_values):
+        # Reset
+        if self.loop_mode == SINGLE_LOOP_MODE:
             self.values = self.original_values.copy()
             self.ptr = 0
             self.stack = []
 
+        self.original_input_values[len(self.stack)] = input_values.copy()
         self.input_values = input_values.copy()
         self.output = []
 
@@ -139,8 +150,9 @@ class IntProcessor:
 
             operations.append(op)
             self.stack.append([self.ptr - 1, self.values.copy()])
+
             if not self.has_valid_output(op):
-                return self.output
+                return None
 
             if op == 1:
                 self.op_values('+')
@@ -150,6 +162,8 @@ class IntProcessor:
                 self.store_input()
             elif op == 4:
                 self.store_output()
+                if self.loop_mode == FEEDBACK_LOOP_MODE:
+                    return self.output
             elif op == 5:
                 self.jump_if_zero(False)
             elif op == 6:
@@ -159,6 +173,7 @@ class IntProcessor:
             elif op == 8:
                 self.op_values('==')
             elif op == 99:
+                self.is_done = True
                 if operations[-2] == 4:
                     return self.output
                 else:
@@ -168,48 +183,42 @@ class IntProcessor:
                 self.debug_stack()
                 return None
 
-    def run(self, input_values, *, reset=True):
+    def run(self, input_values):
         try:
-            return self.unsafe_run(input_values, reset=reset)
-        except Exception:
+            return self.unsafe_run(input_values)
+        except Exception as e:
+            print(f'Exception -> {e}')
             self.debug_stack()
 
 def get_signal(
         values,
+        loop_mode,
         phase_settings,
-        *,
-        cached_outputs=None,
-        reset=True,
 ):
     last_output = 0
-    p = IntProcessor(values)
-    for amp in range(5):
-        inputs = [phase_settings[amp], last_output]
-        key = (amp, *inputs)
-
-        last_output = cached_outputs.get(
-            key,
-            p.run(inputs, reset=reset)[-1],
-        )
-        cached_outputs[key] = last_output
+    p = IntProcessor(values, loop_mode)
+    while not p.is_done:
+        for amp in range(5):
+            inputs = [phase_settings[amp], last_output]
+            outputs = p.run(inputs)
+            if outputs is None:
+                return None
+            last_output = outputs[-1]
 
     return last_output
 
-def run(values, phase_setting_sequence, *, reset=True):
+def run(values, loop_mode, phase_setting_sequence):
     values = split_comma_ints(values)
 
-    cached_outputs = {}
     max_signal = 0
     for phase_settings in itertools.permutations(phase_setting_sequence):
-        max_signal = max(
-            max_signal,
-            get_signal(
-                values,
-                phase_settings,
-                reset=reset,
-                cached_outputs=cached_outputs,
-            )
+        signal = get_signal(
+            values,
+            loop_mode,
+            phase_settings,
         )
+        if signal is not None:
+            max_signal = max(max_signal, signal)
 
     return max_signal
 
@@ -225,16 +234,19 @@ example3 = multiline_input(r"""
 
 run(
     example1,
+    SINGLE_LOOP_MODE,
     [0, 1, 2, 3, 4],
 ) | eq(43210)
 
 run(
     example2,
+    SINGLE_LOOP_MODE,
     [0, 1, 2, 3, 4],
 ) | eq(54321)
 
 run(
     example3,
+    SINGLE_LOOP_MODE,
     [0, 1, 2, 3, 4],
 ) | eq(65210)
 
@@ -242,6 +254,7 @@ input_value = get_input()
 
 run(
     input_value,
+    SINGLE_LOOP_MODE,
     [0, 1, 2, 3, 4],
 ) | debug('Star 1')
 
@@ -254,18 +267,18 @@ example2 = multiline_input("""
 
 run(
     example1,
-    [5, 6, 7, 8, 8],
-    reset=False,
+    FEEDBACK_LOOP_MODE,
+    [5, 6, 7, 8, 9],
 ) | eq(139629729)
 
 run(
     example2,
-    [5, 6, 7, 8, 8],
-    reset=False,
+    FEEDBACK_LOOP_MODE,
+    [5, 6, 7, 8, 9],
 ) | eq(18216)
 
-run(
-    input_value,
-    [5, 6, 7, 8, 8],
-    reset=False,
-) | debug('Star 2')
+# run(
+#     input_value,
+#     FEEDBACK_LOOP_MODE,
+#     [5, 6, 7, 8, 9],
+# ) | debug('Star 2')
