@@ -236,6 +236,14 @@ def get_signal(
             inputs = [*p_inputs[amp], last_output]
 
             outputs = processor.run(inputs)
+            if outputs:
+                last_output = outputs[-1]
+                # Get the output from the last amplifier
+                if amp == 4:
+                    signal = last_output
+
+            p_inputs[amp] = []
+
             if processor.is_done:
                 is_done = amp == 4
                 continue
@@ -244,13 +252,6 @@ def get_signal(
                 processor.print_debug()
                 raise 1
                 break
-
-            last_output = outputs[-1]
-            p_inputs[amp] = []
-
-            # Get the output from the last amplifier
-            if amp == 4:
-                signal = last_output
 
     return signal
 
@@ -279,31 +280,31 @@ example3 = multiline_input(r"""
 3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0
 """)
 
-# run(
-#     example1,
-#     SINGLE_LOOP_MODE,
-#     [0, 1, 2, 3, 4],
-# ) | eq(43210)
+run(
+    example1,
+    SINGLE_LOOP_MODE,
+    [0, 1, 2, 3, 4],
+) | eq(43210)
 
-# run(
-#     example2,
-#     SINGLE_LOOP_MODE,
-#     [0, 1, 2, 3, 4],
-# ) | eq(54321)
+run(
+    example2,
+    SINGLE_LOOP_MODE,
+    [0, 1, 2, 3, 4],
+) | eq(54321)
 
-# run(
-#     example3,
-#     SINGLE_LOOP_MODE,
-#     [0, 1, 2, 3, 4],
-# ) | eq(65210)
+run(
+    example3,
+    SINGLE_LOOP_MODE,
+    [0, 1, 2, 3, 4],
+) | eq(65210)
 
 input_value = get_input()
 
-# run(
-#     input_value,
-#     SINGLE_LOOP_MODE,
-#     [0, 1, 2, 3, 4],
-# ) | debug('Star 1')
+run(
+    input_value,
+    SINGLE_LOOP_MODE,
+    [0, 1, 2, 3, 4],
+) | debug('Star 1')
 
 example1 = multiline_input("""
 3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5
