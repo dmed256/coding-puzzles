@@ -7,13 +7,16 @@ POSITION_MODE = 0
 IMMEDIATE_MODE = 1
 
 class IntProcessor:
-    def __init__(self, values, input_values):
+    def __init__(self, values):
         if type(values) is str:
             self.original_values = split_comma_ints(values)
         else:
             self.original_values = values
 
-        self.original_input_values = input_values.copy()
+        self.values = self.original_values.copy()
+        self.input_values = []
+        self.ptr = 0
+        self.stack = []
 
     def get_modes(self, count):
         modes = []
@@ -119,12 +122,14 @@ class IntProcessor:
 
         return False
 
-    def unsafe_run(self):
-        self.values = self.original_values.copy()
-        self.input_values = self.original_input_values.copy()
-        self.ptr = 0
+    def unsafe_run(self, input_values,*, reset):
+        if reset:
+            self.values = self.original_values.copy()
+            self.ptr = 0
+            self.stack = []
+
+        self.input_values = input_values.copy()
         self.output = []
-        self.stack = []
 
         operations = []
         while self.ptr < len(self.values):
@@ -163,31 +168,48 @@ class IntProcessor:
                 self.debug_stack()
                 return None
 
-    @staticmethod
-    def run(values, input_values):
-        p = IntProcessor(values, input_values)
+    def run(self, input_values, *, reset=True):
         try:
-            return p.unsafe_run()
+            return self.unsafe_run(input_values, reset=reset)
         except Exception:
-            p.debug_stack()
+            self.debug_stack()
 
-def run(values):
+def get_signal(
+        values,
+        phase_settings,
+        *,
+        cached_outputs=None,
+        reset=True,
+):
+    last_output = 0
+    p = IntProcessor(values)
+    for amp in range(5):
+        inputs = [phase_settings[amp], last_output]
+        key = (amp, *inputs)
+
+        last_output = cached_outputs.get(
+            key,
+            p.run(inputs, reset=reset)[-1],
+        )
+        cached_outputs[key] = last_output
+
+    return last_output
+
+def run(values, phase_setting_sequence, *, reset=True):
     values = split_comma_ints(values)
 
     cached_outputs = {}
     max_signal = 0
-    for phase_settings in itertools.permutations([0, 1, 2, 3, 4]):
-        last_output = 0
-        for amp in range(5):
-            inputs = [phase_settings[amp], last_output]
-            key = (amp, *inputs)
-            last_output = cached_outputs.get(
-                key,
-                IntProcessor.run(values, inputs)[-1],
+    for phase_settings in itertools.permutations(phase_setting_sequence):
+        max_signal = max(
+            max_signal,
+            get_signal(
+                values,
+                phase_settings,
+                reset=reset,
+                cached_outputs=cached_outputs,
             )
-            cached_outputs[key] = last_output
-
-        max_signal = max(max_signal, last_output)
+        )
 
     return max_signal
 
@@ -201,10 +223,49 @@ example3 = multiline_input(r"""
 3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0
 """)
 
-run(example1) | eq(43210)
-run(example2) | eq(54321)
-run(example3) | eq(65210)
+run(
+    example1,
+    [0, 1, 2, 3, 4],
+) | eq(43210)
+
+run(
+    example2,
+    [0, 1, 2, 3, 4],
+) | eq(54321)
+
+run(
+    example3,
+    [0, 1, 2, 3, 4],
+) | eq(65210)
 
 input_value = get_input()
 
-run(input_value) | debug('Star 1')
+run(
+    input_value,
+    [0, 1, 2, 3, 4],
+) | debug('Star 1')
+
+example1 = multiline_input("""
+3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5
+""")
+example2 = multiline_input("""
+3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,-5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10
+""")
+
+run(
+    example1,
+    [5, 6, 7, 8, 8],
+    reset=False,
+) | eq(139629729)
+
+run(
+    example2,
+    [5, 6, 7, 8, 8],
+    reset=False,
+) | eq(18216)
+
+run(
+    input_value,
+    [5, 6, 7, 8, 8],
+    reset=False,
+) | debug('Star 2')
