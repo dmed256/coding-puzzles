@@ -4,6 +4,13 @@ import traceback
 from termcolor import colored
 
 
+#---[ Monkey Patches ]------------------
+def lget(lst, index):
+    if index < len(lst):
+        return lst[index]
+    return None
+
+
 #---[ Input ]---------------------------
 def multiline_lines(s):
     return [
