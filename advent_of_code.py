@@ -4,13 +4,16 @@ import traceback
 from termcolor import colored
 
 
-# Input
+#---[ Input ]---------------------------
 def multiline_lines(s):
     return [
         line.strip()
         for line in s.splitlines()
         if line.strip()
     ]
+
+def multiline_input(s):
+    return '\n'.join(multiline_lines(s))
 
 def get_input_lines():
     frame = traceback.extract_stack()[0]
@@ -30,7 +33,16 @@ def get_input():
     return '\n'.join(get_input_lines())
 
 
-# Colors
+#---[ Utils ]---------------------------
+def split_comma_ints(value):
+    return [
+        int(x.strip())
+        for x in value.split(',')
+        if x
+    ]
+
+
+#---[ Colors ]--------------------------
 def blue(value):
     return colored(value, 'blue')
 
@@ -44,7 +56,7 @@ def yellow(value):
     return colored(value, 'yellow')
 
 
-# Testing
+#---[ Testing ]-------------------------
 def get_test_frame():
     return traceback.extract_stack()[0]
 
@@ -152,6 +164,7 @@ class ShouldBe:
 def debug(header=''):
     return Debug(header)
 
+# DEPRECATED
 def should_be(expected_result):
     return ShouldBe(expected_result)
 
