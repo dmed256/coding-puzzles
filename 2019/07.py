@@ -98,12 +98,12 @@ class IntProcessor:
         [ptr2, _] = stack[frame_count - 1]
         output_index = values1[ptr2 - 1]
 
-        for i in range(frame_count):
-            if i in self.original_input_values:
-                print(yellow(f'inputs -> {self.original_input_values[i]}'))
+        for frame in range(frame_count):
+            if frame in self.original_input_values:
+                print(yellow(f'inputs -> {self.original_input_values[frame]}'))
 
-            [ptr, values1] = stack[i]
-            [ptr2, values2] = stack[i + 1]
+            [ptr, values1] = stack[frame]
+            [ptr2, values2] = stack[frame + 1]
 
             output = []
             for i, (v1, v2) in enumerate(zip(values1, values2)):
@@ -114,10 +114,13 @@ class IntProcessor:
                 else:
                     item = str(v1)
 
-                if ptr <= i < ptr2:
-                    color = 'green'
-                elif i == output_index:
+                if i == output_index and (frame + 1) in self.original_input_values:
                     item = f'>>>{item}<<<'
+
+                if ptr <= ptr2:
+                    if ptr <= i < ptr2:
+                        color = 'green'
+                elif i in [ptr, ptr2]:
                     color = 'yellow'
 
                 output.append(colored(item, color))
@@ -155,7 +158,8 @@ class IntProcessor:
             operations.append(op)
             self.stack.append([self.ptr - 1, self.values.copy()])
 
-            if not self.has_valid_output(op):
+            if (self.loop_mode != FEEDBACK_LOOP_MODE and
+                not self.has_valid_output(op)):
                 return None
 
             if op == 1:
@@ -163,6 +167,10 @@ class IntProcessor:
             elif op == 2:
                 self.op_values('*')
             elif op == 3:
+                if self.loop_mode == FEEDBACK_LOOP_MODE and not self.input_values:
+                    self.stack.pop()
+                    self.ptr -= 1
+                    return self.output
                 self.store_input()
             elif op == 4:
                 self.store_output()
@@ -178,18 +186,20 @@ class IntProcessor:
                 self.op_values('==')
             elif op == 99:
                 self.is_done = True
-                if operations[-2] == 4:
+                if len(operations) > 2 and operations[-2] == 4:
                     return self.output
                 elif self.loop_mode == FEEDBACK_LOOP_MODE:
-                    # No need to print errors in feedback loop
+                    # Not an error in feedback loop
                     return None
                 else:
                     print('Invalid [99], no output!')
                     self.print_debug()
+                    raise 1
                     return None
             else:
                 print(f'Operation [{op}] unknown!')
                 self.print_debug()
+                raise 1
                 return None
 
     def run(self, input_values):
@@ -198,34 +208,50 @@ class IntProcessor:
         except Exception as e:
             print(f'Exception -> {e}')
             self.print_debug()
+            raise e
 
 def get_signal(
         values,
         loop_mode,
         phase_settings,
 ):
-    p = IntProcessor(values, loop_mode)
+    amplifier_processors = [
+        IntProcessor(values, loop_mode)
+        for i in range(5)
+    ]
+    p_inputs = [
+        [phase_setting]
+        for phase_setting in phase_settings
+    ]
+
+    is_done = False
     signal = 0
-
     last_output = 0
-    while not p.is_done:
+    while not is_done:
         for amp in range(5):
-            inputs = [phase_settings[amp], last_output]
+            processor = amplifier_processors[amp]
+            if processor.is_done:
+                continue
 
-            outputs = p.run(inputs)
+            inputs = [*p_inputs[amp], last_output]
+
+            outputs = processor.run(inputs)
+            if processor.is_done:
+                is_done = amp == 4
+                continue
+
             if outputs is None:
+                processor.print_debug()
+                raise 1
                 break
 
             last_output = outputs[-1]
+            p_inputs[amp] = []
 
             # Get the output from the last amplifier
             if amp == 4:
                 signal = last_output
 
-            if loop_mode == FEEDBACK_LOOP_MODE and p.is_done:
-                break
-
-    p.print_debug()
     return signal
 
 def run(values, loop_mode, phase_setting_sequence):
@@ -239,7 +265,6 @@ def run(values, loop_mode, phase_setting_sequence):
             phase_settings,
         )
         if signal is not None:
-            print(f'signal -> {signal}')
             max_signal = max(max_signal, signal)
 
     return max_signal
@@ -272,7 +297,7 @@ example3 = multiline_input(r"""
 #     [0, 1, 2, 3, 4],
 # ) | eq(65210)
 
-# input_value = get_input()
+input_value = get_input()
 
 # run(
 #     input_value,
@@ -287,28 +312,20 @@ example2 = multiline_input("""
 3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,-5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10
 """)
 
-
-signal = get_signal(
-    split_comma_ints(example1),
+run(
+    example1,
     FEEDBACK_LOOP_MODE,
-    [9, 8, 7, 6, 5],
-)
-print(f'signal -> {signal}')
+    [5, 6, 7, 8, 9],
+) | eq(139629729)
 
-# run(
-#     example1,
-#     FEEDBACK_LOOP_MODE,
-#     [5, 6, 7, 8, 9],
-# ) | eq(139629729)
+run(
+    example2,
+    FEEDBACK_LOOP_MODE,
+    [5, 6, 7, 8, 9],
+) | eq(18216)
 
-# run(
-#     example2,
-#     FEEDBACK_LOOP_MODE,
-#     [5, 6, 7, 8, 9],
-# ) | eq(18216)
-
-# run(
-#     input_value,
-#     FEEDBACK_LOOP_MODE,
-#     [5, 6, 7, 8, 9],
-# ) | debug('Star 2')
+run(
+    input_value,
+    FEEDBACK_LOOP_MODE,
+    [5, 6, 7, 8, 9],
+) | debug('Star 2')
