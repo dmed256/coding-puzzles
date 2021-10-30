@@ -154,3 +154,6 @@ def debug(header=''):
 
 def should_be(expected_result):
     return ShouldBe(expected_result)
+
+def eq(expected_result):
+    return ShouldBe(expected_result)
