@@ -85,22 +85,25 @@ class IntProcessor:
         [output] = self.extract_values(1)
         self.output.append(output)
 
-    def debug_stack(self):
-        self.stack.append([self.ptr, self.values.copy()])
+    def print_debug(self):
+        stack = [
+            *self.stack,
+            [self.ptr, self.values.copy()]
+        ]
 
-        frame_count = len(self.stack) - 1
+        frame_count = len(stack) - 1
 
         # Get the place we errored out
-        [_, values1] = self.stack[frame_count - 2]
-        [ptr2, _] = self.stack[frame_count - 1]
+        [_, values1] = stack[frame_count - 2]
+        [ptr2, _] = stack[frame_count - 1]
         output_index = values1[ptr2 - 1]
 
         for i in range(frame_count):
             if i in self.original_input_values:
                 print(yellow(f'inputs -> {self.original_input_values[i]}'))
 
-            [ptr, values1] = self.stack[i]
-            [ptr2, values2] = self.stack[i + 1]
+            [ptr, values1] = stack[i]
+            [ptr2, values2] = stack[i + 1]
 
             output = []
             for i, (v1, v2) in enumerate(zip(values1, values2)):
@@ -127,7 +130,7 @@ class IntProcessor:
         if op == 99:
             return True
 
-        self.debug_stack()
+        self.print_debug()
 
         return False
 
@@ -177,13 +180,16 @@ class IntProcessor:
                 self.is_done = True
                 if operations[-2] == 4:
                     return self.output
+                elif self.loop_mode == FEEDBACK_LOOP_MODE:
+                    # No need to print errors in feedback loop
+                    return None
                 else:
                     print('Invalid [99], no output!')
-                    self.debug_stack()
+                    self.print_debug()
                     return None
             else:
                 print(f'Operation [{op}] unknown!')
-                self.debug_stack()
+                self.print_debug()
                 return None
 
     def run(self, input_values):
@@ -191,44 +197,49 @@ class IntProcessor:
             return self.unsafe_run(input_values)
         except Exception as e:
             print(f'Exception -> {e}')
-            self.debug_stack()
+            self.print_debug()
 
 def get_signal(
         values,
         loop_mode,
         phase_settings,
 ):
-    last_output = 0
     p = IntProcessor(values, loop_mode)
+    signal = 0
+
+    last_output = 0
     while not p.is_done:
         for amp in range(5):
             inputs = [phase_settings[amp], last_output]
 
             outputs = p.run(inputs)
             if outputs is None:
-                return None
+                break
 
             last_output = outputs[-1]
 
-            if loop_mode == FEEDBACK_LOOP_MODE:
-                p.debug_stack()
-                if p.is_done:
-                    break
+            # Get the output from the last amplifier
+            if amp == 4:
+                signal = last_output
 
-    return last_output
+            if loop_mode == FEEDBACK_LOOP_MODE and p.is_done:
+                break
+
+    p.print_debug()
+    return signal
 
 def run(values, loop_mode, phase_setting_sequence):
     values = split_comma_ints(values)
 
     max_signal = 0
-    # for phase_settings in itertools.permutations(phase_setting_sequence):
-    for phase_settings in [phase_setting_sequence]:
+    for phase_settings in itertools.permutations(phase_setting_sequence):
         signal = get_signal(
             values,
             loop_mode,
             phase_settings,
         )
         if signal is not None:
+            print(f'signal -> {signal}')
             max_signal = max(max_signal, signal)
 
     return max_signal
@@ -243,31 +254,31 @@ example3 = multiline_input(r"""
 3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0
 """)
 
-run(
-    example1,
-    SINGLE_LOOP_MODE,
-    [0, 1, 2, 3, 4],
-) | eq(43210)
+# run(
+#     example1,
+#     SINGLE_LOOP_MODE,
+#     [0, 1, 2, 3, 4],
+# ) | eq(43210)
 
-run(
-    example2,
-    SINGLE_LOOP_MODE,
-    [0, 1, 2, 3, 4],
-) | eq(54321)
+# run(
+#     example2,
+#     SINGLE_LOOP_MODE,
+#     [0, 1, 2, 3, 4],
+# ) | eq(54321)
 
-run(
-    example3,
-    SINGLE_LOOP_MODE,
-    [0, 1, 2, 3, 4],
-) | eq(65210)
+# run(
+#     example3,
+#     SINGLE_LOOP_MODE,
+#     [0, 1, 2, 3, 4],
+# ) | eq(65210)
 
-input_value = get_input()
+# input_value = get_input()
 
-run(
-    input_value,
-    SINGLE_LOOP_MODE,
-    [0, 1, 2, 3, 4],
-) | debug('Star 1')
+# run(
+#     input_value,
+#     SINGLE_LOOP_MODE,
+#     [0, 1, 2, 3, 4],
+# ) | debug('Star 1')
 
 example1 = multiline_input("""
 3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5
@@ -276,11 +287,19 @@ example2 = multiline_input("""
 3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,-5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10
 """)
 
-run(
-    example1,
+
+signal = get_signal(
+    split_comma_ints(example1),
     FEEDBACK_LOOP_MODE,
-    [5, 6, 7, 8, 9],
-) | eq(139629729)
+    [9, 8, 7, 6, 5],
+)
+print(f'signal -> {signal}')
+
+# run(
+#     example1,
+#     FEEDBACK_LOOP_MODE,
+#     [5, 6, 7, 8, 9],
+# ) | eq(139629729)
 
 # run(
 #     example2,
