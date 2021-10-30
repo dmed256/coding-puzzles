@@ -134,6 +134,7 @@ class IntProcessor:
     def unsafe_run(self, input_values):
         # Reset
         if self.loop_mode == SINGLE_LOOP_MODE:
+            self.is_done = False
             self.values = self.original_values.copy()
             self.ptr = 0
             self.stack = []
@@ -177,6 +178,8 @@ class IntProcessor:
                 if operations[-2] == 4:
                     return self.output
                 else:
+                    print('Invalid [99], no output!')
+                    self.debug_stack()
                     return None
             else:
                 print(f'Operation [{op}] unknown!')
@@ -200,10 +203,17 @@ def get_signal(
     while not p.is_done:
         for amp in range(5):
             inputs = [phase_settings[amp], last_output]
+
             outputs = p.run(inputs)
             if outputs is None:
                 return None
+
             last_output = outputs[-1]
+
+            if loop_mode == FEEDBACK_LOOP_MODE:
+                p.debug_stack()
+                if p.is_done:
+                    break
 
     return last_output
 
@@ -211,7 +221,8 @@ def run(values, loop_mode, phase_setting_sequence):
     values = split_comma_ints(values)
 
     max_signal = 0
-    for phase_settings in itertools.permutations(phase_setting_sequence):
+    # for phase_settings in itertools.permutations(phase_setting_sequence):
+    for phase_settings in [phase_setting_sequence]:
         signal = get_signal(
             values,
             loop_mode,
@@ -271,11 +282,11 @@ run(
     [5, 6, 7, 8, 9],
 ) | eq(139629729)
 
-run(
-    example2,
-    FEEDBACK_LOOP_MODE,
-    [5, 6, 7, 8, 9],
-) | eq(18216)
+# run(
+#     example2,
+#     FEEDBACK_LOOP_MODE,
+#     [5, 6, 7, 8, 9],
+# ) | eq(18216)
 
 # run(
 #     input_value,
