@@ -199,6 +199,9 @@ class IntProcessor:
 
         operations = []
         while self.ptr < len(self.values):
+            if self.is_done:
+                break
+
             [instruction] = self.extract_raw_values(1)
             self.mode = instruction // 100
             op = instruction % 100
@@ -257,5 +260,5 @@ class IntProcessor:
             return self.unsafe_run()
         except Exception as e:
             print(f'Exception -> {e}')
-            self.print_debug()
+            # self.print_debug()
             raise e
