@@ -239,7 +239,20 @@ class IntProcessor:
                 raise 1
                 return None
 
-    def run(self):
+    def run(self, *, inputs=None):
+        # Helper utils to iterate through hard-coded inputs
+        if inputs:
+            inputs = inputs.copy()
+
+            def get_input():
+                return inputs.pop(0)
+
+            def has_input_values():
+                return len(inputs) > 0
+
+            self.get_input = get_input
+            self.has_input_values = has_input_values
+
         try:
             return self.unsafe_run()
         except Exception as e:

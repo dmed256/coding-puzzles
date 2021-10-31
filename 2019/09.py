@@ -15,19 +15,8 @@ example3 = multiline_input("""
 """)
 
 def run(values, inputs):
-    inputs = inputs.copy()
-
-    def get_input():
-        return inputs.pop(0)
-
-    def has_input_values():
-        return len(inputs) > 0
-
     processor = IntProcessor(values, SINGLE_LOOP_MODE)
-    processor.get_input = get_input
-    processor.has_input_values = has_input_values
-
-    return processor.run()
+    return processor.run(inputs=inputs)
 
 run(example1, []) | eq([109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99])
 
