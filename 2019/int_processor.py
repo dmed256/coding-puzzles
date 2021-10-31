@@ -241,7 +241,7 @@ class IntProcessor:
 
     def run(self, *, inputs=None):
         # Helper utils to iterate through hard-coded inputs
-        if inputs:
+        if inputs is not None:
             inputs = inputs.copy()
 
             def get_input():
