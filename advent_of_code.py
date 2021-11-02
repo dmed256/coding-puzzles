@@ -269,3 +269,45 @@ def should_be(expected_result):
 
 def eq(expected_result):
     return ShouldBe(expected_result)
+
+
+#---[ Constants ]-----------------------
+UP = (0, -1)
+DOWN = (0, 1)
+LEFT = (-1, 0)
+RIGHT = (1, 0)
+DIRECTIONS = [DOWN, LEFT, RIGHT, UP]
+
+CLOCKWISE = {
+    UP: RIGHT,
+    RIGHT: DOWN,
+    DOWN: LEFT,
+    LEFT: UP,
+}
+
+COUNTER_CLOCKWISE = {
+    UP: LEFT,
+    LEFT: DOWN,
+    DOWN: RIGHT,
+    RIGHT: UP,
+}
+
+# (0, 0) is usually top-left of the grid
+ASCII_TO_DIRECTION = {
+    '^': UP,
+    'v': DOWN,
+    '<': LEFT,
+    '>': RIGHT,
+}
+
+DIRECTION_TO_ASCII = {
+    UP: '^',
+    DOWN: 'v',
+    LEFT: '<',
+    RIGHT: '>',
+}
+
+def apply_direction(pos, direction):
+    (x, y) = pos
+    (dx, dy) = direction
+    return (x + dx, y + dy)

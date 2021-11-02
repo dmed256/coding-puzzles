@@ -5,12 +5,6 @@ from termcolor import colored
 from advent_of_code import *
 from int_processor import *
 
-UP = (0, 1)
-DOWN = (0, -1)
-LEFT = (-1, 0)
-RIGHT = (1, 0)
-DIRECTIONS = [DOWN, LEFT, RIGHT, UP]
-
 COMMANDS = {
     UP: 1,
     DOWN: 2,
@@ -32,7 +26,7 @@ class System:
         self.grid = [UNKNOWN for i in range(D*D)]
 
         self.targets = set([
-            self.apply_direction(self.pos, direction)
+            apply_direction(self.pos, direction)
             for direction in DIRECTIONS
         ])
         self.target_path = []
@@ -40,12 +34,6 @@ class System:
 
         self.set_target()
         self.set_value(self.pos, FLOOR)
-
-    @staticmethod
-    def apply_direction(pos, direction):
-        (x, y) = pos
-        (dx, dy) = direction
-        return (x + dx, y + dy)
 
     @staticmethod
     def get_direction(pos, pos2):
@@ -81,7 +69,7 @@ class System:
 
     def update_targets(self):
         for direction in DIRECTIONS:
-            pos2 = self.apply_direction(self.pos, direction)
+            pos2 = apply_direction(self.pos, direction)
             if self.get_value(pos2) != UNKNOWN:
                 continue
             self.targets.add(pos2)
@@ -137,7 +125,7 @@ class System:
 
         found_paths = []
         for direction in DIRECTIONS:
-            pos2 = self.apply_direction(pos, direction)
+            pos2 = apply_direction(pos, direction)
 
             if pos2 == target:
                 return [pos, pos2]
@@ -271,7 +259,7 @@ class System:
             new_nodes = set()
             for node in nodes:
                 for direction in DIRECTIONS:
-                    node2 = self.apply_direction(node, direction)
+                    node2 = apply_direction(node, direction)
                     if node2 in missing:
                         new_nodes.add(node2)
                         missing.remove(node2)
