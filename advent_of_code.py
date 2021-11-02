@@ -1,15 +1,14 @@
 import os
+import multiprocess as mp
+import numpy as np
 import textwrap
 import traceback
+from enum import Enum
+from datetime import datetime
 from termcolor import colored
 
 
-#---[ Monkey Patches ]------------------
-def lget(lst, index):
-    if index < len(lst):
-        return lst[index]
-    return None
-
+PROCESSES = 8
 
 #---[ Input ]---------------------------
 def multiline_lines(s):
@@ -40,7 +39,100 @@ def get_input():
     return '\n'.join(get_input_lines())
 
 
+#---[ Timing ]--------------------------
+timestamps = []
+
+def tic():
+    timestamps.append(datetime.now())
+
+def toc(header):
+    end = datetime.now()
+    start = timestamps.pop()
+
+    seconds_taken = int((end - start).total_seconds())
+    minutes_taken = seconds_taken // 60
+    seconds_taken = seconds_taken % 60
+    time_taken = yellow(f'{minutes_taken}m{seconds_taken:02d}s')
+
+    print(blue(header))
+    print(f'  - Time taken: {time_taken}')
+
+
+#---[ Parallel ]------------------------
+class PmapArgType(Enum):
+    VALUE = 1
+    NUMPY_ARRAY = 2
+
+def encode_pmap_arg(key, i, arg):
+    if type(arg) != np.ndarray:
+        return (PmapArgType.VALUE, i, arg)
+
+    filename = f'{key}_{i}.npy'
+    with open(filename, 'wb') as f:
+        np.save(f, arg)
+    return (PmapArgType.NUMPY_ARRAY, i, filename)
+
+def decode_pmap_arg(arg):
+    (arg_type, i, value) = arg
+    if arg_type == PmapArgType.VALUE:
+        return value
+
+    with open(value, 'rb') as f:
+        value = np.load(f)
+    return value
+
+def encode_pmap_args(key, args):
+    return [
+        encode_pmap_arg(key, i, arg)
+        for i, arg in enumerate(args)
+    ]
+
+def decode_pmap_args(args):
+    return [
+        decode_pmap_arg(arg)
+        for arg in args
+    ]
+
+def clean_pmap_args(args):
+    numpy_files = [
+        value
+        for (arg_type, i, value) in args
+        if arg_type == PmapArgType.NUMPY_ARRAY
+    ]
+    for numpy_file in numpy_files:
+        os.remove(numpy_file)
+
+def pmap(key, fn, args):
+    result_key = f'{key}_result'
+
+    if not hasattr(pmap, 'pool'):
+        pmap.pool = mp.Pool(PROCESSES)
+
+    encoded_args = encode_pmap_args(key, args)
+
+    def fn_wrapper(i):
+        args = decode_pmap_args(encoded_args)
+        value = fn(PROCESSES, i, *args)
+        return encode_pmap_arg(result_key, i, value)
+
+    encoded_results = pmap.pool.map(fn_wrapper, range(PROCESSES), 1)
+    results = [
+        decode_pmap_arg(encoded_result)
+        for encoded_result in encoded_results
+    ]
+
+    clean_pmap_args(encoded_args)
+    clean_pmap_args(encoded_results)
+
+    return results
+
+
 #---[ Utils ]---------------------------
+def lget(lst, index):
+    if index < len(lst):
+        return lst[index]
+    return None
+
 def split_comma_ints(value):
     return [
         int(x.strip())

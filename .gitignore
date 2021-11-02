@@ -4,6 +4,7 @@
 # Build artifacts
 *.pyc
 __pycache__
+*.npy
 
 # Debug
 .DS_Store

@@ -49,7 +49,6 @@ def get_steps(x_info, y_info):
 
     return x_distance + y_distance
 
-
 def find_line_intersections(hlines, vlines):
     hlines.sort()
     vlines.sort()
