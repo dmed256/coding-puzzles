@@ -311,3 +311,195 @@ def apply_direction(pos, direction):
     (x, y) = pos
     (dx, dy) = direction
     return (x + dx, y + dy)
+
+class Grid:
+    def __init__(self, grid):
+        self.grid = [
+            [v for v in row]
+            for row in grid
+        ]
+        self.width = len(self.grid[0])
+        self.height = len(self.grid)
+
+    def __getitem__(self, pos):
+        (x, y) = pos
+        return self.grid[y][x]
+
+    def __setitem__(self, pos, value):
+        (x, y) = pos
+        self.grid[y][x] = value
+        return value
+
+    def __iter__(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                yield (x, y, self.grid[y][x])
+
+    def in_grid(self, pos):
+        (x, y) = pos
+        return 0 <= x < self.width and 0 <= y < self.height
+
+    def apply_direction(self, pos, direction):
+        next_pos = apply_direction(pos, direction)
+
+        if in_grid(next_pos):
+            return next_pos
+
+        return None
+
+    def find_all(self, value):
+        return [
+            (x, y)
+            for (x, y, c) in self
+            if c == value
+        ]
+
+    def first(self, value):
+        values = self.find_all(value)
+        if values:
+            return values[0]
+        return None
+
+    def neighbors(self, pos):
+        return [
+            n
+            for direction in DIRECTIONS
+            if self.in_grid(n := apply_direction(pos, direction))
+        ]
+
+    def print(self):
+        padding = '     '
+        x_axis = ' '.join([
+            f'{x:>2}' for x in range(self.width)
+        ])
+
+        output = padding + x_axis + '\n'
+        output += padding + '-' * len(x_axis) + '\n'
+        for (y, row) in enumerate(self.grid):
+            output += f'{y:>3} | '
+            output += '  '.join(row)
+            output += '\n'
+        print(output)
+
+class Graph:
+    class Type(Enum):
+        NOTHING = 0
+        WALL = 1
+        OBJECT = 2
+
+    def __init__(self, grid, *, get_type):
+        self.grid = grid
+
+        # value -> Graph.Type
+        self.get_type = get_type
+
+        self.pos_to_object = {
+            (x, y): v
+            for (x, y, v) in grid
+            if self.get_type(v) == Graph.Type.OBJECT
+        }
+
+        for (x, y, v) in grid:
+            if self.get_type(v) != Graph.Type.WALL:
+                start_pos = (x, y)
+                break
+
+        self.graph = {}
+        # Explore map
+        nodes = [start_pos]
+        explored = set(start_pos)
+        while nodes:
+            new_nodes = set()
+            for node in nodes:
+                neighbors = [
+                    n
+                    for n in self.grid.neighbors(node)
+                    if self.get_pos_type(n) != Graph.Type.WALL
+                ]
+                self.graph[node] = neighbors
+                new_nodes.update(neighbors)
+            nodes = new_nodes - explored
+            explored.update(nodes)
+
+    def get_pos_type(self, pos):
+        return self.get_type(self.grid[pos])
+
+    def find_paths(self, start, targets, obstacles=None):
+        targets = set(targets)
+        obstacles = obstacles or set()
+
+        prev_nodes = { start: None }
+        for obstacle in obstacles:
+            prev_nodes[obstacle] = None
+
+        nodes = set([start])
+        explored = set([start])
+        while nodes:
+            new_nodes = set()
+            for node in nodes:
+                neighbors = [
+                    neighbor
+                    for neighbor in self.graph[node]
+                    if neighbor not in prev_nodes
+                    and neighbor not in obstacles
+                ]
+
+                new_nodes.update(neighbors)
+                explored.update(neighbors)
+
+                for n in neighbors:
+                    prev_nodes[n] = node
+
+            # We've found paths for all targets
+            if targets <= explored:
+                break
+
+            nodes = new_nodes
+
+        def traverse_back_path(target):
+            if target not in prev_nodes:
+                return None
+            node = target
+            path = []
+            while node != start:
+                path.append(node)
+                node = prev_nodes[node]
+            return path[::-1]
+
+        return [
+            path
+            for target in targets
+            if (path := traverse_back_path(target))
+        ]
+
+
+    def find_path(self, start, end, obstacles=None):
+        if start == end:
+            return []
+
+        explored = set(start)
+        if obstacles:
+            explored.update(obstacles)
+
+        paths = [[start]]
+        while paths:
+            paths = [
+                [*path, neighbor]
+                for path in paths
+                for neighbor in self.graph[path[-1]]
+                if neighbor not in explored
+            ]
+            new_nodes = [
+                path[-1]
+                for path in paths
+            ]
+            explored.update(new_nodes)
+            if end in explored:
+                return [
+                    # Remove start from the path
+                    path[1:]
+                    for path in paths
+                    if path[-1] == end
+                ][0]
+
+        return None
