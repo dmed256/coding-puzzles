@@ -3,6 +3,7 @@ import multiprocess as mp
 import numpy as np
 import textwrap
 import traceback
+from collections.abc import Iterable
 from enum import Enum
 from datetime import datetime
 from termcolor import colored
@@ -11,9 +12,15 @@ from termcolor import colored
 PROCESSES = 8
 
 #---[ Input ]---------------------------
-def multiline_lines(s):
+def multiline_lines(s, *, strip_lines=True):
+    if strip_lines:
+        return [
+            line.strip()
+            for line in s.splitlines()
+            if line.strip()
+        ]
     return [
-        line.strip()
+        line
         for line in s.splitlines()
         if line.strip()
     ]
@@ -344,12 +351,17 @@ def apply_direction(pos, direction):
     return (x + dx, y + dy)
 
 class Grid:
-    def __init__(self, grid):
+    def __init__(self, grid, *, default_value=None):
+        self.width = max(len(row) for row in grid)
+
+        def build_row(row):
+            padding = [default_value] * (self.width - len(row))
+            return [v for v in row] + padding
+
         self.grid = [
-            [v for v in row]
+            build_row(row)
             for row in grid
         ]
-        self.width = len(self.grid[0])
         self.height = len(self.grid)
 
     def copy(self):
@@ -455,8 +467,11 @@ class Graph:
         self.get_type = get_type
 
         # Explore map
-        nodes = [start_pos]
-        explored = set([start_pos])
+        if isinstance(start_pos, Iterable):
+            nodes = list(start_pos)
+        else:
+            nodes = [start_pos]
+        explored = set(nodes)
         while nodes:
             new_nodes = set()
             for node in nodes:
@@ -476,6 +491,7 @@ class Graph:
             if (v := self.grid[(x, y)])
             and self.get_type(v) == Graph.Type.OBJECT
         }
+        self.objects = set(self.pos_to_object.values())
 
     def get_pos_type(self, pos):
         return self.get_type(self.grid[pos])
