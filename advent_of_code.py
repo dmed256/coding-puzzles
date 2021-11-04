@@ -434,7 +434,9 @@ class Grid:
         output += padding[:-1] + '┌' + ('─' * (x_axis_length + 2)) + '┐\n'
         for (y, row) in enumerate(self.grid):
             output += f'{y:>3} │ '
-            output += padding_char.join(row)
+            output += padding_char.join([
+                str(v) for v in row
+            ])
             output += ' │\n'
         output += padding[:-1] + '└' + ('─' * (x_axis_length + 2)) + '┘\n'
         print(output)
