@@ -45,17 +45,28 @@ timestamps = []
 def tic():
     timestamps.append(datetime.now())
 
-def toc(header):
+def toc(header=''):
     end = datetime.now()
     start = timestamps.pop()
 
-    seconds_taken = int((end - start).total_seconds())
-    minutes_taken = seconds_taken // 60
-    seconds_taken = seconds_taken % 60
-    time_taken = yellow(f'{minutes_taken}m{seconds_taken:02d}s')
+    time_taken = (end - start).total_seconds()
+    minutes_taken = int(time_taken) // 60
+    seconds_taken = time_taken % 60
+    if seconds_taken < 10:
+        seconds_taken = f'0{seconds_taken:.3f}'
+    else:
+        seconds_taken = f'{seconds_taken:.3f}'
 
-    print(blue(header))
-    print(f'  - Time taken: {time_taken}')
+    time_taken = yellow(
+        f'Time taken: {minutes_taken}m{seconds_taken}s'
+    )
+
+    if header:
+        print(blue(header))
+        print(f'  - {time_taken}')
+    else:
+        print(time_taken)
+    print()
 
 
 #---[ Parallel ]------------------------
@@ -139,6 +150,26 @@ def split_comma_ints(value):
         for x in value.split(',')
         if x
     ]
+
+def shortest_list(lists):
+    lists = [
+        lst
+        for lst in lists
+        if lst is not None
+    ]
+    if lists:
+        return min(lists, key=lambda x: len(x))
+    return None
+
+def longest_list(lists):
+    lists = [
+        lst
+        for lst in lists
+        if lst is not None
+    ]
+    if lists:
+        return max(lists, key=lambda x: len(x))
+    return None
 
 
 #---[ Colors ]--------------------------
@@ -321,6 +352,9 @@ class Grid:
         self.width = len(self.grid[0])
         self.height = len(self.grid)
 
+    def copy(self):
+        return Grid(self.grid.copy())
+
     def __getitem__(self, pos):
         (x, y) = pos
         return self.grid[y][x]
@@ -368,17 +402,41 @@ class Grid:
         ]
 
     def print(self):
-        padding = '     '
-        x_axis = ' '.join([
-            f'{x:>2}' for x in range(self.width)
-        ])
+        max_digits = len(f'{self.width}')
+        has_padding = self.width <= 80
+        padding_char = '  ' if has_padding else ''
 
-        output = padding + x_axis + '\n'
-        output += padding + '-' * len(x_axis) + '\n'
+        def get_digit_value(value, digit):
+            pow10 = 10**digit
+            d = (value // pow10) % 10
+
+            if d or value >= pow10:
+                return d
+            if value == 0 and digit == 0 :
+                return 0
+
+            return ' '
+
+        padding = '     '
+        x_axis = [
+            padding_char.join([
+                f'{get_digit_value(x, digit)}'
+                for x in range(self.width)
+            ])
+            for digit in range(max_digits)
+        ][::-1]
+        x_axis_length = len(x_axis[0])
+
+        output = ''
+        for x in x_axis:
+            output += padding + ' ' + x + '\n'
+
+        output += padding[:-1] + '┌' + ('─' * (x_axis_length + 2)) + '┐\n'
         for (y, row) in enumerate(self.grid):
-            output += f'{y:>3} | '
-            output += '  '.join(row)
-            output += '\n'
+            output += f'{y:>3} │ '
+            output += padding_char.join(row)
+            output += ' │\n'
+        output += padding[:-1] + '└' + ('─' * (x_axis_length + 2)) + '┘\n'
         print(output)
 
 class Graph:
@@ -387,27 +445,16 @@ class Graph:
         WALL = 1
         OBJECT = 2
 
-    def __init__(self, grid, *, get_type):
+    def __init__(self, grid, *, start_pos, get_type):
         self.grid = grid
+        self.graph = {}
 
         # value -> Graph.Type
         self.get_type = get_type
 
-        self.pos_to_object = {
-            (x, y): v
-            for (x, y, v) in grid
-            if self.get_type(v) == Graph.Type.OBJECT
-        }
-
-        for (x, y, v) in grid:
-            if self.get_type(v) != Graph.Type.WALL:
-                start_pos = (x, y)
-                break
-
-        self.graph = {}
         # Explore map
         nodes = [start_pos]
-        explored = set(start_pos)
+        explored = set([start_pos])
         while nodes:
             new_nodes = set()
             for node in nodes:
@@ -420,6 +467,13 @@ class Graph:
                 new_nodes.update(neighbors)
             nodes = new_nodes - explored
             explored.update(nodes)
+
+        self.pos_to_object = {
+            (x, y): v
+            for (x, y) in explored
+            if (v := self.grid[(x, y)])
+            and self.get_type(v) == Graph.Type.OBJECT
+        }
 
     def get_pos_type(self, pos):
         return self.get_type(self.grid[pos])
