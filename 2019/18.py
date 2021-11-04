@@ -113,7 +113,7 @@ class Problem:
 
         paths = graph.key_paths[key]
 
-        potential_paths = []
+        min_path = None
         for path in paths:
             target_key = self.grid[path[-1]]
             if target_key in captured_keys:
@@ -142,9 +142,9 @@ class Problem:
             if next_path is None:
                 continue
 
-            potential_paths.append([*path, *next_path])
+            min_path = shortest_list([min_path, [*path, *next_path]])
 
-        return shortest_list(potential_paths)
+        return min_path
 
     def print_path(self, path):
         grid = self.grid.copy()
@@ -239,7 +239,7 @@ Problem(example4, 1).run() | eq(136)
 Problem(example5, 1).run() | eq(81)
 
 input_lines = get_input_lines()
-# Problem(input_lines, 1).run() | debug('Star 1')
+Problem(input_lines, 1).run() | debug('Star 1')
 
 example1 = multiline_lines("""
 #######
@@ -288,5 +288,4 @@ Problem(example2, 2).run() | eq(24)
 Problem(example3, 2).run() | eq(32)
 Problem(example4, 7).run() | eq(72)
 
-# Too low: 1954
 Problem(input_lines, 2).run() | debug('Star 2')
