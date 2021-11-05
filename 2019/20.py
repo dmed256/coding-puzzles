@@ -117,27 +117,42 @@ class Problem:
                 self.use_teleporter[p1] = p2
                 self.use_teleporter[p2] = p1
 
-    def trim_positions(self, positions, new_positions, min_pos_paths, min_path):
-        min_positions = [
-            [zpos, *other]
-            for [zpos, *other] in new_positions
-            if zpos not in min_pos_paths
-            or len(path) < len(min_pos_paths[zpos])
-        ]
-        for [zpos, path, *other] in min_positions:
-            min_pos_paths[zpos] = path
+    @staticmethod
+    def position_cost(position):
+        [(pos, depth), path, *other] = position
 
+        depth_cost = max(1, (depth - 20))
+
+        return len(path) * depth_cost
+
+    def trim_positions(self, positions, new_positions, min_pos_path_length, min_path):
         if self.using_depth:
+            min_zpositions = [
+                [zpos, path, *other]
+                for [zpos, path, *other] in new_positions
+                if zpos not in min_pos_path_length
+                or len(path) < min_pos_path_length[zpos]
+            ]
+            for [zpos, path, *other] in min_zpositions:
+                min_pos_path_length[zpos] = len(path)
             updated_zpos = set([
                 zpos
-                for [zpos, *other] in min_positions
+                for [zpos, *other] in min_zpositions
             ])
             positions = [
                 [zpos, *other]
                 for [zpos, *other] in positions
                 if zpos not in updated_zpos
-            ]
+            ] + min_zpositions
         else:
+            min_positions = [
+                [(pos, depth), path, *other]
+                for [(pos, depth), path, *other] in new_positions
+                if pos not in min_pos_path_length
+                or len(path) < min_pos_path_length[pos]
+            ]
+            for [(pos, depth), path, *other] in min_positions:
+                min_pos_path_length[pos] = len(path)
             updated_pos = set([
                 pos
                 for [(pos, depth), *other] in min_positions
@@ -146,11 +161,9 @@ class Problem:
                 [(pos, depth), *other]
                 for [(pos, depth), *other] in positions
                 if pos not in updated_pos
-            ]
+            ] + min_positions
 
-        positions += min_positions
-
-        positions.sort(key=lambda x: len(x[1]))
+        positions.sort(key=Problem.position_cost)
         return positions
 
     def find_min_path(self, positions):
@@ -172,6 +185,8 @@ class Problem:
                 if self.teleporter_goes_up[target] else
                 depth + 1
             )
+            if depth2 > 1000:
+                continue
 
             if target == self.end_pos and (depth == 0 or not self.using_depth):
                 min_path = shortest_list([
@@ -197,7 +212,7 @@ class Problem:
 
             new_positions.append([
                 ztarget2,
-                [*path, (('Tx', 'Ty'), depth)],
+                [*path, ztarget2],
                 explored_doors | new_explored_doors,
             ])
 
@@ -222,18 +237,18 @@ class Problem:
 
         min_path = None
         positions = [[init_pos, [], set()]]
-        min_pos_paths = {}
+        min_pos_path_length = {}
         while positions:
             [new_positions, min_path2] = self.find_min_path(positions)
             min_path = shortest_list([min_path, min_path2])
             positions = self.trim_positions(
                 positions,
                 new_positions,
-                min_pos_paths,
+                min_pos_path_length,
                 min_path,
             )
 
-        self.print_path(min_path)
+        # self.print_path(min_path)
 
         return len(min_path)
 
