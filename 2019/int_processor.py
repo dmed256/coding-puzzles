@@ -9,7 +9,7 @@ SINGLE_LOOP_MODE = 0
 FEEDBACK_LOOP_MODE = 1
 
 class IntProcessor:
-    def __init__(self, values, loop_mode):
+    def __init__(self, values, loop_mode=SINGLE_LOOP_MODE):
         if type(values) is str:
             self.original_values = split_comma_ints(values)
         else:

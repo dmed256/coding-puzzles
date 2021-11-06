@@ -9,7 +9,7 @@ class Program:
     def process_output(self, output):
         [code] = output
 
-        if code > 256:
+        if code >= 256:
             return output
 
         if code == ord('\n'):
