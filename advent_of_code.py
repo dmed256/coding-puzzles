@@ -3,7 +3,6 @@ import multiprocess as mp
 import numpy as np
 import textwrap
 import traceback
-from collections.abc import Iterable
 from enum import Enum
 from datetime import datetime
 from termcolor import colored
@@ -467,8 +466,8 @@ class Graph:
         self.get_type = get_type
 
         # Explore map
-        if isinstance(start_pos, Iterable):
-            nodes = list(start_pos)
+        if isinstance(start_pos, list):
+            nodes = [*start_pos]
         else:
             nodes = [start_pos]
         explored = set(nodes)
