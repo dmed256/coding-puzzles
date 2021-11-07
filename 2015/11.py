@@ -57,9 +57,6 @@ def next_password(value):
 
     return unsplit(value)
 
-def run(value):
-    is_valid
-
 is_valid(split('hijklmmn')) | eq(False)
 is_valid(split('abbceffg')) | eq(False)
 is_valid(split('abbcegjk')) | eq(False)
