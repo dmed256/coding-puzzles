@@ -18,7 +18,6 @@ def is_nice(s):
 
     return has_pair and vowel_count >= 3
 
-@testable
 def run(s):
     nice_count = 0
     for line in s.splitlines():
@@ -26,15 +25,15 @@ def run(s):
             nice_count += 1
     return nice_count
 
-run('ugknbfddgicrmopn').should_be(1)
-run('aaa').should_be(1)
-run('jchzalrnumimnmhp').should_be(0)
-run('haegwjzuvuyypxyu').should_be(0)
-run('dvszwmarrgswjxmb').should_be(0)
+run('ugknbfddgicrmopn') | eq(1)
+run('aaa') | eq(1)
+run('jchzalrnumimnmhp') | eq(0)
+run('haegwjzuvuyypxyu') | eq(0)
+run('dvszwmarrgswjxmb') | eq(0)
 
 test_input = get_input()
 
-run(test_input).debug('Star 1')
+run(test_input) | debug('Star 1')
 
 
 def is_nice2(s):
@@ -61,7 +60,6 @@ def is_nice2(s):
 
     return False
 
-@testable
 def run2(s):
     nice_count = 0
     for line in s.splitlines():
@@ -69,11 +67,11 @@ def run2(s):
             nice_count += 1
     return nice_count
 
-run2('aaa').should_be(0)
-run2('qjhvhtzxzqqjkmpb').should_be(1)
-run2('xxyxx').should_be(1)
-run2('uurcxstgmygtbstg').should_be(0)
-run2('ieodomkazucvgmuy').should_be(0)
+run2('aaa') | eq(0)
+run2('qjhvhtzxzqqjkmpb') | eq(1)
+run2('xxyxx') | eq(1)
+run2('uurcxstgmygtbstg') | eq(0)
+run2('ieodomkazucvgmuy') | eq(0)
 
 # 63
-run2(test_input).debug('Star 2')
+run2(test_input) | debug('Star 2')

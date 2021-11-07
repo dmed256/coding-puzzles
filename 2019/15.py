@@ -273,8 +273,14 @@ class System:
 
 s = System()
 
+tic()
 s.explore_map()
+toc('Explore map')
 
+tic()
 s.get_oxygen_system_path() | debug('Star 1')
+toc('Star 1')
 
+tic()
 s.fill_oxygen() | debug('Star 1')
+toc('Star 2')

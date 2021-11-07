@@ -16,23 +16,23 @@ def run(values, inputs):
 
 extract_values(
     [2, 0, 1], 0, 2, 0
-) | should_be([1, 2])
+) | eq([1, 2])
 
 extract_values(
     [2, 0, 1], 0, 2, 1
-) | should_be([2, 2])
+) | eq([2, 2])
 
 extract_values(
     [2, 0, 1], 0, 2, 10
-) | should_be([1, 0])
+) | eq([1, 0])
 
 extract_values(
     [2, 0, 1], 0, 2, 11
-) | should_be([2, 0])
+) | eq([2, 0])
 
 example1 = split_comma_ints('3,0,4,0,99')
 for i in range(100):
-    run(example1, [i]) | should_be([i])
+    run(example1, [i]) | eq([i])
 
 input_value = split_comma_ints(get_input())
 

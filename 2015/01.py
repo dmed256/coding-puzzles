@@ -1,6 +1,5 @@
 from advent_of_code import *
 
-@testable
 def run(s, find_depth=None):
     depth = 0
     for i, char in enumerate(s):
@@ -13,21 +12,21 @@ def run(s, find_depth=None):
 
     return depth
 
-run('(())').should_be(0)
-run('()()').should_be(0)
-run('(((').should_be(3)
-run('(()(()(').should_be(3)
-run('))(((((').should_be(3)
-run('())').should_be(-1)
-run('))(').should_be(-1)
-run(')))').should_be(-3)
-run(')())())').should_be(-3)
+run('(())') | eq(0)
+run('()()') | eq(0)
+run('(((') | eq(3)
+run('(()(()(') | eq(3)
+run('))(((((') | eq(3)
+run('())') | eq(-1)
+run('))(') | eq(-1)
+run(')))') | eq(-3)
+run(')())())') | eq(-3)
 
 test_input = get_input()
 
-run(test_input).debug('Star 1')
+run(test_input) | debug('Star 1')
 
-run(')', -1).should_be(1)
-run('()())', -1).should_be(5)
+run(')', -1) | eq(1)
+run('()())', -1) | eq(5)
 
-run(test_input, -1).debug('Star 2')
+run(test_input, -1) | debug('Star 2')

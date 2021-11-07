@@ -48,11 +48,14 @@ def get_input():
 #---[ Timing ]--------------------------
 timestamps = []
 
+def now():
+    return datetime.now()
+
 def tic():
-    timestamps.append(datetime.now())
+    timestamps.append(now())
 
 def toc(header=''):
-    end = datetime.now()
+    end = now()
     start = timestamps.pop()
 
     time_taken = (end - start).total_seconds()
@@ -210,59 +213,6 @@ def print_message(message):
     print(textwrap.dedent(message).strip())
     print('')
 
-class Testable:
-    def __init__(self, func):
-        self.func = func
-
-    def __call__(self, *args, **kwargs):
-        return Test(
-            self.func(*args, **kwargs),
-            get_test_frame(),
-        )
-
-
-class Test:
-    def __init__(self, result, frame):
-        self.result = result
-        self.frame = frame
-
-    @property
-    def value(self):
-        return self.result
-
-    def get_location(self):
-        return get_frame_location(self.frame)
-
-    def debug(self, header=''):
-        output = blue(f'{self.result}')
-
-        message = f"""
-        {blue(header)}
-        {self.get_location()}
-          -> [{output}]
-        """
-
-        print_message(message)
-
-    def should_be(self, expected_result):
-        if self.result == expected_result:
-            return
-
-        output = red(f'{self.result}')
-        expected_output = green(f'{expected_result}')
-
-        message = f"""
-        {self.get_location()}
-          - OUTPUT:   [{output}]
-          - EXPECTED: [{expected_output}]
-        """
-
-        print_message(message)
-
-# DEPRECATED
-def testable(func):
-    return Testable(func)
-
 class Debug:
     def __init__(self, header):
         self.header = header
@@ -278,7 +228,7 @@ class Debug:
 
         print_message(message)
 
-class ShouldBe:
+class Eq:
     def __init__(self, expected_value):
         self.expected_value = expected_value
 
@@ -300,12 +250,8 @@ class ShouldBe:
 def debug(header=''):
     return Debug(header)
 
-# DEPRECATED
-def should_be(expected_result):
-    return ShouldBe(expected_result)
-
 def eq(expected_result):
-    return ShouldBe(expected_result)
+    return Eq(expected_result)
 
 
 #---[ Constants ]-----------------------

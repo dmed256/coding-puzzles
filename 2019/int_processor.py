@@ -68,10 +68,7 @@ class IntProcessor:
         self.values[index] = value
 
     def extract_raw_values(self, count):
-        raw_values = [
-            self.values[i]
-            for i in range(self.ptr, self.ptr + count)
-        ]
+        raw_values = self.values[self.ptr:(self.ptr + count)]
         self.ptr += count
         return raw_values
 
@@ -197,7 +194,6 @@ class IntProcessor:
 
         self.output = []
 
-        operations = []
         while self.ptr < len(self.values):
             if self.is_done:
                 break
@@ -206,8 +202,7 @@ class IntProcessor:
             self.mode = instruction // 100
             op = instruction % 100
 
-            operations.append(op)
-            self.stack.append([self.ptr - 1, self.values.copy()])
+            # self.stack.append([self.ptr - 1, self.values.copy()])
 
             if op == 1:
                 self.op_values('+')

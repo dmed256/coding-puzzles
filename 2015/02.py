@@ -1,6 +1,5 @@
 from advent_of_code import *
 
-@testable
 def run(s):
     area = 0
     for line in s.splitlines():
@@ -16,15 +15,14 @@ def run(s):
         )
     return area
 
-run('2x3x4').should_be(58)
-run('1x1x10').should_be(43)
+run('2x3x4') | eq(58)
+run('1x1x10') | eq(43)
 
 test_input = get_input()
 
-run(test_input).debug('Star 1')
+run(test_input) | debug('Star 1')
 
 
-@testable
 def run2(s):
     ribbon = 0
     for line in s.splitlines():
@@ -36,7 +34,7 @@ def run2(s):
 
     return ribbon
 
-run2('2x3x4').should_be(34)
-run2('1x1x10').should_be(14)
+run2('2x3x4') | eq(34)
+run2('1x1x10') | eq(14)
 
-run2(test_input).debug('Star 2')
+run2(test_input) | debug('Star 2')

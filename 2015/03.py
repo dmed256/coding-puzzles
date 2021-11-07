@@ -1,6 +1,5 @@
 from advent_of_code import *
 
-@testable
 def run(s):
     houses = {(0, 0): True}
     x = 0
@@ -17,15 +16,14 @@ def run(s):
         houses[(x, y)] = True
     return len(houses.keys())
 
-run('>').should_be(2)
-run('^>v<').should_be(4)
-run('^v^v^v^v^v').should_be(2)
+run('>') | eq(2)
+run('^>v<') | eq(4)
+run('^v^v^v^v^v') | eq(2)
 
 test_input = get_input()
 
-run(test_input).debug('Star 1')
+run(test_input) | debug('Star 1')
 
-@testable
 def run2(s):
     houses = {(0, 0): True}
     x = [0, 0]
@@ -46,10 +44,10 @@ def run2(s):
 
     return len(houses.keys())
 
-run2('^v').should_be(3)
-run2('^>v<').should_be(3)
-run2('^v^v^v^v^v').should_be(11)
+run2('^v') | eq(3)
+run2('^>v<') | eq(3)
+run2('^v^v^v^v^v') | eq(11)
 
 test_input = get_input()
 
-run2(test_input).debug('Star 2')
+run2(test_input) | debug('Star 2')

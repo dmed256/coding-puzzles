@@ -49,7 +49,6 @@ def get_wire_value(signals, line):
 
     return [wire, value]
 
-@testable
 def run(lines, output_wire, default_signals=None):
     signals = default_signals or {}
     definitions = lines
@@ -76,17 +75,17 @@ NOT x -> h
 NOT y -> i
 """)
 
-run(example, 'd').should_be(72)
-run(example, 'e').should_be(507)
-run(example, 'f').should_be(492)
-run(example, 'g').should_be(114)
-run(example, 'h').should_be(65412)
-run(example, 'i').should_be(65079)
-run(example, 'x').should_be(123)
-run(example, 'y').should_be(456)
+run(example, 'd') | eq(72)
+run(example, 'e') | eq(507)
+run(example, 'f') | eq(492)
+run(example, 'g') | eq(114)
+run(example, 'h') | eq(65412)
+run(example, 'i') | eq(65079)
+run(example, 'x') | eq(123)
+run(example, 'y') | eq(456)
 
 input_lines = get_input_lines()
 
-run(input_lines, 'a').debug('Star 1')
+run(input_lines, 'a') | debug('Star 1')
 
-run(input_lines, 'a', {'b': 16076}).debug('Star 2')
+run(input_lines, 'a', {'b': 16076}) | debug('Star 2')

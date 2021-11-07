@@ -50,17 +50,17 @@ example = multiline_lines(r"""
 "\x27"
 """)
 
-string_size(example) | should_be(23)
-byte_size(example) | should_be(11)
-run(example) | should_be(12)
+string_size(example) | eq(23)
+byte_size(example) | eq(11)
+run(example) | eq(12)
 
 input_lines = get_input_lines()
 
 run(input_lines) | debug('Star 1')
 
-line_encode_size(r'""') | should_be(6)
-line_encode_size(r'"abc"') | should_be(9)
-line_encode_size(r'"aaa\"aaa"') | should_be(16)
-line_encode_size(r'"\x27"') | should_be(11)
+line_encode_size(r'""') | eq(6)
+line_encode_size(r'"abc"') | eq(9)
+line_encode_size(r'"aaa\"aaa"') | eq(16)
+line_encode_size(r'"\x27"') | eq(11)
 
 run2(input_lines) | debug('Star 2')
