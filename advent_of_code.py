@@ -335,7 +335,7 @@ class Grid:
     def apply_direction(self, pos, direction):
         next_pos = apply_direction(pos, direction)
 
-        if in_grid(next_pos):
+        if self.in_grid(next_pos):
             return next_pos
 
         return None

@@ -59,27 +59,65 @@ WALK
 
 # Star 2
 """
-@ . _ _ _ _ _ _ _ _
-@ _ _ . _ . _ _ . _
+@ _ _ . _ . _ . _ .
 0 1 2 3 4 5 6 7 8 9
   A B C D E F G H I
 
+@ x _ _ x _
+0 5 6 7 8 9
+  E F G H I
 
-# If there's no floor in the next time, JUMP!
-NOT A J
-# Jump if there is a space to jump and a legit move after
-NOT E T
+. . . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . . .
+# # # # # . # . # . # # . . # # #
+  A B C D E F G H I
+
+. . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . .
+J # # . J . # . # # . . # # #
+  A B C D E F G H I
+
+. . . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . . . .
+# # # # # . # # # . # . . . # # #
+  A B C D E F G H I
+
+. . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . .
+. . . . . . . . . . . . . . .
+J # # . J # # . J . . . # # #
+  A B C D E F G H I
+
+
+if not A:
+    return True
+if D & (H | (E & (I OR F))) & !(B & C & D)
+    return True
+
+
+!(B & F & !H)
+((!B || !F) || H)
+(!(B && F) || H)
+
+OR I T
+OR F T
+AND E T
+OR H T
 AND D T
-AND H T
 OR T J
-# Check if all 4 tiles have floor, if they do DON'T JUMP YET!
-OR A T
-AND B T
+
+NOT B T
+NOT T T
 AND C T
 AND D T
-# !(DON'T JUMP) -> Maybe jump...
 NOT T T
 AND T J
+
+NOT A T
+OR T J
 
 RUN
 """

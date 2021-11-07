@@ -8,6 +8,8 @@ RELATIVE_MODE = 2
 SINGLE_LOOP_MODE = 0
 FEEDBACK_LOOP_MODE = 1
 
+PAUSE = 'PAUSE'
+
 class IntProcessor:
     def __init__(self, values, loop_mode=SINGLE_LOOP_MODE):
         if type(values) is str:
@@ -16,6 +18,10 @@ class IntProcessor:
             self.original_values = values
 
         self.is_done = False
+
+        self.is_paused = False
+        self.pause_pos = None
+
         self.loop_mode = loop_mode
         self.values = self.original_values.copy()
         self.original_input_values = {}
@@ -114,7 +120,13 @@ class IntProcessor:
 
     def store_input(self):
         [pos] = self.extract_pos_values(1)
+
         input_value = self.get_input()
+        if input_value == PAUSE:
+            self.is_paused = True
+            self.pause_pos = pos
+            return
+
         self.set_value(pos, input_value)
 
         self.original_input_values[len(self.stack)] = input_value
@@ -193,7 +205,9 @@ class IntProcessor:
             self.relative_base = 0
 
         self.output = []
+        return self.loop_run()
 
+    def loop_run(self):
         while self.ptr < len(self.values):
             if self.is_done:
                 break
@@ -202,7 +216,7 @@ class IntProcessor:
             self.mode = instruction // 100
             op = instruction % 100
 
-            # self.stack.append([self.ptr - 1, self.values.copy()])
+            self.stack.append([self.ptr - 1, self.values.copy()])
 
             if op == 1:
                 self.op_values('+')
@@ -214,6 +228,8 @@ class IntProcessor:
                     self.ptr -= 1
                     return self.output
                 self.store_input()
+                if self.is_paused:
+                    return None
             elif op == 4:
                 self.store_output()
                 if self.loop_mode == FEEDBACK_LOOP_MODE:
@@ -236,6 +252,19 @@ class IntProcessor:
                 self.print_debug()
                 raise 1
                 return None
+
+    def unpause(self, input_value):
+        self.set_value(self.pause_pos, input_value)
+        self.original_input_values[len(self.stack)] = input_value
+
+        self.is_paused = False
+        self.pause_pos = None
+        try:
+            return self.loop_run()
+        except Exception as e:
+            print(f'Exception -> {e}')
+            # self.print_debug()
+            raise e
 
     def run(self, *, inputs=None):
         # Helper utils to iterate through hard-coded inputs
