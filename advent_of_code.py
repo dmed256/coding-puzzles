@@ -227,6 +227,7 @@ class Debug:
         """
 
         print_message(message)
+        return value
 
 class Eq:
     def __init__(self, expected_value):
@@ -246,6 +247,7 @@ class Eq:
         """
 
         print_message(message)
+        return value
 
 def debug(header=''):
     return Debug(header)

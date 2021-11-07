@@ -40,8 +40,6 @@ class Problem:
 
         return self.ascii_output
 
-# Problem().run() | debug()
-
 # Star 1
 """
 # If there's no floor in the next time, JUMP!
@@ -61,15 +59,19 @@ WALK
 
 # Star 2
 """
-@ _ _   _ . _ _ . _
+@ . _ _ _ _ _ _ _ _
+@ _ _ . _ . _ _ . _
 0 1 2 3 4 5 6 7 8 9
   A B C D E F G H I
 
 
 # If there's no floor in the next time, JUMP!
 NOT A J
-# Jump if there is a space to jump
-OR D J
+# Jump if there is a space to jump and a legit move after
+NOT E T
+AND D T
+AND H T
+OR T J
 # Check if all 4 tiles have floor, if they do DON'T JUMP YET!
 OR A T
 AND B T
@@ -82,5 +84,4 @@ AND T J
 RUN
 """
 
-for path in find_immediate_jump_paths(4):
-    print(path)
+Problem().run() | debug()
