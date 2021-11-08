@@ -195,7 +195,6 @@ class System:
             print(f'  - Y: [{y_min}, {y_max}]')
 
     def explore_map(self):
-        print('EXPLORING MAP')
         input_value = get_input()
         self.p = IntProcessor(input_value)
 
@@ -208,7 +207,6 @@ class System:
         return len(min_path) - 1
 
     def fill_oxygen(self):
-        print('FILLING OXYGEN')
         missing = set([
             (x, y)
             for (x, y, v) in self.grid
@@ -234,15 +232,8 @@ class System:
 
 
 s = System()
-
-tic()
 s.explore_map()
-toc('Explore map')
 
-tic()
-s.get_oxygen_system_path() | debug('Star 1')
-toc('Star 1')
+s.get_oxygen_system_path() | debug('Star 1') | eq(270)
 
-tic()
-s.fill_oxygen() | debug('Star 1')
-toc('Star 2')
+s.fill_oxygen() | debug('Star 2') | eq(364)
