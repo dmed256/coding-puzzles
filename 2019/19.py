@@ -82,6 +82,6 @@ class Problem2:
 
         return prev_y + (10000 * x1)
 
-Problem1().run() | debug('Star 1')
+Problem1().run() | debug('Star 1') | eq(211)
 
-Problem2().run() | debug('Star 2')
+Problem2().run() | debug('Star 2') | eq(8071006)
