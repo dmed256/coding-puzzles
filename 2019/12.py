@@ -174,7 +174,7 @@ simulate(example1, 10) | eq([
 
 run(example1, 10) | eq(179)
 run(example2, 100) | eq(1940)
-run(problem, 1000) | debug('Star 1')
+run(problem, 1000) | debug('Star 1') | eq(10055)
 
 def find_cycle(moons):
     position_hashes = set()
@@ -202,4 +202,4 @@ def run2(moon_positions):
 
 run2(example1) | eq(2772)
 run2(example2) | eq(4686774924)
-run2(problem) | debug('Star 2')
+run2(problem) | debug('Star 2') | eq(374307970285176)
