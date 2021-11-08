@@ -134,7 +134,7 @@ run(example5) | eq([[11, 13], 210])
 
 input_lines = get_input_lines()
 
-run(input_lines) | debug('Star 1')
+run(input_lines)[-1] | debug('Star 1') | eq(269)
 
 def run2(lines, station_coords, target_asteroid):
     # 1-index -> 0-index
@@ -187,4 +187,4 @@ run2(example5, [11, 13], 201) | eq([10, 9])
 run2(example5, [11, 13], 299) | eq([11, 1])
 
 [x, y] = run2(input_lines, [13, 17], 200)
-(100*x + y)| debug('Star 2')
+(100*x + y)| debug('Star 2') | eq(612)
