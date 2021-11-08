@@ -106,7 +106,7 @@ run(example3) | eq(52432133)
 
 input_value = get_input()
 
-run(input_value) | debug('Star 1')
+run(input_value) | debug('Star 1') | eq(36627552)
 
 def run2(value):
     value = [int(c) for c in value]
@@ -132,4 +132,4 @@ def run2(value):
 
     return get_subdigit(value, 0, 8)
 
-run2(input_value) | debug('Star 2')
+run2(input_value) | debug('Star 2') | eq(79723033)
