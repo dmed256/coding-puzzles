@@ -65,4 +65,5 @@ run(example2, 2, 2)
 
 input_value = get_input()
 
-run(input_value, 25, 6) | debug('Star 1')
+print('\n\nProblem ->')
+run(input_value, 25, 6) | debug('Star 1') | eq(2975)
