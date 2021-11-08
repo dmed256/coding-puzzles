@@ -97,7 +97,7 @@ run(example3) | eq(135)
 
 input_lines = get_input_lines()
 
-run(input_lines) | debug('Star 1')
+run(input_lines) | debug('Star 1') | eq(446)
 
 def run2(lines):
     return min(
@@ -109,4 +109,4 @@ run2(example1) | eq(30)
 run2(example2) | eq(610)
 run2(example3) | eq(410)
 
-run2(input_lines) | debug('Star 2')
+run2(input_lines) | debug('Star 2') | eq(9006)

@@ -29,7 +29,7 @@ def run():
         if is_password(i)
     ])
 
-run() | debug('Star 1')
+run() | debug('Star 1') | eq(1650)
 
 def is_password2(value):
     if not is_password(value):
@@ -57,4 +57,4 @@ def run2():
         if is_password2(i)
     ])
 
-run2() | debug('Star 2')
+run2() | debug('Star 2') | eq(1129)
