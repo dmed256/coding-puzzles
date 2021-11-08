@@ -27,7 +27,8 @@ def find_bag_contents(bag, deps, bags):
             contents.get(inner_bag, 0)
             + count
         )
-        for inner_inner_bag, inner_inner_count in find_bag_contents(inner_bag, deps, bags).items():
+        inner_inner_bags = find_bag_contents(inner_bag, deps, bags)
+        for inner_inner_bag, inner_inner_count in inner_inner_bags.items():
             contents[inner_inner_bag] = (
                 contents.get(inner_inner_bag, 0)
                 + (count * inner_inner_count)
