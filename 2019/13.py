@@ -130,7 +130,7 @@ def run(interactive=False):
 
     return len(blocks)
 
-run() | debug('Star 1')
+run() | debug('Star 1') | eq(239)
 
 def run2():
     arcade = Arcade()
@@ -138,4 +138,4 @@ def run2():
 
     return arcade.score
 
-run2() | debug('Star 2')
+run2() | debug('Star 2') | eq(12099)
