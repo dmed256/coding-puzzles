@@ -134,8 +134,6 @@ class Program:
         for (x, y) in intersections:
             self.grid[y][x] = 'O'
 
-        self.print_grid()
-
         return sum([
             x * y
             for (x, y) in intersections
@@ -176,11 +174,11 @@ class Program:
         self.inputs = [ord(c) for c in inputs]
 
         self.run_program(2)
-        return self.p.output
+        return self.p.output[0]
 
 
 program = Program()
 
-program.run() | debug('Star 1')
+program.run() | debug('Star 1') | eq(4372)
 
-program.run2() | debug('Star 2')
+program.run2() | debug('Star 2') | eq(945911)
