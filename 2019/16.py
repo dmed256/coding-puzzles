@@ -114,22 +114,12 @@ def run2(value):
 
     value = value * 10000
     value = value[offset:]
-    digits = len(value)
 
-    # Apply top-right 1 matrix
-    #
-    # 1 1 1 1 1     v1
-    # . 1 1 1 1     v2
-    # . . 1 1 1  x  v3
-    # . . . 1 1     v4
-    # . . . . 1     v5
+    array = np.array(value[::-1]).astype(int)
+    for i in range(100):
+        array = np.cumsum(array) % 10
 
-    for loop in range(100):
-        last_value = value[-1]
-        for i in range(digits - 2, -1, -1):
-            last_value = (last_value + value[i]) % 10
-            value[i] = last_value
-
-    return get_subdigit(value, 0, 8)
+    array = array[:-9:-1]
+    return get_subdigit(array, 0, 8)
 
 run2(input_value) | debug('Star 2') | eq(79723033)
