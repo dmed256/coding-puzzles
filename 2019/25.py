@@ -1,3 +1,4 @@
+import re
 from advent_of_code import *
 from int_processor import *
 
@@ -82,20 +83,10 @@ class Problem:
 
     def get_auto_input(self):
         while not self.ascii_input:
-            if self.ascii_output:
-                if (('heavier' not in self.ascii_output) and
-                    ('lighter' not in self.ascii_output)):
-                    print(f'> {self.ascii_output}')
-                    for i, item in enumerate(items):
-                        if self.item_combination & 2**i:
-                            print(f'TAKE {item}!!')
-                    raise 1
+            self.ascii_output = ''
 
-                self.ascii_output = ''
-
-            self.item_combination += 1
-            print(self.item_combination)
             ascii_input = ''
+            self.item_combination += 1
             if self.item_combination:
                 v1 = self.item_combination - 1
                 v2 = self.item_combination
@@ -130,6 +121,11 @@ class Problem:
         p.process_output = self.process_output
         p.run()
 
-        return self.ascii_output
+        password = re.search(
+            'You should be able to get in by typing (\d+) on the keypad at the main airlock',
+            self.ascii_output,
+        ).groups()[0]
 
-Problem().run() | debug()
+        return int(password)
+
+Problem().run() | debug('Star 1') | eq(328960)
