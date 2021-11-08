@@ -97,7 +97,7 @@ def run_networks():
     return y
 
 
-y = run_networks() | debug('Star 1')
+y = run_networks() | debug('Star 1') | eq(23701)
 
 prev_y = y
 while True:
@@ -106,4 +106,4 @@ while True:
         break
     prev_y = y
 
-y | debug('Star 2')
+y | debug('Star 2') | eq(17225)
