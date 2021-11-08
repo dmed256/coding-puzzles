@@ -99,7 +99,7 @@ run(example2, 1) | eq(54321)
 run(example3, 1) | eq(65210)
 
 input_value = get_input()
-run(input_value, 1) | debug('Star 1')
+run(input_value, 1) | debug('Star 1') | eq(880726)
 
 example1 = multiline_input("""
 3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5
@@ -110,4 +110,4 @@ example2 = multiline_input("""
 
 run(example1, 2) | eq(139629729)
 run(example2, 2) | eq(18216)
-run(input_value, 2) | debug('Star 2')
+run(input_value, 2) | debug('Star 2') | eq(4931744)
