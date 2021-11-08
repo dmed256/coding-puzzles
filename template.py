@@ -1,5 +1,8 @@
 from advent_of_code import *
 
+def run(lines):
+    pass
+
 example = multiline_lines(r"""
 """)
 
