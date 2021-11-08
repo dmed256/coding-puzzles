@@ -125,10 +125,10 @@ def run2(value):
     # . . . . 1     v5
 
     for loop in range(100):
-        for i in range(1, digits):
-            idx = digits - i - 1
-            value[idx] += value[idx + 1]
-            value[idx] %= 10
+        last_value = value[-1]
+        for i in range(digits - 2, -1, -1):
+            last_value = (last_value + value[i]) % 10
+            value[i] = last_value
 
     return get_subdigit(value, 0, 8)
 

@@ -5,6 +5,7 @@
 *.pyc
 __pycache__
 *.npy
+*.py.lprof
 
 # Debug
 .DS_Store
