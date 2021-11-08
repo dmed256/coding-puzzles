@@ -63,7 +63,7 @@ get_orbit_counts(example) | eq([11, 31])
 
 input_lines = get_input_lines()
 
-run(input_lines) | debug('Star 1')
+run(input_lines) | debug('Star 1') | eq(300598)
 
 def get_node_path(inverse_orbits, node):
     path = [[node, 0]]
@@ -117,4 +117,4 @@ I)SAN
 
 run2(example) | eq(4)
 
-run2(input_lines) | debug('Star 2')
+run2(input_lines) | debug('Star 2') | eq(520)
