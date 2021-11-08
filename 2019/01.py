@@ -25,7 +25,7 @@ run(['100756']) | eq(33583)
 
 input_lines = get_input_lines()
 
-run(input_lines) | debug('Star 1')
+run(input_lines) | debug('Star 1') | eq(3512133)
 
 def run2(lines):
     fuel = 0
@@ -43,4 +43,4 @@ run2(['14']) | eq(2)
 run2(['1969']) | eq(966)
 run2(['100756']) | eq(50346)
 
-run2(input_lines) | debug('Star 2')
+run2(input_lines) | debug('Star 2') | eq(5265294)
