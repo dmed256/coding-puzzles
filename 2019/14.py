@@ -166,7 +166,7 @@ run(example5) | eq(2210736)
 
 input_lines = get_input_lines()
 
-run(input_lines) | debug('Star 1')
+run(input_lines) | debug('Star 1') | eq(362713)
 
 A_TRILLION = 1000000000000
 
@@ -194,4 +194,4 @@ run2(example3) | eq(82892753)
 run2(example4) | eq(5586022)
 run2(example5) | eq(460664)
 
-run2(input_lines) | debug('Star 2')
+run2(input_lines) | debug('Star 2') | eq(3281820)
