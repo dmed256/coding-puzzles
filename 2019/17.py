@@ -104,7 +104,7 @@ class Program:
         input_value = get_input()
         input_value = str(mode) + input_value[1:]
 
-        self.p = IntProcessor(input_value, SINGLE_LOOP_MODE)
+        self.p = IntProcessor(input_value)
 
         self.p.get_input = self.get_input
         self.p.process_output = self.process_output

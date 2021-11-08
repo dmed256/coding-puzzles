@@ -114,7 +114,7 @@ class Problem:
         }[self.get_value(self.robot_pos)]
 
     def run(self):
-        self.p = IntProcessor(input_value, SINGLE_LOOP_MODE)
+        self.p = IntProcessor(input_value)
         self.p.get_input = self.get_input
         self.p.process_output = self.process_output
         self.p.run()

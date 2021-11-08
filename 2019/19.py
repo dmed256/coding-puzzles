@@ -2,7 +2,7 @@ from advent_of_code import *
 from int_processor import *
 
 input_value = get_input()
-p = IntProcessor(input_value, SINGLE_LOOP_MODE)
+p = IntProcessor(input_value)
 
 def get_output(x, y):
     [value] = p.run(inputs=[x, y])

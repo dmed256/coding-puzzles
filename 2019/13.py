@@ -8,7 +8,7 @@ from int_processor import *
 class Arcade:
     def __init__(self, interactive=False):
         input_value = get_input()
-        self.p = IntProcessor(input_value, SINGLE_LOOP_MODE)
+        self.p = IntProcessor(input_value)
 
         self.interactive = interactive
 

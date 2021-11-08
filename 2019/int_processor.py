@@ -5,13 +5,10 @@ POSITION_MODE = 0
 IMMEDIATE_MODE = 1
 RELATIVE_MODE = 2
 
-SINGLE_LOOP_MODE = 0
-FEEDBACK_LOOP_MODE = 1
-
 PAUSE = 'PAUSE'
 
 class IntProcessor:
-    def __init__(self, values, loop_mode=SINGLE_LOOP_MODE):
+    def __init__(self, values):
         if type(values) is str:
             self.original_values = split_comma_ints(values)
         else:
@@ -22,7 +19,6 @@ class IntProcessor:
         self.is_paused = False
         self.pause_pos = None
 
-        self.loop_mode = loop_mode
         self.values = self.original_values.copy()
         self.original_input_values = {}
         self.input_values = []
@@ -197,14 +193,13 @@ class IntProcessor:
 
     def unsafe_run(self):
         # Reset
-        if self.loop_mode == SINGLE_LOOP_MODE:
-            self.is_done = False
-            self.values = self.original_values.copy()
-            self.ptr = 0
-            self.stack = []
-            self.relative_base = 0
-
+        self.is_done = False
+        self.values = self.original_values.copy()
+        self.ptr = 0
+        self.stack = []
+        self.relative_base = 0
         self.output = []
+
         return self.loop_run()
 
     def loop_run(self):
@@ -223,17 +218,11 @@ class IntProcessor:
             elif op == 2:
                 self.op_values('*')
             elif op == 3:
-                if self.loop_mode == FEEDBACK_LOOP_MODE and not self.has_input_values():
-                    self.stack.pop()
-                    self.ptr -= 1
-                    return self.output
                 self.store_input()
                 if self.is_paused:
                     return None
             elif op == 4:
                 self.store_output()
-                if self.loop_mode == FEEDBACK_LOOP_MODE:
-                    return self.output
             elif op == 5:
                 self.jump_if_zero(False)
             elif op == 6:

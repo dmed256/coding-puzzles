@@ -235,7 +235,7 @@ class System:
     def explore_map(self):
         print('EXPLORING MAP')
         input_value = get_input()
-        self.p = IntProcessor(input_value, SINGLE_LOOP_MODE)
+        self.p = IntProcessor(input_value)
 
         self.p.get_input = self.get_input
         self.p.process_output = self.process_output

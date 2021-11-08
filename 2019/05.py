@@ -4,14 +4,14 @@ from advent_of_code import *
 from int_processor import *
 
 def extract_values(values, ptr, count, mode):
-    p = IntProcessor(values, SINGLE_LOOP_MODE)
+    p = IntProcessor(values)
     p.ptr = ptr
     p.mode = mode
 
     return p.extract_values(count)
 
 def run(values, inputs):
-    p = IntProcessor(values, SINGLE_LOOP_MODE)
+    p = IntProcessor(values)
     return p.run(inputs=inputs)
 
 extract_values(
