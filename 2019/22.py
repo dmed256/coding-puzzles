@@ -1,11 +1,8 @@
-# Wrong: 41920054595687
-# Wrong: 68160128016288
-# Wrong: 112798141866005
-# Wrong: 36455596558889
-# Wrong: 98178534353069
-# Wrong: 69620352108419
-# Wrong: 12741645857315
-# 96797432275571
+import math
+from sympy import symbols
+from sympy.solvers.diophantine import diophantine
+from advent_of_code import *
+
 
 def get_coefficients(lines, deck_size):
     mult = 1
@@ -26,6 +23,7 @@ def get_coefficients(lines, deck_size):
             shift = ((shift + 1) * m) % deck_size
 
     return [mult, shift]
+
 
 def get_apply_coefficients(mult, shift, deck_size, applications):
     base2_mult = mult
@@ -67,76 +65,79 @@ def get_apply_coefficients(mult, shift, deck_size, applications):
 def run_apply(pos, mult, shift, deck_size):
     return ((pos * mult) + shift) % deck_size
 
-def test_application(test_name, input_value, expected_output):
-    print(f"RUNNING: {test_name}")
-    deck_size = len(expected_output)
 
-    [mult, shift] = get_coefficients(
-        input_value.strip().splitlines(),
-        deck_size,
-    )
+def run(input_lines, deck_size, pos):
+    [mult, shift] = get_coefficients(input_lines, deck_size)
+    return run_apply(pos, mult, shift, deck_size)
 
-    output = list(range(deck_size))
+
+def run2(input_lines, deck_size, applications, pos):
+    [mult, shift] = get_coefficients(input_lines, deck_size)
+    [mult, shift] = get_apply_coefficients(mult, shift, deck_size, applications)
+    #    mult * x + shift = 2020 (mod deck_size)
+    # -> mult * x + shift = 2020 + y * deck_size
+    # -> mult * x + deck_size * y + (shift - 2020) = 0
+
+    x, y, t = symbols("x, y, t_0", integer=True)
+    (sx, sy) = list(
+        diophantine(mult*x - deck_size*y + (shift - 2020))
+    )[0]
+
+    # ax + b = 0
+    (x_b, x_ax) = sx.as_coeff_Add()
+    (x_a, _) = x_ax.as_coeff_Mul()
+
+    answer = sx.subs({
+        t: math.ceil(-x_b / x_a)
+    })
+
+    run_apply(answer, mult, shift, deck_size) | eq(pos)
+
+    return answer
+
+
+def run_test(deck_size, input_lines):
+    output = [0] * deck_size
     for i in range(deck_size):
-        output[run_apply(i, mult, shift, deck_size)] = i
+        output[run(input_lines, deck_size, i)] = i
+    return output
 
-    if expected_output != output:
-        print(f"FAILED: {test_name}")
-        print(f"  - Expected: {expected_output}")
-        print(f"  - Received: {output}")
 
-def test_applications(test_name, mult, shift, expected_output, applications):
-    print(f"RUNNING: {test_name}")
-
-    output = get_apply_coefficients(mult, shift, 1000000000000, applications)
-
-    if expected_output != output:
-        print(f"FAILED: {test_name}")
-        print(f"  - Expected: {expected_output}")
-        print(f"  - Received: {output}")
-
-test_application("tutorial1", """
+example1 = multiline_lines("""
 deal into new stack
-""", [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-)
+""")
 
-test_application("tutorial2", """
+example2 = multiline_lines("""
 cut 3
-""", [3, 4, 5, 6, 7, 8, 9, 0, 1, 2]
-)
+""")
 
-test_application("tutorial3", """
+example3 = multiline_lines("""
 cut -4
-""", [6, 7, 8, 9, 0, 1, 2, 3, 4, 5]
-)
+""")
 
-test_application("tutorial4", """
+example4 = multiline_lines("""
 deal with increment 3
-""", [0, 7, 4, 1, 8, 5, 2, 9, 6, 3]
-)
+""")
 
-test_application("test1", """
+example5 = multiline_lines("""
 deal with increment 7
 deal into new stack
 deal into new stack
-""", [0, 3, 6, 9, 2, 5, 8, 1, 4, 7]
-)
+""")
 
-test_application("test2", """
+example6 = multiline_lines("""
 cut 6
 deal with increment 7
 deal into new stack
-""", [3, 0, 7, 4, 1, 8, 5, 2, 9, 6]
-)
+""")
 
-test_application("test3", """
+example7 = multiline_lines("""
 deal with increment 7
 deal with increment 9
 cut -2
-""", [6, 3, 0, 7, 4, 1, 8, 5, 2, 9]
-)
+""")
 
-test_application("test4", """
+example8 = multiline_lines("""
 deal into new stack
 cut -2
 deal with increment 7
@@ -147,80 +148,37 @@ cut 3
 deal with increment 9
 deal with increment 3
 cut -1
-""", [9, 2, 5, 8, 1, 4, 7, 0, 3, 6]
-)
+""")
 
-test_applications(
-    "applications - test1",
-    2, 1,
-    [2, 1],
-    1,
-)
-test_applications(
-    "applications - test2",
-    2, 1,
-    [4, 3],
-    2,
-)
-test_applications(
-    "applications - test3",
-    2, 1,
-    [8, 7],
-    3,
-)
-test_applications(
-    "applications - test4",
-    2, 1,
-    [16, 15],
-    4,
-)
-test_applications(
-    "applications - test5",
-    1, 1,
-    [1, 10000],
-    10000,
-)
-test_applications(
-    "applications - test6",
-    7, 0,
-    [7*7*7*7, 0],
-    4,
-)
+run_test(10, example1) | eq([9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+run_test(10, example2) | eq([3, 4, 5, 6, 7, 8, 9, 0, 1, 2])
+run_test(10, example3) | eq([6, 7, 8, 9, 0, 1, 2, 3, 4, 5])
+run_test(10, example4) | eq([0, 7, 4, 1, 8, 5, 2, 9, 6, 3])
+run_test(10, example5) | eq([0, 3, 6, 9, 2, 5, 8, 1, 4, 7])
+run_test(10, example6) | eq([3, 0, 7, 4, 1, 8, 5, 2, 9, 6])
+run_test(10, example7) | eq([6, 3, 0, 7, 4, 1, 8, 5, 2, 9])
+run_test(10, example8) | eq([9, 2, 5, 8, 1, 4, 7, 0, 3, 6])
 
-#---[ Star 1 ]--------------------------
-with open('input', 'r') as fd:
-    lines = fd.readlines()
+input_lines = get_input_lines()
+run(input_lines, 10007, 2019) | debug('Star 1') | eq(4284)
 
-deck_size = 10007
-
-[mult, shift] = get_coefficients(lines, deck_size)
-assert 4284 == run_apply(2019, mult, shift, deck_size)
-
-#---[ Star 2 ]--------------------------
+# Test get_apply_coefficients
+mult = 382930490
+shift = 729083420
+x = 112798141866005
 deck_size = 119315717514047
-applications = 101741582076661
-
 for i in range(20):
-    mult = 382930490
-    shift = 729083420
-    x = 112798141866005
-
     expected_value = x
     for j in range(i):
         expected_value = ((mult * expected_value) + shift) % deck_size
 
     [mult, shift] = get_apply_coefficients(mult, shift, deck_size, i)
     value = ((mult * x) + shift) % deck_size
-    if value != expected_value:
-        print(f"FAILED({i}):")
-        print(f"  - Expected: {expected_value}")
-        print(f"  - Received: {value}")
+    value | eq(expected_value)
 
-
-[mult, shift] = get_coefficients(lines, deck_size)
-
-[mult, shift] = get_apply_coefficients(mult, shift, deck_size, applications)
-print(f"{mult} * x + {shift} = 2020 (mod {deck_size})")
-
-answer = int(input("Input answer: "))
-assert 2020 == run_apply(answer, mult, shift, deck_size)
+run2(
+    input_lines,
+    deck_size,
+    applications=101741582076661,
+    pos=2020,
+) | debug('Star 2') | eq(96797432275571)
