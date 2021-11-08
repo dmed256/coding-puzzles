@@ -27,5 +27,5 @@ run(example3, []) | eq([1125899906842624])
 
 input_value = get_input()
 
-run(input_value, [1]) | debug()
-run(input_value, [2]) | debug()
+run(input_value, [1]) | debug('Star 1') | eq([3518157894])
+run(input_value, [2]) | debug('Star 2') | eq([80379])
