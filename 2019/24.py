@@ -57,7 +57,7 @@ while score not in scores:
     scores.add(score)
     score = apply_timestep(score)
 
-score | debug('Star 1')
+score | debug('Star 1') | eq(2130474)
 
 def get_mid_bugs(score, direction):
     if direction == RIGHT:
@@ -168,4 +168,4 @@ score = parse_lines(input_lines)
 
 get_scores_bugs(
     apply_timesteps(score, 200)
-) | debug('Star 2')
+) | debug('Star 2') | eq(1923)
