@@ -22,7 +22,7 @@ run(example1) | eq(514579)
 
 input_lines = get_input_lines()
 
-run(input_lines) | debug('Star 1')
+run(input_lines) | debug('Star 1') | eq(996075)
 
 def run2(lines):
     values = [int(line) for line in lines]
@@ -36,4 +36,4 @@ def run2(lines):
                     return v1 * v2 * v3
 
 run2(example1) | eq(241861950)
-run2(input_lines) | debug('Star 2')
+run2(input_lines) | debug('Star 2') | eq(51810360)
