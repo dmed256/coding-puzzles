@@ -1,6 +1,7 @@
 import re
 import textwrap
 import itertools
+from functools import lru_cache
 from termcolor import colored
 from advent_of_code import *
 from int_processor import *
@@ -12,18 +13,21 @@ COMMANDS = {
     RIGHT: 4,
 }
 
-UNKNOWN = 0
-FLOOR = 1
-WALL = 2
+UNKNOWN = ' '
+FLOOR = '.'
+WALL = '#'
 
 W = 30
 D = 2*W + 1
 
 class System:
     def __init__(self):
-        self.pos = (0, 0)
+        self.pos = (W, W)
         self.oxygen_system = None
-        self.grid = [UNKNOWN for i in range(D*D)]
+        self.grid = Grid([
+            [UNKNOWN for x in range(D)]
+            for y in range(D)
+        ])
 
         self.targets = set([
             apply_direction(self.pos, direction)
@@ -33,7 +37,7 @@ class System:
         self.prev_target_paths = {}
 
         self.set_target()
-        self.set_value(self.pos, FLOOR)
+        self.grid[self.pos] = FLOOR
 
     @staticmethod
     def get_direction(pos, pos2):
@@ -49,63 +53,49 @@ class System:
         if y1 > y2:
             return DOWN
 
-    @staticmethod
-    def get_index(pos):
-        (x, y) = pos
-        return (W + x) + (W + y)*D
-
-    @staticmethod
-    def get_pos(index):
-        return (
-            (index % D) - W,
-            (index // D) - W,
-        )
-
-    def get_value(self, pos):
-        return self.grid[self.get_index(pos)]
-
-    def set_value(self, pos, value):
-        self.grid[self.get_index(pos)] = value
-
     def update_targets(self):
         for direction in DIRECTIONS:
             pos2 = apply_direction(self.pos, direction)
-            if self.get_value(pos2) != UNKNOWN:
+            if self.grid[pos2] != UNKNOWN:
                 continue
             self.targets.add(pos2)
 
     def set_target(self):
-        sorted_prev_targets = sorted(
-            self.prev_target_paths.keys(),
-            key=lambda target: len(self.prev_target_paths[target])
-        )
-        explore_prev_count = min(5, len(sorted_prev_targets))
-        explore_prev_targets = sorted_prev_targets[:explore_prev_count]
-
-        explore_new_targets = self.targets - set(self.prev_target_paths.keys())
-
-        explore_targets = [
-            *explore_prev_targets,
-            *explore_new_targets
+        explored_nodes = set([self.pos])
+        paths = [
+            [self.pos]
         ]
-        if not explore_targets:
-            explored_targets = self.targets
+        self.target_path = None
+        while paths and not self.target_path:
+            next_paths = []
+            for path in paths:
+                pos = path[-1]
 
-        target_paths = {
-            target: path
-            for target in explore_targets
-            if len(path := self.get_path(self.pos, target)) > 1
-        }
-        if not target_paths:
-            return
+                neighbors = [
+                    n
+                    for direction in DIRECTIONS
+                    if (n := self.grid.apply_direction(pos, direction))
+                    and self.grid[n] != WALL
+                    and n not in explored_nodes
+                ]
+                if not neighbors:
+                    continue
 
-        self.target = min(
-            target_paths.keys(),
-            key=lambda target: len(target_paths[target])
-        )
+                unknowns = [
+                    n
+                    for n in neighbors
+                    if self.grid[n] == UNKNOWN
+                ]
+                if unknowns:
+                    # Remove current position from path
+                    self.target_path = [*path[1:], unknowns[0]]
+                    break
 
-        # Remove current position from path
-        self.target_path = target_paths[self.target][1:]
+                for n in neighbors:
+                    next_paths.append([*path, n])
+                    explored_nodes.add(n)
+
+            paths = next_paths
 
     def get_path(self, pos, target, end_paths=None, explored=None):
         end_paths = end_paths if end_paths is not None else {}
@@ -130,7 +120,7 @@ class System:
             if pos2 == target:
                 return [pos, pos2]
 
-            if self.get_value(pos2) != FLOOR:
+            if self.grid[pos2] != FLOOR:
                 continue
 
             path = self.get_path(pos2, target, end_paths, explored)
@@ -160,7 +150,7 @@ class System:
     def process_output(self, output):
         [code] = output
 
-        # self.print_grid()
+        # self.grid.print()
         # self.print_diagnostics()
 
         next_pos = self.target_path.pop(0)
@@ -168,9 +158,9 @@ class System:
             self.targets.remove(next_pos)
 
         if code == 0:
-            self.set_value(next_pos, WALL)
+            self.grid[next_pos] = WALL
         elif code == 1:
-            self.set_value(next_pos, FLOOR)
+            self.grid[next_pos] = FLOOR
             self.pos = next_pos
             self.update_targets()
         elif code == 2:
@@ -188,9 +178,9 @@ class System:
             if tile != UNKNOWN
         ])
         positions = [
-            self.get_pos(i)
-            for i, tile in enumerate(self.grid)
-            if tile != UNKNOWN
+            (x, y)
+            for (x, y, v) in self.grid
+            if v != UNKNOWN
         ]
         x_min = min(x for (x, _) in positions)
         x_max = max(x for (x, _) in positions)
@@ -204,34 +194,6 @@ class System:
             print(f'  - X: [{x_min}, {x_max}]')
             print(f'  - Y: [{y_min}, {y_max}]')
 
-    def print_grid(self):
-        tile_to_ascii = {
-            None: ' ',
-            UNKNOWN: ' ',
-            FLOOR: '.',
-            WALL: '#',
-        }
-
-        def get_ascii(pos):
-            if pos == self.pos:
-                return green('D')
-            if pos in self.targets:
-                return yellow('*')
-
-            tile = tile_to_ascii[self.get_value(pos)]
-            if pos in self.target_path:
-                return red(tile)
-            else:
-                return blue(tile)
-
-        print('\n'.join([
-            f'{y:03d} | ' + ' '.join([
-                get_ascii((x, y))
-                for x in range(-W, W + 1)
-            ]) + ' |'
-            for y in range(-W, W + 1)
-        ]))
-
     def explore_map(self):
         print('EXPLORING MAP')
         input_value = get_input()
@@ -242,15 +204,15 @@ class System:
         self.p.run()
 
     def get_oxygen_system_path(self):
-        min_path = self.get_path((0, 0), self.oxygen_system)
+        min_path = self.get_path((W, W), self.oxygen_system)
         return len(min_path) - 1
 
     def fill_oxygen(self):
         print('FILLING OXYGEN')
         missing = set([
-            self.get_pos(i)
-            for i, tile in enumerate(self.grid)
-            if tile == FLOOR
+            (x, y)
+            for (x, y, v) in self.grid
+            if v == FLOOR
         ])
         nodes = set([self.oxygen_system])
 

@@ -8,25 +8,14 @@ RELATIVE_MODE = 2
 PAUSE = 'PAUSE'
 
 class IntProcessor:
-    def __init__(self, values):
+    def __init__(self, values, *, debug=False):
         if type(values) is str:
             self.original_values = split_comma_ints(values)
         else:
             self.original_values = values
 
-        self.is_done = False
-
-        self.is_paused = False
-        self.pause_pos = None
-
-        self.values = self.original_values.copy()
-        self.original_input_values = {}
-        self.input_values = []
-        self.ptr = 0
-        self.relative_base = 0
-        self.stack = []
-
-        self.process_output = self.default_process_output
+        self.process_output = lambda x: x
+        self.debug = debug
 
     def get_modes(self, count):
         modes = []
@@ -125,10 +114,8 @@ class IntProcessor:
 
         self.set_value(pos, input_value)
 
-        self.original_input_values[len(self.stack)] = input_value
-
-    def default_process_output(self, output):
-        return output
+        if self.debug:
+            self.original_input_values[len(self.stack)] = input_value
 
     def store_output(self):
         [output] = self.extract_values(1)
@@ -140,6 +127,10 @@ class IntProcessor:
         self.relative_base += output
 
     def print_debug(self):
+        if not self.debug:
+            print(red('Debug mode not set!'))
+            raise 1
+
         stack = [
             *self.stack,
             [self.ptr, self.values.copy()]
@@ -192,8 +183,12 @@ class IntProcessor:
         return False
 
     def unsafe_run(self):
-        # Reset
         self.is_done = False
+
+        self.is_paused = False
+        self.pause_pos = None
+
+        self.original_input_values = {}
         self.values = self.original_values.copy()
         self.ptr = 0
         self.stack = []
@@ -211,7 +206,8 @@ class IntProcessor:
             self.mode = instruction // 100
             op = instruction % 100
 
-            self.stack.append([self.ptr - 1, self.values.copy()])
+            if self.debug:
+                self.stack.append([self.ptr - 1, self.values.copy()])
 
             if op == 1:
                 self.op_values('+')
@@ -244,10 +240,13 @@ class IntProcessor:
 
     def unpause(self, input_value):
         self.set_value(self.pause_pos, input_value)
-        self.original_input_values[len(self.stack)] = input_value
+
+        if self.debug:
+            self.original_input_values[len(self.stack)] = input_value
 
         self.is_paused = False
         self.pause_pos = None
+
         try:
             return self.loop_run()
         except Exception as e:
