@@ -51,7 +51,7 @@ class KeyGraph:
 class Problem:
     def __init__(self, lines, problem):
         self.setup_grid(lines, problem)
-        self.grid.print()
+        # self.grid.print()
 
         self.graphs = [
             KeyGraph(self.grid, start_pos)
@@ -178,14 +178,12 @@ class Problem:
             input()
 
     def run(self):
-        tic()
         cached_paths = {}
         min_path = self.find_min_path(
             ['@' for _ in self.graphs],
             captured_keys=set(),
             cached_paths=cached_paths,
         )
-        toc('')
 
         return len(min_path)
 
@@ -239,7 +237,7 @@ Problem(example4, 1).run() | eq(136)
 Problem(example5, 1).run() | eq(81)
 
 input_lines = get_input_lines()
-Problem(input_lines, 1).run() | debug('Star 1')
+Problem(input_lines, 1).run() | debug('Star 1') | eq(5964)
 
 example1 = multiline_lines("""
 #######
@@ -288,4 +286,4 @@ Problem(example2, 2).run() | eq(24)
 Problem(example3, 2).run() | eq(32)
 Problem(example4, 7).run() | eq(72)
 
-Problem(input_lines, 2).run() | debug('Star 2')
+Problem(input_lines, 2).run() | debug('Star 2') | eq(1996)
