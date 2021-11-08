@@ -231,7 +231,7 @@ class Problem:
 
 
     def run(self):
-        self.grid.print()
+        # self.grid.print()
 
         init_pos = (self.start_pos, 0)
 
@@ -318,7 +318,7 @@ Problem(example1, 1).run() | eq(23)
 Problem(example2, 1).run() | eq(58)
 
 input_lines = get_input_lines()
-Problem(input_lines, 1).run() | debug('Star 1')
+Problem(input_lines, 1).run() | debug('Star 1') | eq(642)
 
 example1 = multiline_lines("""
              Z L X W       C
@@ -361,4 +361,4 @@ RE....#.#                           #......RF
 """, strip_lines=False)
 
 Problem(example1, 2).run() | eq(396)
-Problem(input_lines, 2).run() | debug('Star 2')
+Problem(input_lines, 2).run() | debug('Star 2') | eq (7492)
