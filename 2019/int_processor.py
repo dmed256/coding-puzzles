@@ -25,9 +25,10 @@ class IntProcessor:
         return modes
 
     def pad_values(self, index):
-        count = len(self.values)
-        if index < count:
+        if index < len(self.values):
             return
+
+        count = len(self.values)
         padding = [0 for i in range(index - count + 1)]
         self.values = [
             *self.values,
@@ -45,19 +46,11 @@ class IntProcessor:
             self.pad_values(pos)
             return self.values[pos]
 
-    def get_pos_value(self, value, mode):
-        if mode == POSITION_MODE:
-            return value
-        elif mode == IMMEDIATE_MODE:
-            print('Unable to write to IMMEDIATE_MODE')
-            raise 1
-        elif mode == RELATIVE_MODE:
-            return self.relative_base + value
-
     def set_value(self, index, value):
         self.pad_values(index)
         self.values[index] = value
 
+    @profile
     def extract_raw_values(self, count):
         raw_values = self.values[self.ptr:(self.ptr + count)]
         self.ptr += count
@@ -72,18 +65,22 @@ class IntProcessor:
             for raw_value, mode in zip(raw_values, modes)
         ]
 
-    def extract_pos_values(self, count):
-        raw_values = self.extract_raw_values(count)
-        modes = self.get_modes(count)
+    def extract_pos_value(self):
+        [value] = self.extract_raw_values(1)
+        [mode] = self.get_modes(1)
 
-        return [
-            self.get_pos_value(raw_value, mode)
-            for raw_value, mode in zip(raw_values, modes)
-        ]
+        if mode == POSITION_MODE:
+            return value
+        elif mode == RELATIVE_MODE:
+            return self.relative_base + value
+        elif mode == IMMEDIATE_MODE:
+            print('Unable to write to IMMEDIATE_MODE')
+            raise 1
 
+    @profile
     def op_values(self, op):
         [v1, v2] = self.extract_values(2)
-        [pos] = self.extract_pos_values(1)
+        pos = self.extract_pos_value()
 
         if op == '+':
             value = v1 + v2
@@ -104,7 +101,7 @@ class IntProcessor:
             self.ptr = pos
 
     def store_input(self):
-        [pos] = self.extract_pos_values(1)
+        pos = self.extract_pos_value()
 
         input_value = self.get_input()
         if input_value == PAUSE:
@@ -197,6 +194,7 @@ class IntProcessor:
 
         return self.loop_run()
 
+    @profile
     def loop_run(self):
         while self.ptr < len(self.values):
             if self.is_done:
