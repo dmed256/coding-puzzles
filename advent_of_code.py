@@ -1,10 +1,12 @@
-import os
 import multiprocess as mp
 import numpy as np
+import os
+import sys
 import textwrap
 import traceback
-from enum import Enum
 from datetime import datetime
+from enum import Enum
+from pydantic import BaseModel
 from termcolor import colored
 
 
@@ -28,9 +30,7 @@ def multiline_input(s):
     return '\n'.join(multiline_lines(s))
 
 def get_input_lines():
-    frame = traceback.extract_stack()[0]
-    filename = os.path.basename(frame.filename)
-
+    filename = sys.argv[0]
     input_filename = f'{os.path.splitext(filename)[0]}_input'
 
     with open(input_filename, 'r') as fd:
@@ -152,6 +152,20 @@ def lget(lst, index):
     if index < len(lst):
         return lst[index]
     return None
+
+def safe_min(a, b):
+    if a is None:
+        return b
+    if b is None:
+        return a
+    return min(a, b)
+
+def safe_max(a, b):
+    if a is None:
+        return b
+    if b is None:
+        return a
+    return max(a, b)
 
 def split_comma_ints(value):
     return [
@@ -292,6 +306,7 @@ DIRECTION_TO_ASCII = {
     RIGHT: '>',
 }
 
+#---[ Grid ]----------------------------
 def apply_direction(pos, direction):
     (x, y) = pos
     (dx, dy) = direction
@@ -400,6 +415,7 @@ class Grid:
         output += padding[:-1] + '└' + ('─' * (x_axis_length + 2)) + '┘\n'
         print(output)
 
+#---[ Graph ]---------------------------
 class Graph:
     class Type(Enum):
         NOTHING = 0
@@ -408,7 +424,7 @@ class Graph:
 
     def __init__(self, grid, *, start_pos, get_type):
         self.grid = grid
-        self.graph = {}
+        self.neighbors = {}
 
         # value -> Graph.Type
         self.get_type = get_type
@@ -418,6 +434,7 @@ class Graph:
             nodes = [*start_pos]
         else:
             nodes = [start_pos]
+
         explored = set(nodes)
         while nodes:
             new_nodes = set()
@@ -427,7 +444,7 @@ class Graph:
                     for n in self.grid.neighbors(node)
                     if self.get_pos_type(n) != Graph.Type.WALL
                 ]
-                self.graph[node] = neighbors
+                self.neighbors[node] = neighbors
                 new_nodes.update(neighbors)
             nodes = new_nodes - explored
             explored.update(nodes)
@@ -438,18 +455,33 @@ class Graph:
             if (v := self.grid[(x, y)])
             and self.get_type(v) == Graph.Type.OBJECT
         }
-        self.objects = set(self.pos_to_object.values())
+        self.object_to_pos = {}
+        for pos, v in self.pos_to_object.items():
+            positions = self.object_to_pos.get(v, [])
+            self.object_to_pos[v] = positions + [pos]
+
+        self.objects = set(self.pos_to_object.keys())
 
     def get_pos_type(self, pos):
         return self.get_type(self.grid[pos])
 
-    def find_paths(self, start, targets, obstacles=None):
+    def bfs(self, pos):
+        nodes = set(self.neighbors.get(pos, []))
+        explored = set([pos])
+        while nodes:
+            next_nodes = set()
+            for n in nodes:
+                yield n
+                next_nodes.update(
+                    self.neighbors.get(n, [])
+                )
+            nodes = next_nodes - explored
+            explored.update(nodes)
+
+    def find_paths(self, start, targets):
         targets = set(targets)
-        obstacles = obstacles or set()
 
         prev_nodes = { start: None }
-        for obstacle in obstacles:
-            prev_nodes[obstacle] = None
 
         nodes = set([start])
         explored = set([start])
@@ -458,9 +490,8 @@ class Graph:
             for node in nodes:
                 neighbors = [
                     neighbor
-                    for neighbor in self.graph[node]
+                    for neighbor in self.neighbors[node]
                     if neighbor not in prev_nodes
-                    and neighbor not in obstacles
                 ]
 
                 new_nodes.update(neighbors)
@@ -490,35 +521,3 @@ class Graph:
             for target in targets
             if (path := traverse_back_path(target))
         ]
-
-
-    def find_path(self, start, end, obstacles=None):
-        if start == end:
-            return []
-
-        explored = set(start)
-        if obstacles:
-            explored.update(obstacles)
-
-        paths = [[start]]
-        while paths:
-            paths = [
-                [*path, neighbor]
-                for path in paths
-                for neighbor in self.graph[path[-1]]
-                if neighbor not in explored
-            ]
-            new_nodes = [
-                path[-1]
-                for path in paths
-            ]
-            explored.update(new_nodes)
-            if end in explored:
-                return [
-                    # Remove start from the path
-                    path[1:]
-                    for path in paths
-                    if path[-1] == end
-                ][0]
-
-        return None
