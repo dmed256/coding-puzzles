@@ -54,10 +54,6 @@ class Problem2:
                     has_x1 = True
                     break
 
-            if not has_x1:
-                rows.apped
-
-
             x2 = prev_x2
             while True:
                 if not get_output(x2, y):
@@ -74,7 +70,7 @@ class Problem2:
             if prev_x2 - x1 >= 100:
                 break
 
-        if True:
+        if False:
             for y in range(prev_y, prev_y + 100):
                 for x in range(x1, x1 + 100):
                     if not get_output(x, y):
