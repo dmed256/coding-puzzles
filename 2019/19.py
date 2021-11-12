@@ -43,40 +43,37 @@ class Problem1:
 
 class Problem2:
     def run(self):
-        rows = [[0, 0], [0, 0], [0, 0], [3, 3]]
-        while True:
-            [prev_x1, prev_x2] = rows[-1]
-            y = len(rows)
+        left = [0, 0, 0, 3]
 
-            has_x1 = False
-            for x1 in range(prev_x1, prev_x2 + 5):
-                if get_output(x1, y):
-                    has_x1 = True
-                    break
+        for i in range(100):
+            prev_x = left[-1]
+            y = len(left)
 
-            x2 = prev_x2
+            x = prev_x
             while True:
-                if not get_output(x2, y):
+                if get_output(x, y):
                     break
-                x2 += 1
+                x += 1
+            left.append(x)
 
-            rows.append([x1, x2])
 
-            if y < 99:
-                continue
+        while True:
+            prev_x1 = left[-1]
+            y1 = len(left)
 
-            prev_y = y - 99
-            [prev_x1, prev_x2] = rows[prev_y]
-            if prev_x2 - x1 >= 100:
+            x1 = prev_x1
+            while True:
+                if get_output(x1, y1):
+                    break
+                x1 += 1
+            left.append(x1)
+
+            if get_output(x1 + 99, y1 - 99):
                 break
 
-        if False:
-            for y in range(prev_y, prev_y + 100):
-                for x in range(x1, x1 + 100):
-                    if not get_output(x, y):
-                        raise Exception(f"({x1}, {prev_y}) -> ({x}, {y}) not valid")
-
-        return prev_y + (10000 * x1)
+        min_y = len(left) - 100
+        min_x = left[-1]
+        return min_y + (10000 * min_x)
 
 Problem1().run() | debug('Star 1') | eq(211)
 
