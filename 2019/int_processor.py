@@ -50,7 +50,6 @@ class IntProcessor:
         self.pad_values(index)
         self.values[index] = value
 
-    @profile
     def extract_raw_values(self, count):
         raw_values = self.values[self.ptr:(self.ptr + count)]
         self.ptr += count
@@ -77,7 +76,6 @@ class IntProcessor:
             print('Unable to write to IMMEDIATE_MODE')
             raise 1
 
-    @profile
     def op_values(self, op):
         [v1, v2] = self.extract_values(2)
         pos = self.extract_pos_value()
@@ -194,7 +192,6 @@ class IntProcessor:
 
         return self.loop_run()
 
-    @profile
     def loop_run(self):
         while self.ptr < len(self.values):
             if self.is_done:

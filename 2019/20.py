@@ -272,7 +272,7 @@ FG..#########.....#
   ###########.#####
              Z
              Z
-""", strip_lines=False)
+""")
 
 example2 = multiline_lines("""
                    A
@@ -312,7 +312,7 @@ YN......#               VT..#....QG
   #########.###.###.#############
            B   J   C
            U   P   P
-""", strip_lines=False)
+""")
 
 Problem(example1, 1).run() | eq(23)
 Problem(example2, 1).run() | eq(58)
@@ -358,7 +358,7 @@ RE....#.#                           #......RF
   #############.#.#.###.###################
                A O F   N
                A A D   M
-""", strip_lines=False)
+""")
 
 Problem(example1, 2).run() | eq(396)
 Problem(input_lines, 2).run() | debug('Star 2') | eq (7492)

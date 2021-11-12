@@ -13,18 +13,16 @@ from termcolor import colored
 PROCESSES = 8
 
 #---[ Input ]---------------------------
-def multiline_lines(s, *, strip_lines=True):
-    if strip_lines:
-        return [
-            line.strip()
-            for line in s.splitlines()
-            if line.strip()
-        ]
-    return [
+def multiline_lines(s):
+    lines = [
         line
         for line in s.splitlines()
-        if line.strip()
     ]
+    if not lines[0]:
+        lines = lines[1:]
+    if not lines[-1]:
+        lines = lines[:-1]
+    return lines
 
 def multiline_input(s):
     return '\n'.join(multiline_lines(s))
