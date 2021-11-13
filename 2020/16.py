@@ -69,17 +69,18 @@ def run(lines, problem):
     if problem == 1:
         return find_errors(fields, other_tickets)
 
-    mask = (1 << len(fields)) - 1
     valid_tickets = [
         ticket
         for ticket in [my_ticket, *other_tickets]
         if is_valid_ticket(ticket, fields)
     ]
 
-    field_masks = [mask] * len(fields)
+    field_masks = [set()] * len(fields)
     for ticket in valid_tickets:
         for field, value in enumerate(ticket):
-            field_masks[field] &= get_ticket_field_mask(value, fields)
+            mask = get_ticket_field_mask(value, fields)
+            bits = [bit_info[0] for bit_info in get_bits(mask)]
+            field_masks[field] &=
 
     for mask in field_masks:
         for i in range(len(fields)):
