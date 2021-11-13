@@ -33,23 +33,41 @@ run(input_lines) | debug('Star 1') | eq(156)
 def run2(lines):
     schedule = lines[1].split(',')
     bus_info = [
-        (int(bus_id), offset)
-        for offset, bus_id in enumerate(schedule)
-        if bus_id.isdigit()
+        (bus_id, (bus_id - offset) % bus_id)
+        for offset, bus_id_str in enumerate(schedule)
+        if bus_id_str.isdigit()
+        and (bus_id := int(bus_id_str))
+    ]
+    # t = t_mod_id[0] (mod bus_id[0])
+    # t = t_mod_id[1] (mod bus_id[1])
+    # ...
+    #
+    # ->
+    #
+    # t = z[0]*t_mod_id[0]*n[0] + z[1]*t_mod_id[1]*n[1] + ...
+    #
+    # t (mod bus_id[0])
+    #
+    # -> z[0]*t_mod_id[0]*n[0] + z[1]*t_mod_id[1]*n[1] + ... (mod bus_id[0])
+    #
+    # -> z[0]*t_mod_id[0]*n[0] (mod bus_id[0])
+    #    [Note: n[i] == 0 (mod bus_id[j]) when i != j]
+    #
+    # -> t_mod_id[0] (mod bus_id[0])
+    #    [z[i] == n[i]^-1 (mod bus_id[0])]
+
+    N = 1
+    for (bus_id, _) in bus_info:
+        N *= bus_id
+    n = [
+        N // bus_id
+        for (bus_id, _) in bus_info
     ]
 
-    t = 0 (mod 7)
-    t = 12 (mod 13)
-    t = 55 (mod 59)
-    t = 25 (mod 31)
-    t = 12 (mod 19)
-
-
-
-  - OUTPUT:   [[(7, 0), (13, 1), (59, 4), (31, 6), (19, 7)]]
-  - EXPECTED: [1068781]
-
-    return bus_info
+    return sum(
+        t_mod_id * n[i] * inverse_mod(n[i], bus_id)
+        for i, (bus_id, t_mod_id) in enumerate(bus_info)
+    ) % N
 
 run2(['', '7,13,x,x,59,x,31,19']) | eq(1068781)
 run2(['', '17,x,13,19']) | eq(3417)
@@ -58,4 +76,4 @@ run2(['', '67,x,7,59,61']) | eq(779210)
 run2(['', '67,7,x,59,61']) | eq(1261476)
 run2(['', '1789,37,47,1889']) | eq(1202161486)
 
-run2(input_lines) | debug('Star 2')
+run2(input_lines) | debug('Star 2') | eq(404517869995362)

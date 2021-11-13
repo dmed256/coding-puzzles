@@ -539,3 +539,22 @@ class Graph:
             for target in targets
             if (path := traverse_back_path(target))
         ]
+
+#---[ Math ]----------------------------
+
+# Solve using "Extended Euclidean" (assumming a and M are co-prime)
+#         x = a^-1      (mod M)
+#        ax = 1         (mod M)
+#   ax + My = 1
+#   ax + My = gcd(a, M)
+def inverse_mod(a, M):
+    prev_x, x = 1, 0
+    prev_r, r = a, M
+
+    while prev_r > 1:
+        # a = quotient*M + r
+        quotient = prev_r // r
+        (prev_r, r) = (r, prev_r - (quotient * r))
+        (prev_x, x) = (x, prev_x - (quotient * x))
+
+    return prev_x % M
