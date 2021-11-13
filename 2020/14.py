@@ -1,31 +1,39 @@
+import itertools
 from advent_of_code import *
 
 input_value = get_input()
 input_lines = get_input_lines()
 
 def parse_mask(value):
-    and_mask = 0
-    or_mask = 0
+    maskX = 0
+    mask0 = 0
+    mask1 = 0
     for i, value in enumerate(value[::-1]):
         bit = (1 << i)
         if value == 'X':
-            and_mask += bit
+            maskX += bit
         elif value == '1':
-            or_mask += bit
-    return and_mask, or_mask
+            mask1 += bit
+        elif value == '0':
+            mask0 += bit
+    return (maskX, mask0, mask1)
+
+def parse_mem(op, value):
+    addr = int(
+        op.replace('mem[', '').replace(']', '')
+    )
+    value = int(value)
+    return (addr, value)
 
 def run(lines):
     memory = {}
     for line in lines:
         (op, value) = line.split(' = ')
         if op == 'mask':
-            and_mask, or_mask = parse_mask(value)
+            (maskX, _, mask1) = parse_mask(value)
         else:
-            addr = int(
-                op.replace('mem[', '').replace(']', '')
-            )
-            value = int(value)
-            memory[addr] = (value & and_mask) | or_mask
+            (addr, value) = parse_mem(op, value)
+            memory[addr] = (value & maskX) | mask1
 
     return sum(memory.values())
 
@@ -40,6 +48,35 @@ run(example1) | eq(165)
 
 run(input_lines) | debug('Star 1') | eq(8570568288597)
 
-# run2(example1) | eq()
+def run2(lines):
+    memory = {}
+    for line in lines:
+        (op, value) = line.split(' = ')
+        if op == 'mask':
+            (maskX, mask0, mask1) = parse_mask(value)
+        else:
+            (addr, value) = parse_mem(op, value)
 
-# run2(input_lines) | debug('Star 2')
+            stable_bits = ((addr & mask0) | mask1) & ~maskX
+            floating_bits = [
+                bit_value
+                for (_, bit_value) in get_bits(maskX)
+            ]
+            for i in range(len(floating_bits) + 1):
+                for combination in itertools.combinations(floating_bits, i):
+                    floating_addr = stable_bits | sum(combination)
+                    memory[floating_addr] = value
+
+    return sum(memory.values())
+
+
+example1 = multiline_lines(r"""
+mask = 000000000000000000000000000000X1001X
+mem[42] = 100
+mask = 00000000000000000000000000000000X0XX
+mem[26] = 1
+""")
+
+run2(example1) | eq(208)
+
+run2(input_lines) | debug('Star 2') | eq(3289441921203)

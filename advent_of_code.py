@@ -558,3 +558,24 @@ def inverse_mod(a, M):
         (prev_x, x) = (x, prev_x - (quotient * x))
 
     return prev_x % M
+
+def get_bits(value):
+    bits = []
+    bit = 0
+    bit_value = 1
+    while bit_value <= value:
+        if value & bit_value:
+            bits.append((bit, bit_value))
+        bit += 1
+        bit_value *= 2
+    return bits
+
+def format_bits(value):
+    bits = []
+    while value:
+        bits.append(value % 2)
+        value = value // 2
+
+    bits = (bits or [0])[::-1]
+
+    return ''.join([str(b) for b in bits])
