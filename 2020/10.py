@@ -102,4 +102,4 @@ def run2(lines):
 
 run2(example1) | eq(8)
 run2(example2) | eq(19208)
-run2(input_lines) | debug('Star 1') | eq(3947645370368)
+run2(input_lines) | debug('Star 2') | eq(3947645370368)

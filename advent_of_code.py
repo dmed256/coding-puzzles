@@ -269,11 +269,17 @@ def eq(expected_result):
 
 
 #---[ Constants ]-----------------------
+# Grid directions
 UP = (0, -1)
 DOWN = (0, 1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 DIRECTIONS = [DOWN, LEFT, RIGHT, UP]
+
+SOUTH = UP
+NORTH = DOWN
+WEST = LEFT
+EAST = RIGHT
 
 CLOCKWISE = {
     UP: RIGHT,
@@ -282,11 +288,25 @@ CLOCKWISE = {
     LEFT: UP,
 }
 
+COMPASS_CLOCKWISE = {
+    NORTH: EAST,
+    EAST: SOUTH,
+    SOUTH: WEST,
+    WEST: NORTH,
+}
+
 COUNTER_CLOCKWISE = {
     UP: LEFT,
     LEFT: DOWN,
     DOWN: RIGHT,
     RIGHT: UP,
+}
+
+COMPASS_COUNTER_CLOCKWISE = {
+    NORTH: WEST,
+    WEST: SOUTH,
+    SOUTH: EAST,
+    EAST: NORTH,
 }
 
 # (0, 0) is usually top-left of the grid
