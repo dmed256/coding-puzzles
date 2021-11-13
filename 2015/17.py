@@ -8,9 +8,8 @@ def run(lines, value):
     values = [int(v) for v in lines]
     return sum((
         1
-        for i in range(len(values))
-        for combination in itertools.combinations(values, i)
-        if sum(combination) == value
+        for subgroup in get_subgroups(values)
+        if sum(subgroup) == value
     ))
 
 example1 = multiline_lines(r"""
