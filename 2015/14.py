@@ -4,15 +4,10 @@ input_value = get_input()
 input_lines = get_input_lines()
 
 def get_reindeer_info(lines):
-    info = []
-    for line in lines:
-        line = ' '.join(line.split(' ')[1:-1])
-        line = line.replace('can fly ', '')
-        line = line.replace('km/s for ', '')
-        line = line.replace('seconds, but then must rest for ', '')
-        line = line.replace('seconds', '')
-        info.append([int(c) for c in line.split(' ')])
-    return info
+    return [
+        extract_ints(line)
+        for line in lines
+    ]
 
 def run(lines, time):
     distance = 0

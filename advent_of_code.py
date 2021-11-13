@@ -1,6 +1,7 @@
 import multiprocess as mp
 import numpy as np
 import os
+import re
 import sys
 import textwrap
 import traceback
@@ -170,10 +171,13 @@ def safe_max(a, b):
         return a
     return max(a, b)
 
-def split_comma_ints(value):
+def extract_ints(value):
+    return [int(v) for v in re.findall(r'\d+', value)]
+
+def split_comma_ints(value, delimiter=','):
     return [
         int(x.strip())
-        for x in value.split(',')
+        for x in value.split(delimiter)
         if x
     ]
 

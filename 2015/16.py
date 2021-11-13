@@ -25,8 +25,11 @@ perfumes: 1
     sue2 = 0
     for i, line in enumerate(input_lines):
         sue = i + 1
-        words = ', '.join(line.split(': ')[1:])
-        words = words.split(', ')
+        words = [
+            word
+            for parts in line.split(': ')[1:]
+            for word in parts.split(', ')
+        ]
 
         item_count = len(words) // 2
         items = [words[i] for i in range(0, len(words), 2)]
