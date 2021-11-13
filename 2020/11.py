@@ -6,32 +6,25 @@ input_lines = get_input_lines()
 def run(lines, problem):
     grid = Grid(lines)
     seats = set([
-        (x, y)
-        for (x, y, v) in grid
+        pos
+        for pos, v in grid
         if v == 'L'
     ])
     empty_seats = seats.copy()
     filled_seats = set()
-
-    directions = [
-        (dx, dy)
-        for dy in [-1, 0, 1]
-        for dx in [-1, 0, 1]
-        if (dx, dy) != (0, 0)
-    ]
 
     neighbors = {}
     for pos in seats:
         if problem == 1:
             neighbors[pos] = [
                 pos2
-                for direction in directions
+                for direction in DIAG_DIRECTIONS
                 if (pos2 := grid.apply_direction(pos, direction))
                 and pos2 in seats
             ]
         else:
             neighbors[pos] = []
-            for direction in directions:
+            for direction in DIAG_DIRECTIONS:
                 pos2 = pos
                 while pos2 := grid.apply_direction(pos2, direction):
                     if pos2 in seats:

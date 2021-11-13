@@ -77,8 +77,8 @@ class Problem:
             1: blue('.'),
             2: yellow('#'),
         }
-        for (x, y, v) in self.grid:
-            grid[(x, y)] = value_pixel[v]
+        for pos, v in self.grid:
+            grid[pos] = value_pixel[v]
 
         grid[self.robot_pos] = {
             UP: '^',
@@ -100,7 +100,7 @@ p = Problem(1)
 p.run()
 sum([
     1
-    for (x, y, v) in p.grid
+    for pos, v in p.grid
     if v
 ]) | debug('Star 1') | eq(2252)
 

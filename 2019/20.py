@@ -23,11 +23,10 @@ class Problem:
 
         teleporter_positions = {}
         self.teleporter_goes_up = {}
-        for (x1, y1, v1) in self.grid:
+        for p1, v1 in self.grid:
             if not v1.isupper():
                 continue
 
-            p1 = (x1, y1)
             [p2, v2, prev_node1] = self.get_teleporter_info(p1)
             [_, _, prev_node2] = self.get_teleporter_info(p2)
 

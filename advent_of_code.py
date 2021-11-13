@@ -406,7 +406,7 @@ class Grid:
     def __iter__(self):
         for y in range(self.height):
             for x in range(self.width):
-                yield (x, y, self.grid[y][x])
+                yield (x, y), self.grid[y][x]
 
     def in_grid(self, pos):
         (x, y) = pos
@@ -422,8 +422,8 @@ class Grid:
 
     def find_all(self, value):
         return [
-            (x, y)
-            for (x, y, c) in self
+            pos
+            for pos, c in self
             if c == value
         ]
 

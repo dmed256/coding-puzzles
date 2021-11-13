@@ -8,7 +8,7 @@ def parse_lines(lines):
     ])
     return sum([
         2**(x + 5*y)
-        for (x, y, v) in grid
+        for (x, y), v in grid
         if v
     ])
 

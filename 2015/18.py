@@ -7,8 +7,7 @@ def run(lines, steps, problem):
     grid = Grid(lines)
     neighbors = {
         pos: grid.neighbors(pos, DIAG_DIRECTIONS)
-        for (x, y, v) in grid
-        if (pos := (x, y))
+        for pos, v in grid
     }
 
     def set_corners(grid):
@@ -22,8 +21,7 @@ def run(lines, steps, problem):
     for i in range(steps):
         set_corners(grid)
         next_grid = grid.copy()
-        for (x, y, v) in grid:
-            pos = (x, y)
+        for pos, v in grid:
             lights = len([
                 1
                 for n in neighbors[pos]
@@ -40,7 +38,7 @@ def run(lines, steps, problem):
     set_corners(grid)
     return len([
         1
-        for (x, y, v) in grid
+        for pos, v in grid
         if v == '#'
     ])
 

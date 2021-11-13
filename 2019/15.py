@@ -170,30 +170,6 @@ class System:
 
         return []
 
-    def print_diagnostics(self):
-        target_count = len(self.targets)
-        explored_tiles = len([
-            tile
-            for tile in self.grid
-            if tile != UNKNOWN
-        ])
-        positions = [
-            (x, y)
-            for (x, y, v) in self.grid
-            if v != UNKNOWN
-        ]
-        x_min = min(x for (x, _) in positions)
-        x_max = max(x for (x, _) in positions)
-        y_min = min(y for (y, _) in positions)
-        y_max = max(y for (y, _) in positions)
-
-        if explored_tiles and not (explored_tiles % 100):
-            print(f'target_count = {target_count}')
-            print(f'explored_tiles = {explored_tiles}')
-            print(f'GRID: ')
-            print(f'  - X: [{x_min}, {x_max}]')
-            print(f'  - Y: [{y_min}, {y_max}]')
-
     def explore_map(self):
         input_value = get_input()
         self.p = IntProcessor(input_value)
@@ -208,8 +184,8 @@ class System:
 
     def fill_oxygen(self):
         missing = set([
-            (x, y)
-            for (x, y, v) in self.grid
+            pos
+            for pos, v in self.grid
             if v == FLOOR
         ])
         nodes = set([self.oxygen_system])
