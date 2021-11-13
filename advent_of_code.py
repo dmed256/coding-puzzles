@@ -146,6 +146,11 @@ def pmap(key, fn, args):
 
 
 #---[ Utils ]---------------------------
+# TODO:
+# - arg_min with key
+# - arg_max with key
+# - reduction
+
 def lget(lst, index):
     if index < len(lst):
         return lst[index]

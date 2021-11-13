@@ -7,29 +7,33 @@ FIELDS = 0
 MY_TICKET = 1
 OTHER_TICKETS = 2
 
-def is_valid(value, fields):
-    for field, ranges in fields.items():
-        for (v0, v1) in ranges:
-            if v0 <= value <= v1:
-                return True
-    return False
+def get_ticket_field_mask(value, fields):
+    mask = 0
+    for i, (field, ranges) in enumerate(fields.items()):
+        bit = 1 << i
+        is_valid = bool([
+            1
+            for (v0, v1) in ranges
+            if v0 <= value <= v1
+        ])
+        if is_valid:
+            mask += bit
+
+    return mask
+
+def is_valid_ticket(ticket, fields):
+    for value in ticket:
+        if not get_ticket_field_mask(value, fields):
+            return False
+    return True
 
 def find_errors(fields, tickets):
     return sum([
         value
         for ticket in tickets
         for value in ticket
-        if not is_valid(value, fields)
+        if not get_ticket_field_mask(value, fields)
     ])
-
-def get_ticket_field_masks(value, fields):
-    mask = 0
-    for i, (field, ranges) in enumerate(fields.items()):
-        bit = 1 << i
-        for (v0, v1) in ranges:
-            if v0 <= value <= v1:
-                return True
-    return False
 
 def run(lines, problem):
     op = FIELDS
@@ -68,11 +72,19 @@ def run(lines, problem):
     mask = (1 << len(fields)) - 1
     valid_tickets = [
         ticket
-        for ticket in tickets
-        for value in ticket
-        if not is_valid(value, fields)
+        for ticket in [my_ticket, *other_tickets]
+        if is_valid_ticket(ticket, fields)
     ]
 
+    field_masks = [mask] * len(fields)
+    for ticket in valid_tickets:
+        for field, value in enumerate(ticket):
+            field_masks[field] &= get_ticket_field_mask(value, fields)
+
+    for mask in field_masks:
+        for i in range(len(fields)):
+            if mask & (1 << i):
+                pass
 
 example1 = multiline_lines(r"""
 class: 1-3 or 5-7
