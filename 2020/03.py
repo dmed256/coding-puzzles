@@ -53,4 +53,4 @@ slopes = [
 ]
 run(example1, slopes) | eq(336)
 
-run(input_lines, slopes) | debug('Star 2')
+run(input_lines, slopes) | debug('Star 2') | eq(2138320800)

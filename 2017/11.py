@@ -26,6 +26,6 @@ run('se,sw,se,sw,sw')[0] | eq(3)
 
 input_value = get_input()
 
-run(input_value)[0] | debug('Star 1')
+run(input_value)[0] | debug('Star 1') | eq(747)
 
-run(input_value)[1] | debug('Star 2')
+run(input_value)[1] | debug('Star 2') | eq(1544)

@@ -50,7 +50,7 @@ iyr:2011 ecl:brn hgt:59in
 """)
 
 run(example1) | eq(2)
-run(input_lines) | debug('Star 1')
+run(input_lines) | debug('Star 1') | eq(237)
 
 def is_valid(p):
     byr = p.get('byr')
@@ -135,4 +135,4 @@ iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719
 
 run2(example1) | eq(0)
 run2(example2) | eq(4)
-run2(input_lines) | debug('Star 2')
+run2(input_lines) | debug('Star 2') | eq(172)
