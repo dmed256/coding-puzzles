@@ -3,25 +3,10 @@ from advent_of_code import *
 input_value = get_input()
 input_lines = get_input_lines()
 
-directions = [
-    (1, 1),
-    (0, 1),
-    (-1, 1),
-    (-1, 0),
-    (1, 0),
-    (1, -1),
-    (0, -1),
-    (-1, -1),
-]
-
 def run(lines, steps, problem):
     grid = Grid(lines)
     neighbors = {
-        pos: [
-            n
-            for direction in directions
-            if (n := grid.apply_direction(pos, direction))
-        ]
+        pos: grid.neighbors(pos, DIAG_DIRECTIONS)
         for (x, y, v) in grid
         if (pos := (x, y))
     }

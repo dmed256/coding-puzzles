@@ -312,6 +312,22 @@ NORTH = DOWN
 WEST = LEFT
 EAST = RIGHT
 
+SOUTHWEST = (-1, -1)
+SOUTHEAST = (1, -1)
+NORTHWEST = (-1, 1)
+NORTHEAST = (1, 1)
+
+DIAG_DIRECTIONS = [
+    SOUTH,
+    NORTH,
+    WEST,
+    EAST,
+    SOUTHWEST,
+    SOUTHEAST,
+    NORTHWEST,
+    NORTHEAST,
+]
+
 CLOCKWISE = {
     UP: RIGHT,
     RIGHT: DOWN,
@@ -417,10 +433,10 @@ class Grid:
             return values[0]
         return None
 
-    def neighbors(self, pos):
+    def neighbors(self, pos, directions=DIRECTIONS):
         return [
             n
-            for direction in DIRECTIONS
+            for direction in directions
             if self.in_grid(n := apply_direction(pos, direction))
         ]
 
