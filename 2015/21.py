@@ -1,103 +1,100 @@
 import math
 from advent_of_code import *
 
-# (cost, damage, armor)
+class Character:
+    def __init__(self, *, hitpoints=0, gold_spent=0, attack=0, defense=0):
+        self.hitpoints = hitpoints
+        self.gold_spent = gold_spent
+        self.attack = attack
+        self.defense = defense
+
+    def reset(self, items):
+        self.hitpoints = 100
+        self.gold_spent = 0
+        self.attack = 0
+        self.defense = 0
+
+        for item in items:
+            self.gold_spent += item.cost
+            self.attack += item.attack
+            self.defense += item.defense
+
+    def can_win(self):
+        global boss
+
+        boss_dmg = max(1, boss.attack - self.defense)
+        boss_ttk = math.ceil(self.hitpoints / boss_dmg)
+
+        my_dmg = max(1, self.attack - boss.defense)
+        my_ttk = math.ceil(boss.hitpoints / my_dmg)
+
+        return my_ttk <= boss_ttk
+
+boss = Character(
+    hitpoints=104,
+    attack=8,
+    defense=1,
+)
+
+class Item(BaseModel):
+    cost = 0
+    attack = 0
+    defense = 0
+
 weapons = [
-    (8, 4, 0),
-    (10, 5, 0),
-    (25, 6, 0),
-    (40, 7, 0),
-    (74, 8, 0),
+    Item(cost=8, attack=4, defense=0),
+    Item(cost=10, attack=5, defense=0),
+    Item(cost=25, attack=6, defense=0),
+    Item(cost=40, attack=7, defense=0),
+    Item(cost=74, attack=8, defense=0),
 ]
 armors = [
-    (0, 0, 0),
-    (13, 0, 1),
-    (31, 0, 2),
-    (53, 0, 3),
-    (75, 0, 4),
-    (102, 0, 5),
+    Item(cost=13, attack=0, defense=1),
+    Item(cost=31, attack=0, defense=2),
+    Item(cost=53, attack=0, defense=3),
+    Item(cost=75, attack=0, defense=4),
+    Item(cost=102, attack=0, defense=5),
 ]
 rings = [
-    (25, 1, 0),
-    (50, 2, 0),
-    (100, 3, 0),
-    (20, 0, 1),
-    (40, 0, 2),
-    (80, 0, 3),
+    Item(cost=25, attack=1, defense=0),
+    Item(cost=50, attack=2, defense=0),
+    Item(cost=100, attack=3, defense=0),
+    Item(cost=20, attack=0, defense=1),
+    Item(cost=40, attack=0, defense=2),
+    Item(cost=80, attack=0, defense=3),
 ]
 
 def run():
-    hit_points = 100
+    def buy_weapon():
+        for weapon in weapons:
+            yield [weapon]
 
-    boss_hit_points = 104
-    boss_damage = 8
-    boss_armor = 1
+    def buy_armor():
+        yield []
+        for armor in armors:
+            yield [armor]
 
-    def wins(attack, defense):
-        b_attack = max(1, boss_damage - defense)
-        b_turns = (hit_points // b_attack) + bool(hit_points % b_attack)
+    def buy_rings():
+        yield []
+        for i in range(1, 3):
+            for bought_rings in itertools.combinations(rings, i):
+                yield list(bought_rings)
 
-        my_attack = max(1, attack - boss_armor)
-        my_turns = (boss_hit_points // my_attack) + bool(boss_hit_points % my_attack)
+    me = Character()
+    min_amount = 10000000000
+    max_amount = 0
+    for bought_weapon in buy_weapon():
+        for bought_armor in buy_armor():
+            for bought_rings in buy_rings():
+                me.reset(bought_weapon + bought_armor + bought_rings)
+                if me.can_win():
+                    min_amount = min(min_amount, me.gold_spent)
+                else:
+                    max_amount = max(max_amount, me.gold_spent)
 
-        return my_turns <= b_turns
+    return (min_amount, max_amount)
 
-    min_money = 100000000
-    for (cost, attack, _) in weapons:
-        if cost >= min_money:
-            continue
-        for (acost, _, defense) in armors:
-            cost2 = cost + acost
-            if cost2 >= min_money:
-                continue
-            if wins(attack, defense):
-                min_money = cost2
-            for ri in range(1, 3):
-                for bought_rings in itertools.combinations(rings, ri):
-                    cost3 = cost2 + sum(r[0] for r in bought_rings)
-                    if cost3 >= min_money:
-                        continue
-                    rattack = attack + sum(r[1] for r in bought_rings)
-                    rdefense = defense + sum(r[2] for r in bought_rings)
-                    if wins(rattack, rdefense):
-                        min_money = cost3
+(min_amount, max_amount) = run()
 
-    return min_money
-
-run() | debug('Star 1')
-
-def run2():
-    hit_points = 100
-
-    boss_hit_points = 104
-    boss_damage = 8
-    boss_armor = 1
-
-    def wins(attack, defense):
-        b_attack = max(1, boss_damage - defense)
-        b_turns = (hit_points // b_attack) + bool(hit_points % b_attack)
-
-        my_attack = max(1, attack - boss_armor)
-        my_turns = (boss_hit_points // my_attack) + bool(boss_hit_points % my_attack)
-
-        return my_turns <= b_turns
-
-    max_money = 0
-    for (cost, attack, _) in weapons:
-        for (acost, _, defense) in armors:
-            cost2 = cost + acost
-            if cost2 >= max_money and not wins(attack, defense):
-                max_money = cost2
-            for ri in range(1, 3):
-                for bought_rings in itertools.combinations(rings, ri):
-                    cost3 = cost2 + sum(r[0] for r in bought_rings)
-                    if cost3 <= max_money:
-                        continue
-                    rattack = attack + sum(r[1] for r in bought_rings)
-                    rdefense = defense + sum(r[2] for r in bought_rings)
-                    if not wins(rattack, rdefense):
-                        max_money = cost3
-
-    return max_money
-
-run2() | debug('Star 2')
+min_amount | debug('Star 1') | eq(78)
+max_amount | debug('Star 2') | eq(148)
