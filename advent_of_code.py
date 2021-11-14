@@ -9,6 +9,7 @@ import traceback
 from datetime import datetime
 from enum import Enum
 from pydantic import BaseModel
+from sympy import sieve
 from termcolor import colored
 
 
@@ -610,3 +611,12 @@ def get_subgroups(values):
     for i in range(len(values)):
         for combination in itertools.combinations(values, i):
             yield combination
+
+def mult(values):
+    v = 1
+    for value in values:
+        v *= value
+    return v
+
+def get_primes(N):
+    return list(sieve.primerange(N))
