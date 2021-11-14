@@ -248,6 +248,7 @@ class Problem():
                 yellow(f'[{s.compressed_value}]')
                 for s in segments
             ))
+            print()
 
         return ''.join(
             s.original_value
