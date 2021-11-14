@@ -1,3 +1,4 @@
+import atexit
 import itertools
 import multiprocess as mp
 import numpy as np
@@ -259,6 +260,8 @@ def print_message(message):
     print(textwrap.dedent(message).strip())
     print('')
 
+test_errors = 0
+
 class Debug:
     def __init__(self, header):
         self.header = header
@@ -283,6 +286,9 @@ class Eq:
         if value == self.expected_value:
             return
 
+        global test_errors
+        test_errors += 1
+
         output = red(f'{value}')
         expected_output = green(f'{self.expected_value}')
 
@@ -301,6 +307,12 @@ def debug(header=''):
 def eq(expected_result):
     return Eq(expected_result)
 
+def assert_tests_passed():
+    global test_errors
+    if test_errors:
+        print(red(f'TESTS FAILED: {test_errors}'))
+
+atexit.register(assert_tests_passed)
 
 #---[ Constants ]-----------------------
 # Grid directions
