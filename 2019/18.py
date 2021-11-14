@@ -20,7 +20,7 @@ class KeyGraph:
         self.key_paths = {
             key: self.graph.find_paths(
                 key_pos,
-                key_positions - set([key_pos]),
+                key_positions - {key_pos},
             )
             for key, key_pos in key_positions_map.items()
         }
@@ -29,12 +29,12 @@ class KeyGraph:
         self.key_paths['@'] = self.graph.find_paths(start_pos, key_positions)
 
         self.key_deps = {
-            (key, target_key): set([
+            (key, target_key): {
                 value.lower()
                 for node in path
                 if (value := grid[node]).isupper()
                 and value.lower() != key
-            ])
+            }
             for key in ['@', *self.keys]
             for path in self.key_paths[key]
             if (target_key := grid[path[-1]])
@@ -132,7 +132,7 @@ class Problem:
 
                 next_path = self.find_min_path(
                     target_keys,
-                    captured_keys | set([target_key]),
+                    captured_keys | {target_key},
                     cached_paths,
                 )
                 cached_paths[cache_key] = next_path

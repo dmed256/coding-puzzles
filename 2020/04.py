@@ -26,7 +26,7 @@ def get_passports(lines):
 def run(lines):
     passports = get_passports(lines)
 
-    required_fields = set(['byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid'])
+    required_fields = {'byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid'}
     return len([
         p
         for p in passports

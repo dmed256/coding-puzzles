@@ -29,10 +29,10 @@ class System:
             for y in range(D)
         ])
 
-        self.targets = set([
+        self.targets = {
             apply_direction(self.pos, direction)
             for direction in DIRECTIONS
-        ])
+        }
         self.target_path = []
         self.prev_target_paths = {}
 
@@ -61,7 +61,7 @@ class System:
             self.targets.add(pos2)
 
     def set_target(self):
-        explored_nodes = set([self.pos])
+        explored_nodes = {self.pos}
         paths = [
             [self.pos]
         ]
@@ -183,12 +183,12 @@ class System:
         return len(min_path) - 1
 
     def fill_oxygen(self):
-        missing = set([
+        missing = {
             pos
             for pos, v in self.grid
             if v == FLOOR
-        ])
-        nodes = set([self.oxygen_system])
+        }
+        nodes = {self.oxygen_system}
 
         minutes = 0
         while missing:

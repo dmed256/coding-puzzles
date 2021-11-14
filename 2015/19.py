@@ -160,7 +160,7 @@ class Problem():
                 if v not in non_suffix:
                     self.suffixes.add(v)
 
-        self.tags = set([*self.prefixes, *self.suffixes])
+        self.tags = {*self.prefixes, *self.suffixes}
         self.max_tag_length = len(max(self.tags, key=len))
 
     def find_next_word(self, value):

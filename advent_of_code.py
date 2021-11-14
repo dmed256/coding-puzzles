@@ -535,7 +535,7 @@ class Graph:
 
     def bfs(self, pos):
         nodes = set(self.neighbors.get(pos, []))
-        explored = set([pos])
+        explored = {pos}
         while nodes:
             next_nodes = set()
             for n in nodes:
@@ -551,8 +551,8 @@ class Graph:
 
         prev_nodes = { start: None }
 
-        nodes = set([start])
-        explored = set([start])
+        nodes = {start}
+        explored = {start}
         while nodes:
             new_nodes = set()
             for node in nodes:

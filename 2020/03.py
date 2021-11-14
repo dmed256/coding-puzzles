@@ -4,12 +4,12 @@ input_value = get_input()
 input_lines = get_input_lines()
 
 def run(lines, slopes):
-    tree_positions = set([
+    tree_positions = {
         (x, y)
         for y, line in enumerate(lines)
         for x, c in enumerate(line)
         if c == '#'
-    ])
+    }
     height = len(lines)
     width = len(lines[0])
 

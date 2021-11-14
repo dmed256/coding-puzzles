@@ -23,10 +23,10 @@ def get_recipes(lines):
 def get_dependencies(recipes):
     # Find dependencies
     dependencies = {
-        material: set([
+        material: {
             dependency_material
             for [_, dependency_material] in recipes[material][1]
-        ])
+        }
         for material in recipes.keys()
     }
     dependencies['ORE'] = set()

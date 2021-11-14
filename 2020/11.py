@@ -5,11 +5,11 @@ input_lines = get_input_lines()
 
 def run(lines, problem):
     grid = Grid(lines)
-    seats = set([
+    seats = {
         pos
         for pos, v in grid
         if v == 'L'
-    ])
+    }
     empty_seats = seats.copy()
     filled_seats = set()
 

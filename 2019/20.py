@@ -134,10 +134,10 @@ class Problem:
             ]
             for [zpos, path, *other] in min_zpositions:
                 min_pos_path_length[zpos] = len(path)
-            updated_zpos = set([
+            updated_zpos = {
                 zpos
                 for [zpos, *other] in min_zpositions
-            ])
+            }
             positions = [
                 [zpos, *other]
                 for [zpos, *other] in positions
@@ -152,10 +152,10 @@ class Problem:
             ]
             for [(pos, depth), path, *other] in min_positions:
                 min_pos_path_length[pos] = len(path)
-            updated_pos = set([
+            updated_pos = {
                 pos
                 for [(pos, depth), *other] in min_positions
-            ])
+            }
             positions = [
                 [(pos, depth), *other]
                 for [(pos, depth), *other] in positions
@@ -205,9 +205,9 @@ class Problem:
             target2 = self.use_teleporter[target]
             ztarget2 = (target2, depth2)
             if self.using_depth:
-                new_explored_doors = set([ztarget, ztarget2])
+                new_explored_doors = {ztarget, ztarget2}
             else:
-                new_explored_doors = set([target, target2])
+                new_explored_doors = {target, target2}
 
             new_positions.append([
                 ztarget2,
