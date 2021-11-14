@@ -3,13 +3,13 @@ import multiprocess as mp
 import numpy as np
 import os
 import re
+import sympy
 import sys
 import textwrap
 import traceback
 from datetime import datetime
 from enum import Enum
 from pydantic import BaseModel
-from sympy import sieve
 from termcolor import colored
 
 
@@ -621,4 +621,8 @@ def mult(values):
     return v
 
 def get_primes(N):
-    return list(sieve.primerange(N))
+    nth_prime = sympy.prime(N)
+    return list(sympy.primerange(nth_prime + 1))
+
+def get_primes_before(N):
+    return list(sympy.primerange(N))
