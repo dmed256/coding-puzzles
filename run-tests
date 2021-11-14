@@ -60,7 +60,13 @@ script_end_time=`epoch-seconds`
 time_taken=$(time-taken "${script_start_time}" "${script_end_time}")
 printf "\n${YELLOW}Total time taken: ${time_taken}s${NORM}\n\n"
 
-for file in "${failed_tests[@]}"; do
-    python3 "${file}"
-    exit 1
+if [[ "${#failed_tests[@]}" -eq 0 ]]; do
+    exit 0
 done
+
+for file in "${failed_tests[@]}"; do
+    printf "Running failed test ${RED}${NORM}:\n"
+    python3 "${file}"
+    printf "\n\n"
+done
+exit 1

@@ -311,6 +311,7 @@ def assert_tests_passed():
     global test_errors
     if test_errors:
         print(red(f'TESTS FAILED: {test_errors}'))
+        os._exit(1)
 
 atexit.register(assert_tests_passed)
 
