@@ -76,7 +76,7 @@ class Program:
                 pos = apply_direction(pos, d)
 
                 (x, y) = pos
-                self.grid[y][x] = DIRECTION_TO_ASCII[d]
+                self.grid[y][x] = GRID_DIRECTION_TO_ASCII[d]
                 continue
 
             # Find where to turn
@@ -93,7 +93,7 @@ class Program:
             path.append(0)
 
             d = next_d
-            self.grid[y][x] = DIRECTION_TO_ASCII[d]
+            self.grid[y][x] = GRID_DIRECTION_TO_ASCII[d]
 
         print([n for n in path if n])
 
@@ -124,7 +124,7 @@ class Program:
             [(x, y), direction]
             for (y, row) in enumerate(self.grid)
             for (x, v) in enumerate(row)
-            if (direction := ASCII_TO_DIRECTION.get(v))
+            if (direction := ASCII_TO_GRID_DIRECTION.get(v))
         ][0]
 
     def run(self):

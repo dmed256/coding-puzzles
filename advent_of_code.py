@@ -370,7 +370,6 @@ COUNTER_CLOCKWISE = {
     RIGHT: UP,
 }
 
-# (0, 0) is usually top-left of the grid
 ASCII_TO_DIRECTION = {
     '^': UP,
     'v': DOWN,
@@ -378,7 +377,21 @@ ASCII_TO_DIRECTION = {
     '>': RIGHT,
 }
 
+ASCII_TO_GRID_DIRECTION = {
+    '^': GRID_UP,
+    'v': GRID_DOWN,
+    '<': GRID_LEFT,
+    '>': GRID_RIGHT,
+}
+
 DIRECTION_TO_ASCII = {
+    UP: '^',
+    DOWN: 'v',
+    LEFT: '<',
+    RIGHT: '>',
+}
+
+GRID_DIRECTION_TO_ASCII = {
     UP: '^',
     DOWN: 'v',
     LEFT: '<',
