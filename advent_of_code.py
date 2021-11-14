@@ -154,10 +154,12 @@ def pmap(key, fn, args):
 # - arg_max with key
 # - reduction
 
-def lget(lst, index):
-    if index < len(lst):
-        return lst[index]
-    return None
+def lget(lst, index, default=None):
+    if index >= 0 and index >= len(lst):
+        return default
+    if index < 0 and -index > len(lst):
+        return default
+    return lst[index]
 
 def safe_min(a, b):
     if a is None:
