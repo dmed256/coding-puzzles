@@ -4,23 +4,6 @@ from termcolor import colored
 from advent_of_code import *
 from int_processor import *
 
-DIRECTIONS = {
-    # Counter-clockwise
-    0: {
-        UP: LEFT,
-        LEFT: DOWN,
-        DOWN: RIGHT,
-        RIGHT: UP,
-    },
-    # Clockwise
-    1: {
-        UP: RIGHT,
-        RIGHT: DOWN,
-        DOWN: LEFT,
-        LEFT: UP,
-    }
-}
-
 class Problem:
     def __init__(self, problem):
         W = 50
@@ -32,7 +15,7 @@ class Problem:
             for y in range(D)
         ])
         self.robot_pos = (W, W)
-        self.robot_direction = UP
+        self.robot_direction = GRID_UP
 
         self.grid[self.robot_pos] = (
             0
@@ -50,9 +33,9 @@ class Problem:
         self.grid[self.robot_pos] = paint + 1
 
         self.robot_direction = (
-            COUNTER_CLOCKWISE
+            GRID_COUNTER_CLOCKWISE
             if rotation == 0 else
-            CLOCKWISE
+            GRID_CLOCKWISE
         )[self.robot_direction]
 
         self.robot_pos = self.grid.apply_direction(
@@ -81,10 +64,10 @@ class Problem:
             grid[pos] = value_pixel[v]
 
         grid[self.robot_pos] = {
-            UP: '^',
-            RIGHT: '>',
-            DOWN: 'v',
-            LEFT: '<',
+            GRID_UP: '^',
+            GRID_RIGHT: '>',
+            GRID_DOWN: 'v',
+            GRID_LEFT: '<',
         }[self.robot_direction]
         grid.print()
 

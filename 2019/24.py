@@ -29,7 +29,7 @@ def apply_timestep(score):
             bit_set = score & bit_value
             neighbors = sum([
                 bool(score & 2**(x + dx + 5*(y + dy)))
-                for dx, dy in DIRECTIONS
+                for dx, dy in GRID_DIRECTIONS
                 if 0 <= (x + dx) < 5
                 and 0 <= (y + dy) < 5
             ])
@@ -60,22 +60,22 @@ while score not in scores:
 score | debug('Star 1') | eq(2130474)
 
 def get_mid_bugs(score, direction):
-    if direction == RIGHT:
+    if direction == GRID_RIGHT:
         return sum(
             bool(score & (1 << 5*y))
             for y in range(5)
         )
-    if direction == LEFT:
+    if direction == GRID_LEFT:
         return sum(
             bool(score & (1 << (4 + 5*y)))
             for y in range(5)
         )
-    if direction == DOWN:
+    if direction == GRID_DOWN:
         return sum(
             bool(score & (1 << x))
             for x in range(5)
         )
-    if direction == UP:
+    if direction == GRID_UP:
         return sum(
             bool(score & (1 << (20 + x)))
             for x in range(5)
@@ -92,7 +92,7 @@ def apply_timestep2(outer_score, score, inner_score):
             bit_set = score & bit_value
             neighbors = [
                 (x + dx, y + dy)
-                for dx, dy in DIRECTIONS
+                for dx, dy in GRID_DIRECTIONS
                 if 0 <= (x + dx) < 5
                 and 0 <= (y + dy) < 5
             ]
@@ -103,7 +103,7 @@ def apply_timestep2(outer_score, score, inner_score):
             ])
             mid_direction = [
                 direction
-                for direction in DIRECTIONS
+                for direction in GRID_DIRECTIONS
                 if (2, 2) == apply_direction((x, y), direction)
             ]
             if mid_direction:

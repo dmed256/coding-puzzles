@@ -7,10 +7,10 @@ from advent_of_code import *
 from int_processor import *
 
 COMMANDS = {
-    UP: 1,
-    DOWN: 2,
-    LEFT: 3,
-    RIGHT: 4,
+    GRID_UP: 1,
+    GRID_DOWN: 2,
+    GRID_LEFT: 3,
+    GRID_RIGHT: 4,
 }
 
 UNKNOWN = ' '
@@ -31,7 +31,7 @@ class System:
 
         self.targets = {
             apply_direction(self.pos, direction)
-            for direction in DIRECTIONS
+            for direction in GRID_DIRECTIONS
         }
         self.target_path = []
         self.prev_target_paths = {}
@@ -45,16 +45,16 @@ class System:
         (x2, y2) = pos2
 
         if x1 < x2:
-            return RIGHT
+            return GRID_RIGHT
         if x1 > x2:
-            return LEFT
+            return GRID_LEFT
         if y1 < y2:
-            return UP
+            return GRID_UP
         if y1 > y2:
-            return DOWN
+            return GRID_DOWN
 
     def update_targets(self):
-        for direction in DIRECTIONS:
+        for direction in GRID_DIRECTIONS:
             pos2 = apply_direction(self.pos, direction)
             if self.grid[pos2] != UNKNOWN:
                 continue
@@ -73,7 +73,7 @@ class System:
 
                 neighbors = [
                     n
-                    for direction in DIRECTIONS
+                    for direction in GRID_DIRECTIONS
                     if (n := self.grid.apply_direction(pos, direction))
                     and self.grid[n] != WALL
                     and n not in explored_nodes
@@ -114,7 +114,7 @@ class System:
         explored.add(pos)
 
         found_paths = []
-        for direction in DIRECTIONS:
+        for direction in GRID_DIRECTIONS:
             pos2 = apply_direction(pos, direction)
 
             if pos2 == target:
@@ -141,7 +141,7 @@ class System:
 
         if not self.target_path:
             self.p.is_done = True
-            return COMMANDS[UP]
+            return COMMANDS[GRID_UP]
 
         direction = self.get_direction(self.pos, self.target_path[0])
 
@@ -194,7 +194,7 @@ class System:
         while missing:
             new_nodes = set()
             for node in nodes:
-                for direction in DIRECTIONS:
+                for direction in GRID_DIRECTIONS:
                     node2 = apply_direction(node, direction)
                     if node2 in missing:
                         new_nodes.add(node2)

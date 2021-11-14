@@ -13,8 +13,8 @@ def run(lines):
     pos = (0, 0)
     direction = EAST
     rotations = {
-        'L': COMPASS_COUNTER_CLOCKWISE,
-        'R': COMPASS_CLOCKWISE,
+        'L': COUNTER_CLOCKWISE,
+        'R': CLOCKWISE,
     }
 
     for line in lines:

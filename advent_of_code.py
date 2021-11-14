@@ -304,14 +304,25 @@ def eq(expected_result):
 
 #---[ Constants ]-----------------------
 # Grid directions
-UP = (0, -1)
-DOWN = (0, 1)
+UP = (0, 1)
+DOWN = (0, -1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 DIRECTIONS = [DOWN, LEFT, RIGHT, UP]
 
-SOUTH = UP
-NORTH = DOWN
+GRID_UP = (0, -1)
+GRID_DOWN = (0, 1)
+GRID_LEFT = (-1, 0)
+GRID_RIGHT = (1, 0)
+GRID_DIRECTIONS = [
+    GRID_DOWN,
+    GRID_LEFT,
+    GRID_RIGHT,
+    GRID_UP,
+]
+
+NORTH = UP
+SOUTH = DOWN
 WEST = LEFT
 EAST = RIGHT
 
@@ -331,6 +342,20 @@ DIAG_DIRECTIONS = [
     NORTHEAST,
 ]
 
+GRID_CLOCKWISE = {
+    GRID_UP: GRID_RIGHT,
+    GRID_RIGHT: GRID_DOWN,
+    GRID_DOWN: GRID_LEFT,
+    GRID_LEFT: GRID_UP,
+}
+
+GRID_COUNTER_CLOCKWISE = {
+    GRID_UP: GRID_LEFT,
+    GRID_LEFT: GRID_DOWN,
+    GRID_DOWN: GRID_RIGHT,
+    GRID_RIGHT: GRID_UP,
+}
+
 CLOCKWISE = {
     UP: RIGHT,
     RIGHT: DOWN,
@@ -338,25 +363,11 @@ CLOCKWISE = {
     LEFT: UP,
 }
 
-COMPASS_CLOCKWISE = {
-    NORTH: EAST,
-    EAST: SOUTH,
-    SOUTH: WEST,
-    WEST: NORTH,
-}
-
 COUNTER_CLOCKWISE = {
     UP: LEFT,
     LEFT: DOWN,
     DOWN: RIGHT,
     RIGHT: UP,
-}
-
-COMPASS_COUNTER_CLOCKWISE = {
-    NORTH: WEST,
-    WEST: SOUTH,
-    SOUTH: EAST,
-    EAST: NORTH,
 }
 
 # (0, 0) is usually top-left of the grid
@@ -379,6 +390,9 @@ def apply_direction(pos, direction):
     (x, y) = pos
     (dx, dy) = direction
     return (x + dx, y + dy)
+
+def pos_distance(pos):
+    return abs(pos[0]) + abs(pos[1])
 
 class Grid:
     def __init__(self, grid, *, default_value=None):
@@ -436,7 +450,7 @@ class Grid:
             return values[0]
         return None
 
-    def neighbors(self, pos, directions=DIRECTIONS):
+    def neighbors(self, pos, directions=GRID_DIRECTIONS):
         return [
             n
             for direction in directions

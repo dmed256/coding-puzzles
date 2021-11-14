@@ -37,7 +37,7 @@ class Problem:
                 pos = (prev_node2, p2, p1)
 
             (prev_node, p1, p2) = pos
-            for direction in DIRECTIONS:
+            for direction in GRID_DIRECTIONS:
                 if apply_direction(p1, direction) == direction:
                     break
 
@@ -48,10 +48,10 @@ class Problem:
             )
 
             name = {
-                UP: v1 + v2,
-                DOWN: v2 + v1,
-                LEFT: v1 + v2,
-                RIGHT: v2 + v1,
+                GRID_UP: v1 + v2,
+                GRID_DOWN: v2 + v1,
+                GRID_LEFT: v1 + v2,
+                GRID_RIGHT: v2 + v1,
             }[direction]
 
             teleporter_positions[pos] = name

@@ -86,9 +86,9 @@ class Program:
 
             next_d = next_d[0]
 
-            if CLOCKWISE[d] == next_d:
+            if GRID_CLOCKWISE[d] == next_d:
                 path.append('R')
-            else: # if COUNTER_CLOCKWISE[d] == next_d:
+            else:
                 path.append('L')
             path.append(0)
 
