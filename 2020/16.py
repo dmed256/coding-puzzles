@@ -17,7 +17,7 @@ def get_ticket_field_mask(value, fields):
             if v0 <= value <= v1
         ])
         if is_valid:
-            mask += bit
+            mask |= bit
 
     return mask
 
@@ -69,23 +69,55 @@ def run(lines, problem):
     if problem == 1:
         return find_errors(fields, other_tickets)
 
+    field_names = list(fields.keys())
     valid_tickets = [
         ticket
         for ticket in [my_ticket, *other_tickets]
         if is_valid_ticket(ticket, fields)
     ]
 
-    field_masks = [set()] * len(fields)
+    field_count = len(fields)
+    full_mask = (1 << (field_count + 1)) - 1
+    field_masks = [full_mask] * field_count
+
     for ticket in valid_tickets:
         for field, value in enumerate(ticket):
             mask = get_ticket_field_mask(value, fields)
-            bits = [bit_info[0] for bit_info in get_bits(mask)]
-            field_masks[field] &=
+            field_masks[field] &= mask
 
-    for mask in field_masks:
-        for i in range(len(fields)):
-            if mask & (1 << i):
-                pass
+    bit_indices = {
+        (1 << i): i
+        for i in range(field_count)
+    }
+
+    field_indices = {}
+    for i in range(field_count):
+        remove_mask = 0
+        for field_idx, mask in enumerate(field_masks):
+            # Found the index already
+            if not mask:
+                continue
+            # Could be many things
+            bit = bit_indices.get(mask)
+            if bit is None:
+                continue
+
+            remove_mask |= mask
+            field_indices[field_names[bit]] = field_idx
+
+        if remove_mask == 0:
+            break
+
+        field_masks = [
+            mask & (full_mask ^ remove_mask)
+            for mask in field_masks
+        ]
+
+    value = 1
+    for field_name in field_names:
+        if field_name.startswith('departure'):
+            value *= my_ticket[field_indices[field_name]]
+    return value
 
 example1 = multiline_lines(r"""
 class: 1-3 or 5-7

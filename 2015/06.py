@@ -66,5 +66,4 @@ run2(['toggle 0,0 through 999,999']) | eq(2000000)
 
 input_lines = get_input_lines()
 
-# 17325717 - Too low
 run2(input_lines) | debug('Star 2')
