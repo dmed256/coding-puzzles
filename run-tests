@@ -60,9 +60,9 @@ script_end_time=`epoch-seconds`
 time_taken=$(time-taken "${script_start_time}" "${script_end_time}")
 printf "\n${YELLOW}Total time taken: ${time_taken}s${NORM}\n\n"
 
-if [[ "${#failed_tests[@]}" -eq 0 ]]; do
+if [[ "${#failed_tests[@]}" -eq 0 ]]; then
     exit 0
-done
+fi
 
 for file in "${failed_tests[@]}"; do
     printf "Running failed test ${RED}${NORM}:\n"
