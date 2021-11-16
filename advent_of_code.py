@@ -2,6 +2,7 @@ import atexit
 import itertools
 import multiprocess as mp
 import numpy as np
+import operator
 import os
 import re
 import sympy
@@ -412,10 +413,11 @@ GRID_DIRECTION_TO_ASCII = {
 }
 
 #---[ Grid ]----------------------------
+def add_tuples(a, b):
+    return tuple(map(operator.add, a, b))
+
 def apply_direction(pos, direction):
-    (x, y) = pos
-    (dx, dy) = direction
-    return (x + dx, y + dy)
+    return add_tuples(pos, direction)
 
 def pos_distance(pos):
     return abs(pos[0]) + abs(pos[1])
