@@ -9,7 +9,15 @@ def run(lines):
 example1 = multiline_lines(r"""
 """)
 
+example2 = multiline_lines(r"""
+""")
+
+example3 = multiline_lines(r"""
+""")
+
 run(example1) | eq()
+run(example2) | eq()
+run(example3) | eq()
 
 run(input_lines) | debug('Star 1')
 
