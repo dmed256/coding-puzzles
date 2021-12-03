@@ -24,6 +24,7 @@ else
 fi
 
 url="https://adventofcode.com/${year}/day/${day}/input"
+input="${full_day}_input"
 
 curl "${url}" \
   -H 'authority: adventofcode.com' \
@@ -42,4 +43,7 @@ curl "${url}" \
   -H 'referer: https://adventofcode.com/2021/day/2' \
   -H 'accept-language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7' \
   -H "cookie: session=${SESSION}" \
-  --compressed > "${full_day}_input"
+  --compressed > "${input}"
+
+cat "${input}"
+echo '^ '"${input}"

@@ -231,6 +231,10 @@ def format_bits(value):
 
     return ''.join([str(b) for b in bits])
 
+def invrange(a, b=None):
+    if b is None:
+        return range(a - 1, -1, -1)
+    return range(b - 1, a - 1, -1)
 
 #---[ Colors ]--------------------------
 def blue(value):
@@ -684,3 +688,23 @@ def get_primes(N):
 
 def get_primes_before(N):
     return list(sympy.primerange(N))
+
+def to_binary(num):
+    value = ''
+    for i in range(10000):
+        if value & (1 << i):
+            value += '1'
+        else:
+            value += '0'
+        value = value << 1
+        if not value:
+            break
+
+    return value[::-1]
+
+def from_binary(s):
+    value = 0
+    for i, bit in enumerate(s[::-1]):
+        if bit == '1':
+            value += 1 << i
+    return value
