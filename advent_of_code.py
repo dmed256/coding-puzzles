@@ -5,6 +5,7 @@ import numpy as np
 import operator
 import os
 import re
+import subprocess
 import sympy
 import sys
 import textwrap
@@ -47,6 +48,8 @@ def get_input_lines():
 def get_input():
     return '\n'.join(get_input_lines())
 
+
+#---[ Output ]--------------------------
 
 #---[ Timing ]--------------------------
 timestamps = []
@@ -285,7 +288,7 @@ class Eq:
 
     def __ror__(self, value):
         if value == self.expected_value:
-            return
+            return value
 
         global test_errors
         test_errors += 1
@@ -302,11 +305,24 @@ class Eq:
         print_message(message)
         return value
 
+class Clipboard:
+    def __ror__(self, value):
+        value = f'{value}'
+        p = subprocess.Popen(
+            ['pbcopy', 'w'],
+            stdin=subprocess.PIPE,
+            close_fds=True,
+        )
+        p.communicate(input=value.encode('utf-8'))
+
 def debug(header=''):
     return Debug(header)
 
 def eq(expected_result):
     return Eq(expected_result)
+
+def clipboard():
+    return Clipboard()
 
 def assert_tests_passed():
     global test_errors

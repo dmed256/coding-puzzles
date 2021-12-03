@@ -19,8 +19,8 @@ run(example1) | eq()
 run(example2) | eq()
 run(example3) | eq()
 
-run(input_lines) | debug('Star 1')
+run(input_lines) | debug('Star 1') | clipboard()
 
 # run2(example1) | eq()
 
-# run2(input_lines) | debug('Star 2')
+# run2(input_lines) | debug('Star 2') | clipboard()
