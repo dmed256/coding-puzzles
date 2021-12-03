@@ -1,0 +1,45 @@
+#!/bin/bash
+
+SESSION=$(.get-session)
+
+year_dir=$(dirname "$(greadlink -f "$0")")
+year=$(basename "${year_dir}")
+
+if [[ $# -eq 0 ]]; then
+    last_day=$(ls -1 "${year_dir}"/*py | \
+                   tr '\n' '\0' | \
+                   xargs -0 -n 1 basename | \
+                   sort | \
+                   tail -n 1 | \
+                   sed 's,^0,,g;s,[.]py,,g')
+    day=$((last_day + 1))
+else
+    day="$1"
+fi
+
+if [[ ${day} -lt 10 ]]; then
+    full_day="0${day}"
+else
+    full_day="${day}"
+fi
+
+url="https://adventofcode.com/${year}/day/${day}/input"
+
+curl "${url}" \
+  -H 'authority: adventofcode.com' \
+  -H 'cache-control: max-age=0' \
+  -H 'sec-ch-ua: " Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "macOS"' \
+  -H 'dnt: 1' \
+  -H 'upgrade-insecure-requests: 1' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.55 Safari/537.36' \
+  -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9' \
+  -H 'sec-fetch-site: same-origin' \
+  -H 'sec-fetch-mode: navigate' \
+  -H 'sec-fetch-user: ?1' \
+  -H 'sec-fetch-dest: document' \
+  -H 'referer: https://adventofcode.com/2021/day/2' \
+  -H 'accept-language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7' \
+  -H "cookie: session=${SESSION}" \
+  --compressed > "${full_day}_input"

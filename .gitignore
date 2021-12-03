@@ -10,3 +10,6 @@ __pycache__
 # Debug
 .DS_Store
 *.dSYM
+
+# Secrets
+.get-session
