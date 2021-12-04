@@ -10,6 +10,7 @@ import sympy
 import sys
 import textwrap
 import traceback
+from copy import deepcopy
 from datetime import datetime
 from enum import Enum
 from pydantic import BaseModel
@@ -48,8 +49,6 @@ def get_input_lines():
 def get_input():
     return '\n'.join(get_input_lines())
 
-
-#---[ Output ]--------------------------
 
 #---[ Timing ]--------------------------
 timestamps = []
@@ -154,11 +153,6 @@ def pmap(key, fn, args):
 
 
 #---[ Utils ]---------------------------
-# TODO:
-# - arg_min with key
-# - arg_max with key
-# - reduction
-
 def lget(lst, index, default=None):
     if index >= 0 and index >= len(lst):
         return default
@@ -235,6 +229,9 @@ def invrange(a, b=None):
     if b is None:
         return range(a - 1, -1, -1)
     return range(b - 1, a - 1, -1)
+
+def zlist(N):
+    return [0 for i in range(N)]
 
 #---[ Colors ]--------------------------
 def blue(value):
