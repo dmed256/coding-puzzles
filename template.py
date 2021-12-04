@@ -3,8 +3,18 @@ from advent_of_code import *
 input_value = get_input()
 input_lines = get_input_lines()
 
+class Problem:
+    def __init__(self, problem, lines):
+        pass
+
+    def run(self):
+        pass
+
 def run(lines):
-    pass
+    return Problem(1, lines).run()
+
+def run2(lines):
+    return Problem(2, lines).run()
 
 example1 = multiline_lines(r"""
 """)
