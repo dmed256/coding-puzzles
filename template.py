@@ -10,11 +10,11 @@ class Problem:
     def run(self):
         return None
 
-def run(lines):
-    return Problem(1, lines).run()
+def run(*args):
+    return Problem(1, *args).run()
 
-def run2(lines):
-    return Problem(2, lines).run()
+def run2(*args):
+    return Problem(2, *args).run()
 
 example1 = multiline_lines(r"""
 """)
