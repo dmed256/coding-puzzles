@@ -1,5 +1,6 @@
 import atexit
 import itertools
+import math
 import multiprocess as mp
 import numpy as np
 import operator
