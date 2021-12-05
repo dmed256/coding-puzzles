@@ -1,4 +1,5 @@
 import atexit
+import functools
 import itertools
 import math
 import multiprocess as mp
