@@ -5,10 +5,10 @@ input_lines = get_input_lines()
 
 class Problem:
     def __init__(self, problem, lines):
-        pass
+        self.problem = problem
 
     def run(self):
-        pass
+        return None
 
 def run(lines):
     return Problem(1, lines).run()
