@@ -56,7 +56,7 @@ example1 = multiline_lines(r"""
 11
 """)
 
-run(example1) | eq(99) | eq(10723906903)
+run(example1) | eq(99)
 
 run(input_lines) | debug('Star 1') | eq(10723906903)
 
