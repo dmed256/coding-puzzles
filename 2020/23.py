@@ -1,42 +1,52 @@
 from advent_of_code import *
 
-class Node(BaseModel):
-    next_node: int
-
 class Problem:
     def __init__(self, problem, labels, moves):
         self.problem = problem
-        self.labels = [int(x) - 1 for x in labels]
         self.moves = moves
 
-        if problem == 2:
-            self.labels += list(range(len(labels), 1000000))
+        labels = [int(x) - 1 for x in labels]
+        count = len(labels)
+
+        label_pointers = deepcopy(labels)
+        for i in range(count):
+            label_pointers[labels[i]] = labels[(i + 1) % count]
+
+        self.start = labels[0]
+
+        if problem == 1:
+            self.pointers = label_pointers
+        else:
+            count = 1000000
+            self.pointers = [
+                (i + 1) % count
+                for i in range(count)
+            ]
+            self.pointers[:len(labels)] = label_pointers
+            self.pointers[labels[-1]] = len(labels)
+            self.pointers[-1] = labels[0]
 
     def run(self):
-        labels = self.labels
-        count = len(labels)
-        nodes = {
-            labels[i]: Node(next_node=labels[(i + 1) % count])
-            for i in range(count)
-        }
+        pointers = self.pointers
+        current = self.start
 
-        current = labels[0]
+        count = len(pointers)
         for i in range(self.moves):
-            n1 = nodes[current].next_node
-            n2 = nodes[n1].next_node
-            n3 = nodes[n2].next_node
+            n1 = pointers[current]
+            n2 = pointers[n1]
+            n3 = pointers[n2]
 
-            next_current = nodes[n3].next_node
-            nodes[current].next_node = next_current
+            next_current = pointers[n3]
+            pointers[current] = next_current
 
             taken = [n1, n2, n3]
             dest = (current - 1) % count
             while dest in taken:
                 dest = (dest - 1) % count
 
-            end_node = nodes[dest].next_node
-            nodes[dest].next_node = n1
-            nodes[n3].next_node = end_node
+            end_node = pointers[dest]
+            pointers[dest] = n1
+            pointers[n3] = end_node
 
             current = next_current
 
@@ -44,12 +54,12 @@ class Problem:
             current = 0
             output = ''
             for i in range(count - 1):
-                current = nodes[current].next_node
+                current = pointers[current]
                 output += str(current + 1)
             return output
 
-        n1 = nodes[0].next_node
-        n2 = nodes[n1].next_node
+        n1 = pointers[0]
+        n2 = pointers[n1]
         return (n1 + 1) * (n2 + 1)
 
 def run(*args):
@@ -66,4 +76,4 @@ run(example1, 100) | eq('67384529')
 run(input1, 100) | debug('Star 1') | eq('82934675')
 
 run2(example1, 10000000) | eq(149245887792)
-run2(input1, 10000000) | debug('Star 2') | clipboard
+run2(input1, 10000000) | debug('Star 2') | eq(474600314018)

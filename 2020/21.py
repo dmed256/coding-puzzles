@@ -73,4 +73,4 @@ run(input_lines) | debug('Star 1') | eq(2569)
 
 run2(example1) | eq('mxmxvkd,sqjhc,fvjkl')
 
-run2(input_lines) | debug('Star 2') | clipboard()
+run2(input_lines) | debug('Star 2') | eq('vmhqr,qxfzc,khpdjv,gnrpml,xrmxxvn,rfmvh,rdfr,jxh')

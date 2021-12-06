@@ -55,4 +55,4 @@ run2(['a ab abc abd abf abj']) | eq(1)
 run2(['iiii oiii ooii oooi oooo']) | eq(1)
 run2(['oiii ioii iioi iiio']) | eq(0)
 
-run2(input_lines) | debug('Star 2') | clipboard()
+run2(input_lines) | debug('Star 2') | eq(186)

@@ -44,8 +44,8 @@ example1 = multiline_lines(r"""
 
 run(example1) | eq(5)
 
-run(input_lines) | debug('Star 1') | clipboard()
+run(input_lines) | debug('Star 1') | eq(394829)
 
 run2(example1) | eq(10)
 
-run2(input_lines) | debug('Star 2') | clipboard()
+run2(input_lines) | debug('Star 2') | eq(31150702)

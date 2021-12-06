@@ -12,7 +12,6 @@ slow_tests+=('2019/20.py')
 slow_tests+=('2019/25.py')
 slow_tests+=('2020/15.py')
 slow_tests+=('2020/22.py')
-slow_tests+=('2020/23.py')
 
 function epoch-seconds {
     perl -MTime::HiRes=time -e 'printf "%.3f\n", time'

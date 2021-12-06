@@ -58,7 +58,7 @@ example1 = multiline_lines(r"""
 
 run(example1) | eq(99) | eq(10723906903)
 
-run(input_lines) | debug('Star 1') |
+run(input_lines) | debug('Star 1') | eq(10723906903)
 
 run2(example1) | eq(44)
 
