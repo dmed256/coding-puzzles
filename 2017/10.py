@@ -3,72 +3,82 @@ from advent_of_code import *
 input_value = get_input()
 input_lines = get_input_lines()
 
-class Problem:
-    def __init__(self, problem, lines, length):
-        self.problem = problem
+def hash_values(values, lengths, rounds):
+    values = deepcopy(values)
 
-        self.lengths = [int(x) for x in lines[0].split(',')]
+    ptr = 0
+    skip = -1
+    for _ in range(rounds):
+        for length in lengths:
+            skip += 1
 
-        if self.problem == 1:
-            self.rounds = 1
-            self.values = list(range(length))
-        else:
-            self.rounds = 64
-            self.values = [
-                ord(c)
-                for c in str(range(length))[1:-1]
-            ]
-            self.values += [17, 31, 73, 47, 23]
+            if length > len(values):
+                continue
 
-    def run(self):
-        values = self.values
+            p1 = ptr
+            p2 = (ptr + length) % len(values)
 
-        ptr = 0
-        for _ in range(self.rounds):
-            for skip, length in enumerate(self.lengths):
-                if length > len(values):
-                    continue
+            ptr = (ptr + length + skip) % len(values)
 
-                p1 = ptr
-                p2 = (ptr + length) % len(values)
+            if p1 < p2:
+                values[p1:p2] = reversed(values[p1:p2])
+            elif length:
+                start = values[:p2]
+                end = values[p1:]
+                chunk = (end + start)[::-1]
+                values[:p2] = chunk[len(end):]
+                values[p1:] = chunk[:len(end)]
 
-                ptr = (ptr + length + skip) % len(values)
+    return values
 
-                if p1 < p2:
-                    values[p1:p2] = reversed(values[p1:p2])
-                elif length:
-                    start = values[:p2]
-                    end = values[p1:]
-                    chunk = (end + start)[::-1]
-                    values[:p2] = chunk[len(end):]
-                    values[p1:] = chunk[:len(end)]
+def run(lines, chars):
+    values = list(range(chars))
+    lengths = [int(x) for x in lines[0].split(',')]
 
-        if self.problem == 1:
-            return values[0] * values[1]
+    values = hash_values(values, lengths, 1)
+    return values[0] * values[1]
 
-        hash_value = []
-        for i in range(0, len(values), 16):
-            h = 0
-            for v in values[i:i + 16]:
-                h ^= v
-            hash_value.append(chr(h))
+def run2(content):
+    if type(content) is list:
+        content = content[0]
 
-        print(hash_value)
+    values = list(range(256))
+    lengths = (
+        [ord(c) for c in content]
+        + [17, 31, 73, 47, 23]
+    )
 
-def run(*args):
-    return Problem(1, *args).run()
+    values = hash_values(values, lengths, 64)
 
-def run2(*args):
-    return Problem(2, *args).run()
+    hashed_value = []
+    for i in range(0, 256, 16):
+        value = 0
+        for j in range(i, i + 16):
+            value ^= values[j]
+        hashed_value.append(value)
+
+    def hex_value(v):
+        h = hex(v)[2:]
+        if len(h) == 2:
+            return h
+        return '0' + h
+
+    return ''.join(
+        hex_value(c)
+        for c in hashed_value
+    )
 
 example1 = multiline_lines(r"""
-3, 4, 1, 5
+3,4,1,5
 """)
 
 run(example1, 5) | eq(12)
 
 run(input_lines, 256) | debug('Star 1') | eq(8536)
 
-# run2(example1, 5) | eq()
+run2('') | eq('a2582a3a0e66e6e86e3812dcb672a272')
+run2('AoC 2017') | eq('33efeb34ea91902bb2f59c9920caa6cd')
+run2('1,2,3') | eq('3efbe78a8d82f29979031a4aa0b16a9d')
+run2('1,2,4') | eq('63960835bcdc130f0b66d7ff4f6a5a8e')
 
-# run2(input_lines) | debug('Star 2') | clipboard()
+run2(input_lines) | debug('Star 2') | eq('aff593797989d665349efe11bb4fd99b')
