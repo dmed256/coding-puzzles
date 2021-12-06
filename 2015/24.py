@@ -10,7 +10,8 @@ class Problem:
 
     def run(self):
         count = len(self.values)
-        group_weight = sum(self.values) // 3
+        groups = 3 if self.problem == 1 else 4
+        group_weight = sum(self.values) // groups
 
         sorted_values = sorted(self.values, reverse=True)
         queue = [([x], x, i) for i, x in enumerate(sorted_values)]
@@ -55,10 +56,10 @@ example1 = multiline_lines(r"""
 11
 """)
 
-run(example1) | eq(99)
+run(example1) | eq(99) | eq(10723906903)
 
-run(input_lines) | debug('Star 1') | clipboard()
+run(input_lines) | debug('Star 1') |
 
-# run2(example1) | eq()
+run2(example1) | eq(44)
 
-# run2(input_lines) | debug('Star 2') | clipboard()
+run2(input_lines) | debug('Star 2') | eq(74850409)
