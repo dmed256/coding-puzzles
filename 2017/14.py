@@ -71,7 +71,7 @@ def run2(*args):
     return Problem(2, *args).run()
 
 run('flqrgnkx') | eq(8108)
-run('oundnydw') | debug('Star 1') | clipboard()
+run('oundnydw') | debug('Star 1') | eq(8106)
 
 run2('flqrgnkx') | eq(1242)
-run2('oundnydw') | debug('Star 2') | clipboard()
+run2('oundnydw') | debug('Star 2') | eq(1164)

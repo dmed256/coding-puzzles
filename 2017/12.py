@@ -65,4 +65,4 @@ run(input_lines) | debug('Star 1') | eq(239)
 
 run2(example1) | eq(2)
 
-run2(input_lines) | debug('Star 2') | clipboard()
+run2(input_lines) | debug('Star 2') | eq(215)

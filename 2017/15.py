@@ -79,4 +79,4 @@ run(277, 349) | debug('Star 1') | eq(592)
 
 run2(65, 8921) | eq(309)
 
-run2(277, 349) | debug('Star 2') | clipboard()
+run2(277, 349) | debug('Star 2') | eq(320)
