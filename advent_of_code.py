@@ -8,6 +8,7 @@ import numpy as np
 import operator
 import os
 import re
+import string
 import subprocess
 import sympy
 import sys
@@ -709,3 +710,9 @@ def from_binary(s):
         if bit == '1':
             value += 1 << i
     return value
+
+def int_or(v, default):
+    try:
+        return int(v)
+    except:
+        return default
