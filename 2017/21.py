@@ -10,23 +10,42 @@ def run(problem, lines, iterations):
     def stringify(img):
         return '/'.join(img)
 
+    def rotate(img):
+        img = parse(img)
+        size = len(img)
+        return stringify([
+            ''.join(row[i] for row in reversed(img))
+            for i in range(size)
+        ])
+
+    def flip(img):
+        img = parse(img)
+        return stringify(img[::-1])
+
+    def get_arrangements(img):
+        arrangements = []
+        for flip_ in range(2):
+            for rotation in range(4):
+                arrangements.append(img)
+                img = rotate(img)
+            img = flip(img)
+        return arrangements
+
+    def print_grid(grid):
+        output = ''
+        for row in grid:
+            for img_row in range(size):
+                for img in row:
+                    output += parse(img)[img_row]
+                output += '\n'
+        print(output)
+
     maps = {}
     for line in lines:
         [left, right] = line.split(' => ')
 
-        def rotate(img):
-            img = parse(img)
-            size = len(img)
-            return stringify([
-                ''.join(row[i] for row in reversed(img))
-                for i in range(size)
-            ])
-
-        for flip_ in range(2):
-            for rotation in range(4):
-                maps[left] = right
-                left = rotate(left)
-            left = left[::-1]
+        for arrangement in get_arrangements(left):
+            maps[arrangement] = right
 
     def split(grid):
         grid = [
@@ -64,11 +83,13 @@ def run(problem, lines, iterations):
             [maps[img] for img in row]
             for row in grid
         ]
+        # Check for % rather than 3 -> 2 -> 3 -> 2 -> 3 -> 2
         if size == 3:
             grid = split(grid)
             size = 2
         else:
             size = 3
+        print_grid(grid)
 
     count = 0
     for row in grid:
@@ -83,6 +104,7 @@ example1 = multiline_lines(r"""
 
 run(1, example1, 2) | eq(12)
 
+# Too low: 110
 # run(1, input_lines, 5) | debug('Star 1') | clipboard()
 
 # run(2, example1) | eq()
