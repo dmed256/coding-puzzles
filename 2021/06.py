@@ -26,7 +26,7 @@ class Problem:
             fish[6] += next_fish
             fish[8] += next_fish
 
-        return sum(x for x in fish.values())
+        return sum(fish.values())
 
 def run(*args):
     return Problem(1, *args).run()
