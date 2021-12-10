@@ -1,0 +1,222 @@
+#!/usr/bin/env python3
+#
+# Usage:
+#     ../get-global-leaderboard [USER]
+#
+# Should download and cache the appropriate year daily leaderboard and aggregate it
+import random
+import requests
+import time
+import os
+import sys
+from bs4 import BeautifulSoup
+from collections import defaultdict
+from pydantic import BaseModel
+from typing import List
+
+PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
+LEADERBOARD_CACHE_DIR = os.path.join(PROJ_DIR, '.cache/leaderboard')
+
+YEAR = os.path.basename(
+    os.path.abspath(os.getcwd())
+)
+CACHE_DIR = os.path.join(LEADERBOARD_CACHE_DIR, YEAR)
+
+
+class Ranking(BaseModel):
+    day: int
+    star: int
+    rank: int
+    seconds_taken: int
+    username: str
+
+    @staticmethod
+    def key(ranking):
+        return (ranking.star, -ranking.rank)
+
+    def __str__(self):
+        rank = f'{self.rank:>3})'
+        day = f'Dec {self.day:02d}'
+
+        hours = self.seconds_taken // 3600
+        minutes = (self.seconds_taken // 60) % 60
+        seconds = self.seconds_taken % 60
+        time = f'{hours:02d}:{minutes:02d}:{seconds:02d}'
+
+        return f'{rank} {day}  {time}  {self.username}'
+
+
+class Leaderboard(BaseModel):
+    day: int
+    days: int
+    rankings: List[Ranking]
+
+    def __str__(self):
+        lines = ['First hundred users to get [both stars] on Day {self.day}:\n']
+        for ranking in self.rankings[:100]:
+            lines.append(str(ranking))
+
+        lines += [
+            '',
+            'First hundred users to get the [first stars] on Day {self.day}:\n'
+        ]
+        for ranking in self.rankings[100:]:
+            lines.append(str(ranking))
+
+        return '\n'.join(lines)
+
+
+def request_daily_leaderboard(day):
+    url = f'https://adventofcode.com/{YEAR}/leaderboard/day/{day}'
+    filename = f'{CACHE_DIR}/{day}.html'
+
+    if os.path.exists(filename):
+        with open(filename, 'r') as fd:
+            return fd.read()
+
+    # Make sure the filename directory exists
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+    # Don't overload the servers
+    print(f'Sleeping before requesting: {url}')
+    time.sleep(random.randint(5, 10))
+    req = requests.get(url)
+
+    # Cache the output
+    html = req.text
+    with open(filename, 'w') as fd:
+        fd.write(html)
+
+    return html
+
+
+def parse_daily_leaderboard(day, html):
+    s = BeautifulSoup(html, 'html.parser')
+
+    links = s.find_all('span', 'leaderboard-daylinks')[0]
+    days = max([
+        int(day)
+        for child in links
+        if (day := child.text.strip())
+    ])
+
+    def get_username(entry):
+        for child in reversed(entry.contents):
+            text = child.get_text().strip()
+            if not text:
+                continue
+            if text not in ['(AoC++)', '(Sponsor)']:
+                return text
+
+        raise KeyError("Username not found")
+
+    rankings = []
+
+    entries = s.find_all('div', 'leaderboard-entry')
+    for entry_idx, entry in enumerate(entries):
+        rank = entry.contents[0].get_text()
+        time = entry.contents[2].get_text()
+        username = get_username(entry)
+        star = 1 if entry_idx < 100 else 2
+
+        rank = int(rank[:-1].strip())
+        t = [
+            int(s)
+            for s in time.split()[-1].split(':')
+        ]
+        seconds_taken = t[2] + (60 * (t[1] + 60 * t[0]))
+
+        rankings.append(
+            Ranking(
+                day=day,
+                star=star,
+                rank=rank,
+                seconds_taken=seconds_taken,
+                username=username,
+            )
+        )
+
+    return Leaderboard(
+        day=day,
+        days=days,
+        rankings=sorted(rankings, key=Ranking.key, reverse=True),
+    )
+
+
+def get_daily_leaderboard(day):
+    html = request_daily_leaderboard(day)
+    return parse_daily_leaderboard(day, html)
+
+
+def get_leaderboards():
+    leaderboard = get_daily_leaderboard(1)
+    return [
+        get_daily_leaderboard(day + 1)
+        for day in range(leaderboard.days)
+    ]
+
+
+def get_global_rankings():
+    leaderboards = get_leaderboards()
+
+    user_points = defaultdict(int)
+    for leaderboard in leaderboards:
+        for ranking in leaderboard.rankings:
+            user_points[ranking.username] += 101 - ranking.rank
+
+    ordered_users = sorted([
+        (points, username)
+        for username, points in user_points.items()
+    ], reverse=True)
+
+    return [
+        (idx + 1, username, points)
+        for idx, (points, username) in enumerate(ordered_users)
+    ]
+
+
+def print_global_leaderboard():
+    global_rankings = get_global_rankings()
+
+    print('\nGlobal leaderboard:\n')
+
+    prev_points = 1000000
+    for ranking, username, points in global_rankings:
+        output = '   '
+        rank = f'{ranking:>4}) '
+        if points != prev_points:
+            output += rank
+        else:
+            output += ' ' * len(rank)
+
+        output += f'{points:>4}  '
+        output += username
+        print(output)
+
+
+def print_user_ranking(username):
+    global_rankings = get_global_rankings()
+
+    _, _, max_top_100_points = global_rankings[0]
+    _, _, min_top_100_points = global_rankings[99]
+
+    print(f'Top 100: [{min_top_100_points}, {max_top_100_points}]')
+
+    user = sys.argv[1]
+    in_leaderboard = False
+    for ranking, username, points in global_rankings:
+        if user == username:
+            in_leaderboard = True
+            print(f'  Ranking: {ranking}')
+            print(f'  Points : {points}')
+            break
+
+    if not in_leaderboard:
+        print('Not in global leaderboard :(')
+
+
+if '__main__' == __name__:
+    if len(sys.argv) < 2:
+        print_global_leaderboard()
+    else:
+        print_user_ranking(sys.argv[1])

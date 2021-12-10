@@ -14,7 +14,7 @@ import sympy
 import sys
 import textwrap
 import traceback
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from copy import deepcopy
 from datetime import datetime
 from enum import Enum

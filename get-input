@@ -11,6 +11,11 @@ SESSION=$(cat "${PROJ_DIR}/.session")
 year=$(basename "${PWD}")
 day="$1"
 
+if [[ $# -eq 0 ]]; then
+   echo "ERROR: No day passed"
+   exit 1
+fi
+
 if [[ ${day} -lt 10 ]]; then
     full_day="0${day}"
 else
@@ -34,7 +39,7 @@ curl "${url}" \
   -H 'sec-fetch-mode: navigate' \
   -H 'sec-fetch-user: ?1' \
   -H 'sec-fetch-dest: document' \
-  -H 'referer: https://adventofcode.com/2021/day/2' \
+  -H "referer: https://adventofcode.com/${year}/day/${day}" \
   -H 'accept-language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7' \
   -H "cookie: session=${SESSION}" \
   --compressed > "${input}"
