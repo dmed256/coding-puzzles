@@ -475,6 +475,9 @@ class Grid:
             for x in range(self.width):
                 yield (x, y), self.grid[y][x]
 
+    def center(self):
+        return (self.width // 2, self.width // 2)
+
     def in_grid(self, pos):
         (x, y) = pos
         return 0 <= x < self.width and 0 <= y < self.height
