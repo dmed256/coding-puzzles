@@ -8,18 +8,25 @@ def run(problem, lines):
 
     pos = (0, 0)
     direction = UP
+
+    visited = set(pos)
     for value in values:
         turn = value[0]
         dist = int(value[1:])
+
         if turn == 'R':
             direction = CLOCKWISE[direction]
         else:
             direction = COUNTER_CLOCKWISE[direction]
-        pos = (pos[0] + dist * direction[0], pos[1] + dist * direction[1])
-    return(abs(pos[0]) + abs(pos[1]))
+
+        for _ in range(dist):
+            pos = apply_direction(pos, direction)
+            if problem == 2 and pos in visited:
+                return abs(pos[0]) + abs(pos[1])
+            visited.add(pos)
+
+    return abs(pos[0]) + abs(pos[1])
 
 run(1, input_lines) | debug('Star 1') | eq(241)
 
-# run(2, example1) | eq()
-
-# run(2, input_lines) | debug('Star 2') | clipboard()
+run(2, input_lines) | debug('Star 2') | eq(116)
