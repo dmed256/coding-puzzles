@@ -33,26 +33,28 @@ def run(problem, lines):
                 del node_statuses[pos]
 
             pos = apply_direction(pos, direction)
-    else:
-        for _ in range(10000000):
-            status = node_statuses.get(pos, CLEAN)
 
-            if status == CLEAN:
-                direction = GRID_COUNTER_CLOCKWISE[direction]
-            elif status == INFECTED:
-                direction = GRID_CLOCKWISE[direction]
-            elif status == FLAGGED:
-                direction = (-direction[0], -direction[1])
+        return infection_count
 
-            status = (status + 1) % 4
-            if status == CLEAN:
-                del node_statuses[pos]
-            else:
-                if status == INFECTED:
-                    infection_count += 1
-                node_statuses[pos] = status
+    for _ in range(10000000):
+        status = node_statuses.get(pos, CLEAN)
 
-            pos = apply_direction(pos, direction)
+        if status == CLEAN:
+            direction = GRID_COUNTER_CLOCKWISE[direction]
+        elif status == INFECTED:
+            direction = GRID_CLOCKWISE[direction]
+        elif status == FLAGGED:
+            direction = (-direction[0], -direction[1])
+
+        status = (status + 1) % 4
+        if status == CLEAN:
+            del node_statuses[pos]
+        else:
+            if status == INFECTED:
+                infection_count += 1
+            node_statuses[pos] = status
+
+        pos = apply_direction(pos, direction)
 
     return infection_count
 
@@ -68,4 +70,4 @@ run(1, input_lines) | debug('Star 1') | eq(5552)
 
 run(2, example1) | eq(2511944)
 
-run(2, input_lines) | debug('Star 2') | clipboard()
+run(2, input_lines) | debug('Star 2') | eq(2511527)
