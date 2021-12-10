@@ -26,12 +26,13 @@ def run(problem, lines):
 
             if status == CLEAN:
                 direction = GRID_COUNTER_CLOCKWISE[direction]
-                node_statuses[pos] = INFECTED
-                infection_count += 1
+                status = INFECTED
             else:
                 direction = GRID_CLOCKWISE[direction]
-                del node_statuses[pos]
+                status = CLEAN
 
+            infection_count += (status == INFECTED)
+            node_statuses[pos] = status
             pos = apply_direction(pos, direction)
 
         return infection_count
@@ -47,12 +48,9 @@ def run(problem, lines):
             direction = (-direction[0], -direction[1])
 
         status = (status + 1) % 4
-        if status == CLEAN:
-            del node_statuses[pos]
-        else:
-            if status == INFECTED:
-                infection_count += 1
-            node_statuses[pos] = status
+        if status == INFECTED:
+            infection_count += 1
+        node_statuses[pos] = status
 
         pos = apply_direction(pos, direction)
 
