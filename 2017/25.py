@@ -1,7 +1,5 @@
 from advent_of_code import *
 
-# 55
-
 input_value = get_input()
 input_lines = get_input_lines()
 
