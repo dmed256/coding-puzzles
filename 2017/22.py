@@ -16,7 +16,7 @@ def run(problem, lines):
         if v == '#':
             node_statuses[pos] = INFECTED
 
-    pos = grid.center()
+    pos = grid.center
     direction = GRID_UP
 
     infection_count = 0
