@@ -48,7 +48,6 @@ class Ranking(BaseModel):
 
 class Leaderboard(BaseModel):
     day: int
-    days: int
     rankings: List[Ranking]
 
     def __str__(self):
@@ -64,6 +63,30 @@ class Leaderboard(BaseModel):
             lines.append(str(ranking))
 
         return '\n'.join(lines)
+
+
+def parse_leaderboard_days(html):
+    s = BeautifulSoup(html, 'html.parser')
+
+    # Find the largest day link
+    links = s.find_all('span', 'leaderboard-daylinks')[0]
+    return max([
+        int(day)
+        for child in links
+        if (day := child.text.strip())
+    ])
+
+
+def get_leaderboard_days():
+    # Check if the year is over by pulling our day 1 cache
+    html = request_daily_leaderboard(1)
+    if parse_leaderboard_days(html) == 25:
+        return 25
+
+    url = f'https://adventofcode.com/{YEAR}/leaderboard'
+    req = requests.get(url)
+
+    return parse_leaderboard_days(req.text)
 
 
 def request_daily_leaderboard(day):
@@ -92,13 +115,6 @@ def request_daily_leaderboard(day):
 
 def parse_daily_leaderboard(day, html):
     s = BeautifulSoup(html, 'html.parser')
-
-    links = s.find_all('span', 'leaderboard-daylinks')[0]
-    days = max([
-        int(day)
-        for child in links
-        if (day := child.text.strip())
-    ])
 
     def get_username(entry):
         for child in reversed(entry.contents):
@@ -138,7 +154,6 @@ def parse_daily_leaderboard(day, html):
 
     return Leaderboard(
         day=day,
-        days=days,
         rankings=sorted(rankings, key=Ranking.key, reverse=True),
     )
 
@@ -149,10 +164,10 @@ def get_daily_leaderboard(day):
 
 
 def get_leaderboards():
-    leaderboard = get_daily_leaderboard(1)
+    days = get_leaderboard_days()
     return [
         get_daily_leaderboard(day + 1)
-        for day in range(leaderboard.days)
+        for day in range(days)
     ]
 
 
