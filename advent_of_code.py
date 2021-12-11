@@ -459,6 +459,10 @@ class Grid:
         self.height = len(self.grid)
 
     @property
+    def entry_count(self):
+        return self.width * self.height
+
+    @property
     def center(self):
         return (self.width // 2, self.width // 2)
 
@@ -467,6 +471,11 @@ class Grid:
             [c for c in row]
             for row in self.grid
         ])
+
+    def replace(self, v1, v2):
+        for pos, v in self:
+            if v == v1:
+                self[pos] = v2
 
     def __getitem__(self, pos):
         (x, y) = pos
@@ -482,14 +491,21 @@ class Grid:
             for x in range(self.width):
                 yield (x, y), self.grid[y][x]
 
-    def in_grid(self, pos):
+    def __contains__(self, pos):
         (x, y) = pos
         return 0 <= x < self.width and 0 <= y < self.height
+
+    def count(self, value):
+        return len([
+            1
+            for _, v in self
+            if v == value
+        ])
 
     def apply_direction(self, pos, direction):
         next_pos = apply_direction(pos, direction)
 
-        if self.in_grid(next_pos):
+        if next_pos in self.in_grid:
             return next_pos
 
         return None
@@ -511,12 +527,17 @@ class Grid:
         return [
             n
             for direction in directions
-            if self.in_grid(n := apply_direction(pos, direction))
+            if (n := apply_direction(pos, direction)) in self
         ]
 
-    def print(self):
+    def print(self, use_padding=None):
         max_digits = len(f'{self.width}')
-        has_padding = self.width <= 80
+
+        if use_padding is None:
+            has_padding = self.width <= 80
+        else:
+            has_padding = use_padding
+
         padding_char = '  ' if has_padding else ''
 
         def get_digit_value(value, digit):
