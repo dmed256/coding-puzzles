@@ -458,6 +458,10 @@ class Grid:
         ]
         self.height = len(self.grid)
 
+    @property
+    def center(self):
+        return (self.width // 2, self.width // 2)
+
     def copy(self):
         return Grid(self.grid.copy())
 
@@ -474,9 +478,6 @@ class Grid:
         for y in range(self.height):
             for x in range(self.width):
                 yield (x, y), self.grid[y][x]
-
-    def center(self):
-        return (self.width // 2, self.width // 2)
 
     def in_grid(self, pos):
         (x, y) = pos
