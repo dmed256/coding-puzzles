@@ -1,6 +1,5 @@
 from advent_of_code import *
 
-input_value = get_input()
 input_lines = get_input_lines()
 
 def run(problem, lines):
