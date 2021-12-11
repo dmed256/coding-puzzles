@@ -463,7 +463,10 @@ class Grid:
         return (self.width // 2, self.width // 2)
 
     def copy(self):
-        return Grid(self.grid.copy())
+        return Grid([
+            [c for c in row]
+            for row in self.grid
+        ])
 
     def __getitem__(self, pos):
         (x, y) = pos
