@@ -1,5 +1,4 @@
 from repo_utils import *
-from hashlib import md5
 
 def run(door):
     counter = 0
@@ -7,7 +6,7 @@ def run(door):
     ans2 = [' '] * 8
     while True:
         s = f'{door}{counter}'
-        h = md5(s.encode('utf-8')).hexdigest()
+        h = md5(s)
         if h.startswith('00000'):
             if len(ans1) < 8:
                 ans1 += h[5]

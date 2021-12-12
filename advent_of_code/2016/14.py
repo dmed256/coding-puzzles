@@ -1,8 +1,4 @@
 from repo_utils import *
-import hashlib
-
-def md5(s):
-    return hashlib.md5(str.encode(s)).hexdigest()
 
 def run(problem, salt):
     triples = []

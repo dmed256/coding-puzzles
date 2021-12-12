@@ -1,5 +1,6 @@
 import atexit
 import functools
+import hashlib
 import json
 import itertools
 import math
@@ -516,7 +517,7 @@ class Grid:
     def apply_direction(self, pos, direction):
         next_pos = apply_direction(pos, direction)
 
-        if next_pos in self.grid:
+        if next_pos in self:
             return next_pos
 
         return None
@@ -716,6 +717,9 @@ def get_subgroups(values):
     for i in range(len(values)):
         for combination in itertools.combinations(values, i):
             yield combination
+
+def md5(s):
+    return hashlib.md5(str.encode(s)).hexdigest()
 
 def mult(values):
     v = 1

@@ -1,8 +1,4 @@
-import hashlib
 from repo_utils import *
-
-def md5(s):
-    return hashlib.md5(str.encode(s)).hexdigest()
 
 def run(s, hash_prefix):
     suffix = 0
