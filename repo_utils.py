@@ -14,6 +14,7 @@ import sympy
 import sys
 import textwrap
 import traceback
+from bisect import bisect, insort
 from collections import defaultdict, namedtuple
 from copy import deepcopy
 from datetime import datetime
@@ -515,7 +516,7 @@ class Grid:
     def apply_direction(self, pos, direction):
         next_pos = apply_direction(pos, direction)
 
-        if next_pos in self.in_grid:
+        if next_pos in self.grid:
             return next_pos
 
         return None
