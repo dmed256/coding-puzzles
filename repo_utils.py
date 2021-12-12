@@ -383,7 +383,7 @@ class Submit:
             return
 
         html = self.submit_answer(answer)
-        self.print_clean_response(html)
+        self.print_clean_response(html, answer)
 
     def submit_answer(self, answer):
         aoc_dir = os.path.join(
@@ -408,7 +408,7 @@ class Submit:
         req = requests.post(url, headers=headers, data=payload)
         return req.text
 
-    def print_clean_response(self, html):
+    def print_clean_response(self, html, answer):
         s = BeautifulSoup(html, 'html.parser')
         article = [
             article
@@ -439,7 +439,6 @@ class Submit:
 
             # Store correct answer in the clipboard
             answer | Clipboard()
-
             return
 
         if "That's not the right answer" in response:
