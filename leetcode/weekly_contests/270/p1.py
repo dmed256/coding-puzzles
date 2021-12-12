@@ -1,5 +1,7 @@
 from repo_utils import *
 
+#---[ Solution ]----------------------------------
+
 import itertools
 
 class Solution:
@@ -12,6 +14,8 @@ class Solution:
                 numbers.add(digits[0] * 100 + digits[1] * 10 + digits[2])
 
         return sorted(list(numbers))
+
+#=================================================
 
 def run(inputs):
     return Solution().findEvenNumbers(inputs)

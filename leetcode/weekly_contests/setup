@@ -1,5 +1,6 @@
 #!/bin/bash
-cp ../../template.py p1.py
-cp ../../template.py p2.py
-cp ../../template.py p3.py
-cp ../../template.py p4.py
+for filename in p1 p2 p3 p4; do
+    if [[ ! -a "${filename}.py" ]]; then
+       cp ../../template.py "${filename}.py"
+    fi
+done
