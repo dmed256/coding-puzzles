@@ -1,0 +1,5 @@
+#!/bin/bash
+cp ../../template.py p1.py
+cp ../../template.py p2.py
+cp ../../template.py p3.py
+cp ../../template.py p4.py
