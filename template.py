@@ -1,4 +1,4 @@
-from advent_of_code import *
+from utils import *
 
 input_lines = get_input_lines()
 
