@@ -592,7 +592,7 @@ class Graph:
         WALL = 1
         OBJECT = 2
 
-    def __init__(self, grid, *, start_pos, get_type):
+    def __init__(self, grid, *, start_pos, get_type, directions=GRID_DIRECTIONS):
         self.grid = grid
         self.neighbors = {}
 
@@ -611,7 +611,7 @@ class Graph:
             for node in nodes:
                 neighbors = [
                     n
-                    for n in self.grid.neighbors(node)
+                    for n in self.grid.neighbors(node, directions)
                     if self.get_pos_type(n) != Graph.Type.WALL
                 ]
                 self.neighbors[node] = neighbors
