@@ -9,6 +9,7 @@ import numpy as np
 import operator
 import os
 import re
+import requests
 import string
 import subprocess
 import sympy
@@ -16,6 +17,7 @@ import sys
 import textwrap
 import traceback
 from bisect import bisect, insort
+from bs4 import BeautifulSoup
 from collections import defaultdict, namedtuple
 from copy import deepcopy
 from datetime import datetime
@@ -25,6 +27,7 @@ from termcolor import colored
 
 
 PROCESSES = 8
+IN_CI = 'CI' in os.environ
 
 #---[ Input ]---------------------------
 def multiline_lines(s):
@@ -325,6 +328,9 @@ class Eq:
 
 class Clipboard:
     def __ror__(self, value):
+        if IN_CI:
+            raise OSError('No clipboard() in CI')
+
         value = f'{value}'
         p = subprocess.Popen(
             ['pbcopy', 'w'],
@@ -332,6 +338,108 @@ class Clipboard:
             close_fds=True,
         )
         p.communicate(input=value.encode('utf-8'))
+        return value
+
+class Submit:
+    def __init__(self, star):
+        self.star = star
+
+    def __ror__(self, answer):
+        try:
+            return self.unsafe_ror(answer)
+        except Exception as e:
+            print('\n\nError submitting:')
+            print(e)
+            print('\n\n')
+            print(red('Failed to submit, copying to clipboard instead'))
+            return Clipboard() | answer
+
+    def unsafe_ror(self, answer):
+        if IN_CI:
+            raise OSError('No submit() in CI')
+
+        star = '⭐' * self.star
+
+        print('\n\n')
+        print(f'Submit answer for {star} ?', yellow('y/n'))
+        print(f'  -> [{blue(str(answer))}]\n\n')
+
+        response = input()
+        if response.lower() != 'y':
+            print(yellow('Not submitting'))
+            return
+
+        # Fetch year and day from problem filename
+        frame = get_test_frame()
+
+        year = os.path.basename(
+            os.path.dirname(frame.filename)
+        )
+        filename = os.path.basename(frame.filename)
+        day, _ = os.path.splitext(filename)
+
+        # Get secret session
+        session_filename = os.path.abspath(
+            os.path.join(frame.filename, '..', '..', '.session')
+        )
+        with open(session_filename, 'r') as fd:
+            session = fd.read().strip()
+
+        url = f'https://adventofcode.com/{year}/day/{day}/answer'
+        payload = f'level={self.star}&answer={answer}'
+        headers = {
+            'X-MAS': 'hi-eric-thank-you-for-making-aoc',
+            'cookie': f'session={session}',
+        }
+
+        req = requests.post(url, headers=headers, data=payload)
+
+        s = BeautifulSoup(req.text, 'html.parser')
+        article = [
+            article
+            for main in s.find_all('main')
+            for article in main.find_all('article')
+        ][0]
+
+        response = article.get_text()
+
+        if "That's the right answer!" in response:
+            print(green("That's the right answer!"))
+
+            match = re.search('You achieved rank (\d+)', response)
+            if match is not None:
+                rank = int(match.groups()[0])
+                points = 101 - rank
+                print(green(f'Leaderboard: {rank}'), blue(f'({points})'))
+            else:
+                match = re.search('You got rank (\d+)', response)
+                if match is not None:
+                    rank = int(match.groups()[0])
+                    print(blue(f'Rank: {rank}'))
+            return
+
+        if "That's not the right answer." in response:
+            output = red("That's not the right answer")
+
+            if 'answer is too high' in response:
+                output += f' ({blue("Too high")})'
+            elif 'answer is too low' in response:
+                output += f' ({blue("Too low")})'
+
+            print(output)
+            return
+
+        if "You gave an answer too recently" in response:
+            match = re.search('You have (\d+)s left to wait.', response)
+            if match is not None:
+                wait_time = match.groups()[0]
+            else:
+                wait_time = '???'
+
+            print(yellow(f"You gave an answer too recently: Wait {wait_time}s"))
+            return
+
+        print(yellow(response))
 
 def debug(header=''):
     return Debug(header)
@@ -341,6 +449,9 @@ def eq(expected_result):
 
 def clipboard():
     return Clipboard()
+
+def submit(star):
+    return Submit(star)
 
 def assert_tests_passed():
     global test_errors

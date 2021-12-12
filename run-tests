@@ -3,6 +3,7 @@
 PROJ_DIR=$(cd $(dirname $BASH_SOURCE) && pwd)
 
 cd "${PROJ_DIR}/advent_of_code"
+export CI=1
 
 files=$(find * -type f | \
             grep '[0-9]\{4\}/[0-9]\{2\}.py' | \
