@@ -1,6 +1,6 @@
 #!/bin/bash
 for filename in p1 p2 p3 p4; do
     if [[ ! -a "${filename}.py" ]]; then
-       cp ../../template.py "${filename}.py"
+        touch "${filename}.py"
     fi
 done
