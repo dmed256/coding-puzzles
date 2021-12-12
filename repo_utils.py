@@ -437,9 +437,12 @@ class Submit:
                 url = f'https://adventofcode.com/{self.year}/day/{self.day}#part2'
                 webbrowser.open(url)
 
+            # Store correct answer in the clipboard
+            answer | Clipboard()
+
             return
 
-        if "That's not the right answer." in response:
+        if "That's not the right answer" in response:
             output = red("That's not the right answer")
 
             if 'answer is too high' in response:

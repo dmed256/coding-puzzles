@@ -10,8 +10,8 @@ def run(problem, lines):
 
 # run(1, example1) | eq()
 
-run(1, input_lines) | debug('Star 1') | clipboard()
+run(1, input_lines) | submit(1)
 
 # run(2, example1) | eq()
 
-# run(2, input_lines) | debug('Star 2') | clipboard()
+# run(2, input_lines) | submit(2)
