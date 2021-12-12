@@ -16,6 +16,7 @@ import sympy
 import sys
 import textwrap
 import traceback
+import webbrowser
 from bisect import bisect, insort
 from bs4 import BeautifulSoup
 from collections import defaultdict, namedtuple
@@ -344,6 +345,18 @@ class Submit:
     def __init__(self, star):
         self.star = star
 
+        # Fetch year and day from problem filename
+        frame = get_test_frame()
+
+        year = os.path.basename(
+            os.path.dirname(frame.filename)
+        )
+        filename = os.path.basename(frame.filename)
+        day, _ = os.path.splitext(filename)
+
+        self.year = year
+        self.day = day
+
     def __ror__(self, answer):
         try:
             return self.unsafe_ror(answer)
@@ -369,15 +382,10 @@ class Submit:
             print(yellow('Not submitting'))
             return
 
-        # Fetch year and day from problem filename
-        frame = get_test_frame()
+        html = self.submit_answer(answer)
+        self.print_clean_response(html)
 
-        year = os.path.basename(
-            os.path.dirname(frame.filename)
-        )
-        filename = os.path.basename(frame.filename)
-        day, _ = os.path.splitext(filename)
-
+    def submit_answer(self, answer):
         # Get secret session
         session_filename = os.path.abspath(
             os.path.join(frame.filename, '..', '..', '.session')
@@ -385,16 +393,21 @@ class Submit:
         with open(session_filename, 'r') as fd:
             session = fd.read().strip()
 
-        url = f'https://adventofcode.com/{year}/day/{day}/answer'
-        payload = f'level={self.star}&answer={answer}'
+        url = f'https://adventofcode.com/{self.year}/day/{self.day}/answer'
+        payload = {
+            'level': self.star,
+            'answer': str(answer),
+        }
         headers = {
             'X-MAS': 'hi-eric-thank-you-for-making-aoc',
             'cookie': f'session={session}',
         }
 
         req = requests.post(url, headers=headers, data=payload)
+        return req.text
 
-        s = BeautifulSoup(req.text, 'html.parser')
+    def print_clean_response(self, html):
+        s = BeautifulSoup(html, 'html.parser')
         article = [
             article
             for main in s.find_all('main')
@@ -416,6 +429,12 @@ class Submit:
                 if match is not None:
                     rank = int(match.groups()[0])
                     print(blue(f'Rank: {rank}'))
+
+            # Quick-open part 2
+            if self.star == 1:
+                url = f'https://adventofcode.com/{self.year}/day/{self.day}#part2'
+                webbrowser.open(url)
+
             return
 
         if "That's not the right answer." in response:
