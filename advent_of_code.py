@@ -209,6 +209,16 @@ def longest_list(lists):
         return max(lists, key=lambda x: len(x))
     return None
 
+def bit_count(value):
+    bits = 0
+    for i in range(10000):
+        bit = 1 << i
+        if value < bit:
+            break
+        if value & bit:
+            bits += 1
+    return bits
+
 def get_bits(value):
     bits = []
     bit = 0
