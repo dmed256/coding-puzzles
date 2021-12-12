@@ -365,7 +365,7 @@ class Submit:
             print(e)
             print('\n\n')
             print(red('Failed to submit, copying to clipboard instead'))
-            return Clipboard() | answer
+            return answer | Clipboard()
 
     def unsafe_ror(self, answer):
         if IN_CI:
@@ -386,9 +386,11 @@ class Submit:
         self.print_clean_response(html)
 
     def submit_answer(self, answer):
-        # Get secret session
+        aoc_dir = os.path.join(
+            os.path.dirname(__file__), 'advent_of_code',
+        )
         session_filename = os.path.abspath(
-            os.path.join(frame.filename, '..', '..', '.session')
+            os.path.join(aoc_dir, '.session')
         )
         with open(session_filename, 'r') as fd:
             session = fd.read().strip()
