@@ -371,6 +371,10 @@ class Submit:
         if IN_CI:
             raise OSError('No submit() in CI')
 
+        if answer is None:
+            print(yellow('Skipping [None] answer\n'))
+            return answer
+
         star = '⭐' * self.star
 
         print('\n\n')
@@ -384,6 +388,7 @@ class Submit:
 
         html = self.submit_answer(answer)
         self.print_clean_response(html)
+        print()
 
         # Store correct answer in the clipboard
         answer | Clipboard()
