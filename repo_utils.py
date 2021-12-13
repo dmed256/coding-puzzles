@@ -358,6 +358,7 @@ class Submit:
         )
         filename = os.path.basename(frame.filename)
         day, _ = os.path.splitext(filename)
+        day = int(day)
 
         self.year = year
         self.day = day
