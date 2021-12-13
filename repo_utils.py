@@ -610,6 +610,20 @@ class Grid:
         ]
         self.height = len(self.grid)
 
+    @staticmethod
+    def from_points(points, *, set_value='#', unset_value='.'):
+        max_x = max(x for x, y in points)
+        min_x = min(x for x, y in points)
+        max_y = max(y for x, y in points)
+        min_y = min(y for x, y in points)
+        grid = Grid([
+            [unset_value for x in range(min_x, max_x + 1)]
+            for y in range(min_y, max_y + 1)
+        ])
+        for pos in points:
+            grid[pos] = set_value
+        return grid
+
     @property
     def entry_count(self):
         return self.width * self.height

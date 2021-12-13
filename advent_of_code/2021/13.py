@@ -15,19 +15,6 @@ def run(problem, lines):
             x, y = line.split(',')
             coords.add((int(x), int(y)))
 
-    def print_coord(coords):
-        max_x = max(x for x, y in coords)
-        min_x = min(x for x, y in coords)
-        max_y = max(y for x, y in coords)
-        min_y = min(y for x, y in coords)
-        grid = Grid([
-            ['.' for x in range(min_x, max_x + 1)]
-            for y in range(min_y, max_y + 1)
-        ])
-        for x, y in coords:
-            grid[(x, y)] = '#'
-        grid.print()
-
     for axis, value in folds:
         new_coords = set()
         for x, y in coords:
@@ -50,7 +37,7 @@ def run(problem, lines):
             break
 
     if problem == 2:
-        print_coord(coords)
+        Grid.from_points(coords).print()
         return
 
     return len(coords)
