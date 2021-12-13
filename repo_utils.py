@@ -460,7 +460,7 @@ class Submit:
             else:
                 wait_time = '???'
 
-            print(yellow(f"You gave an answer too recently: Wait {wait_time}s"))
+            print(blue('You gave an answer too recently:'), yellow(f'Wait {wait_time}s'))
             return
 
         print(yellow(response))
