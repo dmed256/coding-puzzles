@@ -310,6 +310,11 @@ class Eq:
 
     def __ror__(self, value):
         if value == self.expected_value:
+            message = f"""
+            {get_frame_location()}
+            - {green('PASS')}: [{value}]
+            """
+            print_message(message)
             return value
 
         global test_errors
