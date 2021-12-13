@@ -39,24 +39,14 @@ def run(lines):
 def run2(lines):
     nodes = parse_lines(lines)
 
-    min_x = min(x for x, y in nodes.keys())
-    max_x = max(x for x, y in nodes.keys())
-    min_y = min(y for x, y in nodes.keys())
-    max_y = max(y for x, y in nodes.keys())
-
-    grid = Grid([
-        [None for x in range(min_x, max_x + 1)]
-        for y in range(min_y, max_y + 1)
-    ])
-
+    grid = Grid.from_points(nodes.keys())
     for pos, info in nodes.items():
         grid[pos] = info
 
-    grid.print()
-
-    pos = (max_x, 0)
+    pos  = (grid.width - 1, 0)
     goal = (0, 0)
 
+    # TODO: ???
 
 run(input_lines) | debug('Star 1') | eq(1045)
 
