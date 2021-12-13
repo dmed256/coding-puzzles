@@ -223,4 +223,4 @@ run(example1) | eq(3)
 
 run(input_lines) | debug('Star 1') | eq(11340)
 
-run2() | submit(2)
+run2() | debug('Star 2') | eq(479007900)

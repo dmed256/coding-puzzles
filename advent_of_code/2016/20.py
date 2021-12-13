@@ -39,6 +39,6 @@ example1 = multiline_lines(r"""
 
 run(1, example1) | eq(3)
 
-run(1, input_lines) | eq(22887907)
+run(1, input_lines) | debug('Star 1') | eq(22887907)
 
-run(2, input_lines) | submit(2)
+run(2, input_lines) | debug('Star 2') | eq(109)

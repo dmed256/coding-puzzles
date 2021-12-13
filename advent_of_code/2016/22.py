@@ -50,4 +50,4 @@ def run2(lines):
 
 run(input_lines) | debug('Star 1') | eq(1045)
 
-run2(input_lines) | submit(2)
+# run2(input_lines) | submit(2)
