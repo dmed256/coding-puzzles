@@ -22,12 +22,10 @@ def run1(lines):
 
         if ins == 'cpy':
             registers[i2] = v1
-        if ins == 'inc':
+        elif ins == 'inc':
             registers[i1] += 1
-        if ins == 'dec':
+        elif ins == 'dec':
             registers[i1] -= 1
-        if ins == 'cpy':
-            registers[i2] = v1
 
         ptr += 1
 
