@@ -47,10 +47,10 @@ run(1, 'ihgpwlah') | eq('DDRRRD')
 run(1, 'kglvqrro') | eq('DDUDRLRRUDRD')
 run(1, 'ulqzkmiv') | eq('DRURDRUDDLLDLUURRDULRLDUUDDDRR')
 
-run(1, 'qtetzkpl') | debug('Star 1') | clipboard()
+run(1, 'qtetzkpl') | debug('Star 1') | eq('RRRLDRDUDD')
 
 run(2, 'ihgpwlah') | eq(370)
 run(2, 'kglvqrro') | eq(492)
 run(2, 'ulqzkmiv') | eq(830)
 
-run(2, 'qtetzkpl') | debug('Star 2') | clipboard()
+run(2, 'qtetzkpl') | debug('Star 2') | eq(706)

@@ -49,4 +49,4 @@ run(1, 'zpqevtbw') | debug('Star 1') | eq(16106)
 
 run(2, 'abc') | eq(22551)
 
-run(2, 'zpqevtbw') | debug('Star 2') | clipboard()
+run(2, 'zpqevtbw') | debug('Star 2') | eq(22423)

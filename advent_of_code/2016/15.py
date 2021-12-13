@@ -37,6 +37,6 @@ input_values2 = [
 
 run(example1) | eq(5)
 
-run(input_values) | debug('Star 1') | clipboard()
+run(input_values) | debug('Star 1') | eq(16824)
 
-run(input_values2) | debug('Star 2') | clipboard()
+run(input_values2) | debug('Star 2') | eq(3543984)
