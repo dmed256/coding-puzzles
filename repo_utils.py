@@ -383,7 +383,10 @@ class Submit:
             return
 
         html = self.submit_answer(answer)
-        self.print_clean_response(html, answer)
+        self.print_clean_response(html)
+
+        # Store correct answer in the clipboard
+        answer | Clipboard()
 
     def submit_answer(self, answer):
         aoc_dir = os.path.join(
@@ -408,7 +411,7 @@ class Submit:
         req = requests.post(url, headers=headers, data=payload)
         return req.text
 
-    def print_clean_response(self, html, answer):
+    def print_clean_response(self, html):
         s = BeautifulSoup(html, 'html.parser')
         article = [
             article
@@ -437,8 +440,6 @@ class Submit:
                 url = f'https://adventofcode.com/{self.year}/day/{self.day}#part2'
                 webbrowser.open(url)
 
-            # Store correct answer in the clipboard
-            answer | Clipboard()
             return
 
         if "That's not the right answer" in response:
