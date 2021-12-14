@@ -208,6 +208,8 @@ def print_global_leaderboard():
         output += username
         print(output)
 
+        prev_points = points
+
 
 def print_user_ranking(username):
     global_rankings = get_global_rankings()
