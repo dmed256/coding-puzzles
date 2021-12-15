@@ -1,257 +1,144 @@
 from repo_utils import *
 
-class Problem:
-    def __init__(self, lines, problem):
-        self.setup_grid(lines)
-        self.setup_graph()
+input_lines = get_input_lines()
 
-        self.start_pos = self.teleporters['A'][0]
-        self.end_pos = self.teleporters['Z'][0]
+def get_path(grid, pos1, pos2):
+    queue = [(0, pos1)]
+    visited = {pos1}
 
-        self.using_depth = problem == 2
+    while queue:
+        steps, pos = heapq.heappop(queue)
 
-    @staticmethod
-    def get_graph_type(value):
-        if value in ['#', ' ']:
-            return Graph.Type.WALL
-        if value == '.':
-            return Graph.Type.NOTHING
-        return Graph.Type.OBJECT
+        for npos in grid.neighbors(pos):
+            next_steps = steps + 1
 
-    def setup_grid(self, lines):
-        self.grid = Grid(lines, default_value=' ')
+            if npos == pos2:
+                return next_steps
 
-        teleporter_positions = {}
-        self.teleporter_goes_up = {}
-        for p1, v1 in self.grid:
-            if not v1.isupper():
+            if npos in visited:
+                continue
+            visited.add(npos)
+
+            v = grid[npos]
+            if v != '.':
                 continue
 
-            [p2, v2, prev_node1] = self.get_teleporter_info(p1)
-            [_, _, prev_node2] = self.get_teleporter_info(p2)
+            heapq.heappush(queue, (next_steps, npos))
 
+def run(problem, lines):
+    grid = Grid(lines, default_value=' ')
 
-            if prev_node1:
-                pos = (prev_node1, p1, p2)
-            else:
-                pos = (prev_node2, p2, p1)
+    x_ends = {0, grid.width - 1}
+    y_ends = {0, grid.height - 1}
 
-            (prev_node, p1, p2) = pos
+    def get_gate_pos(pos1, pos2):
+        is_outer = any((
+            pos1[0] in x_ends,
+            pos2[0] in x_ends,
+            pos1[1] in y_ends,
+            pos2[1] in y_ends,
+        ))
+
+        for p1, p2 in [(pos1, pos2), (pos2, pos1)]:
             for direction in GRID_DIRECTIONS:
-                if apply_direction(p1, direction) == direction:
-                    break
+                if grid.apply_direction(p1, direction) != p2:
+                    continue
 
-            (x2, y2) = p2
-            goes_up = (
-                (x2 < 1 or (self.grid.width - 2) < x2) or
-                (y2 < 1 or (self.grid.height - 2) < y2)
-            )
+                p3 = grid.apply_direction(p2, direction)
+                if p3 is None or grid[p3] != '.':
+                    continue
 
-            name = {
-                GRID_UP: v1 + v2,
-                GRID_DOWN: v2 + v1,
-                GRID_LEFT: v1 + v2,
-                GRID_RIGHT: v2 + v1,
-            }[direction]
+                gate_key = ''.join(sorted(grid[p1] + grid[p2]))
+                return (is_outer, gate_key, p3)
 
-            teleporter_positions[pos] = name
-            self.teleporter_goes_up[prev_node] = goes_up
+    gate_values = set(string.ascii_uppercase)
+    gates = {}
+    for pos, v in grid:
+        if v not in gate_values:
+            continue
 
-        bitly = {
-            'AA': 'A',
-            'ZZ': 'Z',
-        }
-        letter = 'a'
-        for name in teleporter_positions.values():
-            if name not in bitly:
-                bitly[name] = letter
-                letter = chr(ord(letter) + 1)
-
-        self.teleporters = {}
-        for (prev_node, p1, p2), name in teleporter_positions.items():
-            name = bitly[name]
-            self.teleporters[name] = self.teleporters.get(name, []) + [prev_node]
-
-        for (prev_node, p1, p2), name in teleporter_positions.items():
-            self.grid[p1] = bitly[name]
-            self.grid[p2] = ' '
-
-    def get_teleporter_info(self, p1):
-        p2 = None
-        v2 = None
-        prev_node = None
-
-        for neighbor in self.grid.neighbors(p1):
-            maybe_v2 = self.grid[neighbor]
-            if maybe_v2.isupper():
-                p2 = neighbor
-                v2 = maybe_v2
-            elif maybe_v2 == '.':
-                prev_node = neighbor
-
-        return [p2, v2, prev_node]
-
-    def setup_graph(self):
-        doors = [
-            p
-            for positions in self.teleporters.values()
-            for p in positions
-        ]
-
-        graph = Graph(
-            self.grid,
-            start_pos=doors,
-            get_type=Problem.get_graph_type,
-        )
-
-        self.paths = {
-            p: graph.find_paths(p, doors)
-            for p in doors
-        }
-
-        self.use_teleporter = {}
-        for positions in self.teleporters.values():
-            if len(positions) == 2:
-                [p1, p2] = positions
-                self.use_teleporter[p1] = p2
-                self.use_teleporter[p2] = p1
-
-    @staticmethod
-    def position_cost(position):
-        [(pos, depth), path, *other] = position
-
-        depth_cost = max(1, (depth - 20))
-
-        return len(path) * depth_cost
-
-    def trim_positions(self, positions, new_positions, min_pos_path_length, min_path):
-        if self.using_depth:
-            min_zpositions = [
-                [zpos, path, *other]
-                for [zpos, path, *other] in new_positions
-                if zpos not in min_pos_path_length
-                or len(path) < min_pos_path_length[zpos]
-            ]
-            for [zpos, path, *other] in min_zpositions:
-                min_pos_path_length[zpos] = len(path)
-            updated_zpos = {
-                zpos
-                for [zpos, *other] in min_zpositions
-            }
-            positions = [
-                [zpos, *other]
-                for [zpos, *other] in positions
-                if zpos not in updated_zpos
-            ] + min_zpositions
-        else:
-            min_positions = [
-                [(pos, depth), path, *other]
-                for [(pos, depth), path, *other] in new_positions
-                if pos not in min_pos_path_length
-                or len(path) < min_pos_path_length[pos]
-            ]
-            for [(pos, depth), path, *other] in min_positions:
-                min_pos_path_length[pos] = len(path)
-            updated_pos = {
-                pos
-                for [(pos, depth), *other] in min_positions
-            }
-            positions = [
-                [(pos, depth), *other]
-                for [(pos, depth), *other] in positions
-                if pos not in updated_pos
-            ] + min_positions
-
-        positions.sort(key=Problem.position_cost)
-        return positions
-
-    def find_min_path(self, positions):
-        [(pos, depth), prev_path, explored_doors] = positions.pop(0)
-
-        min_path = None
-        new_positions = []
-        for path in self.paths[pos]:
-            target = path[-1]
-            ztarget = (target, depth)
-
-            if target in explored_doors or ztarget in explored_doors:
+        for npos in grid.neighbors(pos):
+            v2 = grid[npos]
+            if v2 not in gate_values:
                 continue
 
-            path = [*prev_path, *[(p, depth) for p in path]]
+            is_outer, gate_key, gate_pos = get_gate_pos(pos, npos)
 
-            depth2 = (
-                depth - 1
-                if self.teleporter_goes_up[target] else
-                depth + 1
-            )
-            if depth2 > 1000:
+            # Get a 1-char ID and store it
+            gates[(gate_key, is_outer)] = gate_pos
+
+            # Clean up the grid
+            grid[pos] = ' '
+            grid[npos] = ' '
+            grid[gate_pos] = gate_key
+
+    paths = defaultdict(dict)
+    for gate1 in gates.keys():
+        gate_key1, is_outer1 = gate1
+        pos1 = gates[gate1]
+
+        for gate2 in gates.keys():
+            gate_key2, is_outer2 = gate2
+            pos2 = gates[gate2]
+
+            if gate1 == gate2 or (gate1, gate2) in paths:
                 continue
 
-            if target == self.end_pos and (depth == 0 or not self.using_depth):
-                min_path = shortest_list([
-                    min_path,
-                    path,
-                ])
+            steps = get_path(grid, pos1, pos2)
+            if steps is None:
                 continue
 
-            # Doors are closed
-            if self.using_depth and depth > 0 and target == self.end_pos:
+            if gate_key2 != 'AA':
+                paths[gate1][gate2] = steps
+
+            if gate_key2 != 'AA':
+                paths[gate2][gate1] = steps
+
+    start = ('AA', True)
+    start_pos, _ = gates[start]
+
+    end = ('ZZ', True)
+    end_pos, _ = gates[end]
+
+    queue = [(0, 0, start)]
+    min_dist = None
+    while queue:
+        depth, steps, gate = heapq.heappop(queue)
+
+        if min_dist and min_dist <= steps:
+            continue
+
+        for gate2, dist in paths[gate].items():
+            next_steps = steps + dist
+
+            if gate2 == end:
+                if depth == 0:
+                    min_dist = safe_min(min_dist, next_steps)
                 continue
-            if target == self.start_pos:
+
+            # Takes 1 step to go through the portal
+            next_steps += 1
+
+            gate_key2, is_outer2 = gate2
+
+            # Can't go up any higher
+            if problem == 2 and depth == 0 and is_outer2:
                 continue
-            if self.using_depth and depth2 < 0:
-                continue
 
-            target2 = self.use_teleporter[target]
-            ztarget2 = (target2, depth2)
-            if self.using_depth:
-                new_explored_doors = {ztarget, ztarget2}
-            else:
-                new_explored_doors = {target, target2}
+            next_depth = depth
+            if problem == 2:
+                if is_outer2:
+                    next_depth -= 1
+                else:
+                    next_depth += 1
 
-            new_positions.append([
-                ztarget2,
-                [*path, ztarget2],
-                explored_doors | new_explored_doors,
-            ])
+            next_gate = (gate_key2, not is_outer2)
 
-        return [new_positions, min_path]
+            heapq.heappush(queue, (next_depth, next_steps, next_gate))
 
-    def print_path(self, path):
-        if path is None:
-            return
+    return min_dist
 
-        prev_depth = 0
-        for ((x, y), depth) in path:
-            if self.using_depth and depth != prev_depth:
-                print(yellow(f'{prev_depth} -> {depth}'))
-                prev_depth = depth
-            print((x, y, depth))
-
-
-    def run(self):
-        # self.grid.print()
-
-        init_pos = (self.start_pos, 0)
-
-        min_path = None
-        positions = [[init_pos, [], set()]]
-        min_pos_path_length = {}
-        while positions:
-            [new_positions, min_path2] = self.find_min_path(positions)
-            min_path = shortest_list([min_path, min_path2])
-            positions = self.trim_positions(
-                positions,
-                new_positions,
-                min_pos_path_length,
-                min_path,
-            )
-
-        # self.print_path(min_path)
-
-        return len(min_path)
-
-example1 = multiline_lines("""
+example1 = multiline_lines(r"""
          A
          A
   #######.#########
@@ -273,7 +160,7 @@ FG..#########.....#
              Z
 """)
 
-example2 = multiline_lines("""
+example2 = multiline_lines(r"""
                    A
                    A
   #################.#############
@@ -313,13 +200,12 @@ YN......#               VT..#....QG
            U   P   P
 """)
 
-Problem(example1, 1).run() | eq(23)
-Problem(example2, 1).run() | eq(58)
+run(1, example1) | eq(23)
+run(1, example2) | eq(58)
 
-input_lines = get_input_lines()
-Problem(input_lines, 1).run() | debug('Star 1') | eq(642)
+run(1, input_lines) | debug('Star 1') | eq(642)
 
-example1 = multiline_lines("""
+example1 = multiline_lines(r"""
              Z L X W       C
              Z P Q B       K
   ###########.#.#.#.#######.###############
@@ -359,5 +245,5 @@ RE....#.#                           #......RF
                A A D   M
 """)
 
-Problem(example1, 2).run() | eq(396)
-Problem(input_lines, 2).run() | debug('Star 2') | eq (7492)
+run(2, example1) | eq(396)
+run(2, input_lines) | debug('Star 2') | eq (7492)
