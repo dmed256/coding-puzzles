@@ -19,7 +19,7 @@ import textwrap
 import traceback
 import webbrowser
 from bs4 import BeautifulSoup
-from collections import defaultdict, namedtuple
+from collections import defaultdict, deque, namedtuple, Counter
 from copy import deepcopy
 from datetime import datetime
 from enum import Enum
