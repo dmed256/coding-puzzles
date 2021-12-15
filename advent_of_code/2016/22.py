@@ -18,6 +18,7 @@ def parse_lines(lines):
 
     return nodes
 
+
 def run(lines):
     nodes = parse_lines(lines)
 
@@ -41,7 +42,7 @@ def empty_to_pos_steps(grid, empty_pos, data_pos, end):
     queue = deque([(empty_pos, 0)])
     visited = {empty_pos, data_pos}
     while queue:
-        (pos, steps) = queue.popleft()
+        pos, steps = queue.popleft()
         _, size = grid[pos]
 
         found_data = False
@@ -83,24 +84,19 @@ def run2(lines):
     data_neighbor2 = (grid.width - 1, 1)
 
     queue = [
-        (empty_pos, data_pos, data_neighbor1, 0, {data_pos}),
-        (empty_pos, data_pos, data_neighbor2, 0, {data_pos}),
+        (empty_pos, data_pos, data_neighbor1, 0),
+        (empty_pos, data_pos, data_neighbor2, 0),
     ]
     min_steps = None
-    path_steps = {}
+    cached_steps = {}
 
     def queue_key(entry):
-        empty_pos, data_pos, next_pos, steps, visited = entry
-
-        dist = sum(abs(x) for x in data_pos)
-
-        return steps + dist
-
+        empty_pos, data_pos, next_pos, steps = entry
+        dist = abs(data_pos[0] - goal_pos[0]) + abs(data_pos[1] - goal_pos[1])
+        return (dist, steps)
 
     while queue:
-        empty_pos, data_pos, next_pos, steps, visited = queue.pop(0)
-
-        print(len(queue), queue_key((empty_pos, data_pos, next_pos, steps, visited)))
+        empty_pos, data_pos, next_pos, steps = queue.pop(0)
 
         if min_steps and min_steps <= steps:
             continue
@@ -110,13 +106,12 @@ def run2(lines):
         if data_size > node_space:
             continue
 
-        key = (empty_pos, data_pos, next_pos)
-        if key in path_steps:
-            steps_taken = path_steps[key]
-        else:
-            steps_taken = empty_to_pos_steps(grid, empty_pos, data_pos, next_pos)
-            path_steps[key] = steps_taken
+        key = (data_pos, next_pos)
+        if key in cached_steps and cached_steps[key] <= steps:
+            continue
+        cached_steps[key] = steps
 
+        steps_taken = empty_to_pos_steps(grid, empty_pos, data_pos, next_pos)
         if steps_taken is None:
             continue
 
@@ -127,14 +122,10 @@ def run2(lines):
             min_steps = safe_min(min_steps, steps)
             continue
 
-        data_pos = empty_pos
-        empty_pos = next_pos
+        empty_pos = data_pos
+        data_pos = next_pos
         for npos in grid.neighbors(data_pos):
-            if npos in visited:
-                continue
-
-            next_visited = visited | {npos}
-            entry = (empty_pos, data_pos, npos, steps, next_visited)
+            entry = (empty_pos, data_pos, npos, steps)
             insort_right(queue, entry, key=queue_key)
 
     return min_steps
@@ -158,4 +149,4 @@ run(input_lines) | debug('Star 1') | eq(1045)
 
 run2(example1) | eq(7)
 
-# run2(input_lines) | submit(2)
+run2(input_lines) | debug('Star 2') | eq(265)

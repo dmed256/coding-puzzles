@@ -35,7 +35,7 @@ def run(problem, lines):
     start = (0, 0)
     end = (grid.width - 1, grid.height - 1)
 
-    def dist_heuristic(entry):
+    def queue_key(entry):
         pos, risk = entry
         dist = abs(pos[0] - end[0]) + abs(pos[1] - end[1])
         return (dist, risk)
@@ -68,7 +68,7 @@ def run(problem, lines):
                 continue
 
             # Add the next node based on distance heuristic
-            insort_right(queue, (npos, new_risk), key=dist_heuristic)
+            insort_right(queue, (npos, new_risk), key=queue_key)
 
     return min_end_risk
 
