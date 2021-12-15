@@ -35,42 +35,26 @@ def run(problem, lines):
     start = (0, 0)
     end = (grid.width - 1, grid.height - 1)
 
-    def queue_key(entry):
-        pos, risk = entry
-        dist = abs(pos[0] - end[0]) + abs(pos[1] - end[1])
-        return (dist, risk)
-
-    queue = [(start, 0)]
-    min_end_risk = None
+    queue = [(0, start)]
     while queue:
-        pos, risk = queue.pop()
+        risk, pos = heapq.heappop(queue)
 
         # Check that we haven't visited this node with less risk
-        if grid2[pos] and risk > grid2[pos]:
+        if grid2[pos] and grid2[pos] <= risk:
             continue
 
-        # Check that we haven't solved the problem with a better risk
-        if min_end_risk and min_end_risk <= risk:
-            continue
+        grid2[pos] = risk
 
         for npos in grid.neighbors(pos):
             new_risk = risk + grid[npos]
 
-            # Check that we haven't visited this node with less risk
             if grid2[npos] and grid2[npos] <= new_risk:
                 continue
 
-            grid2[npos] = new_risk
-
-            # No need to keep looking after finding the end node
-            if npos == end:
-                min_end_risk = safe_min(min_end_risk, new_risk)
-                continue
-
             # Add the next node based on distance heuristic
-            insort_right(queue, (npos, new_risk), key=queue_key)
+            heapq.heappush(queue, (new_risk, npos))
 
-    return min_end_risk
+    return grid2[end]
 
 example1 = multiline_lines(r"""
 1163751742

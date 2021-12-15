@@ -80,26 +80,18 @@ def run2(lines):
     data_pos = (grid.width - 1, 0)
     data_size, _ = grid[data_pos]
 
-    data_neighbor1 = (grid.width - 2, 0)
-    data_neighbor2 = (grid.width - 1, 1)
-
     queue = [
-        (empty_pos, data_pos, data_neighbor1, 0),
-        (empty_pos, data_pos, data_neighbor2, 0),
+        (0, data_pos, neighbor, empty_pos)
+        for neighbor in [
+                (grid.width - 2, 0),
+                (grid.width - 1, 1),
+        ]
     ]
-    min_steps = None
     cached_steps = {}
-
-    def queue_key(entry):
-        empty_pos, data_pos, next_pos, steps = entry
-        dist = abs(data_pos[0] - goal_pos[0]) + abs(data_pos[1] - goal_pos[1])
-        return (dist, steps)
+    min_steps = None
 
     while queue:
-        empty_pos, data_pos, next_pos, steps = queue.pop(0)
-
-        if min_steps and min_steps <= steps:
-            continue
+        steps, data_pos, next_pos, empty_pos = heapq.heappop(queue)
 
         # Make sure there's space for the data to move to
         _, node_space = grid[next_pos]
@@ -125,8 +117,7 @@ def run2(lines):
         empty_pos = data_pos
         data_pos = next_pos
         for npos in grid.neighbors(data_pos):
-            entry = (empty_pos, data_pos, npos, steps)
-            insort_right(queue, entry, key=queue_key)
+            heapq.heappush(queue, (steps, data_pos, npos, empty_pos))
 
     return min_steps
 

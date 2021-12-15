@@ -2,6 +2,7 @@ import atexit
 import bisect
 import functools
 import hashlib
+import heapq
 import itertools
 import json
 import math
