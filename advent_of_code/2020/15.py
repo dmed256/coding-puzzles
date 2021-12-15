@@ -8,7 +8,7 @@ def run(values, find_turn):
 
     value = values[-1]
     turn = len(values)
-    while turn < find_turn:
+    for turn in range(len(values), find_turn):
         last_turn = memory.get(value)
         if last_turn is None:
             next_value = 0
@@ -17,7 +17,6 @@ def run(values, find_turn):
 
         memory[value] = turn
         value = next_value
-        turn += 1
 
     return value
 
