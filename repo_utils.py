@@ -1,3 +1,4 @@
+import _md5
 import atexit
 import bisect
 import functools
@@ -775,7 +776,7 @@ def get_subgroups(values):
             yield combination
 
 def md5(s):
-    return hashlib.md5(str.encode(s)).hexdigest()
+    return _md5.md5(str.encode(s)).hexdigest()
 
 def mult(values):
     v = 1

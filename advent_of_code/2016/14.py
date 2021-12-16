@@ -43,10 +43,6 @@ def run(problem, salt):
 
         ptr += 1
 
-run(1, 'abc') | eq(22728)
-
 run(1, 'zpqevtbw') | debug('Star 1') | eq(16106)
-
-run(2, 'abc') | eq(22551)
 
 run(2, 'zpqevtbw') | debug('Star 2') | eq(22423)
