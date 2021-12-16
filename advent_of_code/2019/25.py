@@ -21,7 +21,7 @@ class Problem:
         self.ascii_output = ''
         self.ascii_input = [
             c
-            for c in (multiline_input("""
+            for c in textwrap.dedent(multiline_input("""
             south
             take space law space brochure
             south
@@ -50,7 +50,6 @@ class Problem:
             south
             west
             west
-            west
             drop space law space brochure
             drop mouse
             drop astrolabe
@@ -59,15 +58,17 @@ class Problem:
             drop monolith
             drop manifold
             drop wreath
-            """) + '\n')
+            """))
         ]
 
         self.item_combination = 0
 
     def get_input(self):
-        return self.get_auto_input()
+        self.load_auto_input()
 
-    def get_human_input(self):
+        return ord(self.ascii_input.pop(0))
+
+    def load_human_input(self):
         while not self.ascii_input:
             if self.ascii_output:
                 print(f'> {self.ascii_output}')
@@ -79,9 +80,7 @@ class Problem:
 
             self.ascii_input = [c for c in ascii_input]
 
-        return ord(self.ascii_input.pop(0))
-
-    def get_auto_input(self):
+    def load_auto_input(self):
         while not self.ascii_input:
             self.ascii_output = ''
 
@@ -100,8 +99,6 @@ class Problem:
             ascii_input += 'west\n'
 
             self.ascii_input = [c for c in ascii_input]
-
-        return ord(self.ascii_input.pop(0))
 
     def process_output(self, output):
         [code] = output

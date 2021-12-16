@@ -10,13 +10,8 @@ files=$(find * -type f | \
             sort)
 
 slow_tests+=('2016/11.py')
-
 slow_tests+=('2017/15.py')
 slow_tests+=('2017/24.py')
-
-slow_tests+=('2019/25.py')
-
-# No idea how to speed up the recursive gameplay
 slow_tests+=('2020/22.py')
 
 function epoch-seconds {
