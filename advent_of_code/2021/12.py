@@ -22,7 +22,7 @@ def run(problem, lines):
 
     extra_small_cave = None if problem == 2 else 'hi'
 
-    queue = [('start', small_caves, extra_small_cave)]
+    queue = [('start', set(), extra_small_cave)]
     paths = 0
     while queue:
         node, small_caves, extra_small_cave = queue.pop(0)
@@ -39,13 +39,12 @@ def run(problem, lines):
                 queue.append((next_node, small_caves, extra_small_cave))
                 continue
 
-            if next_node not in small_caves:
+            if next_node in small_caves:
                 if extra_small_cave is None:
                     queue.append((next_node, small_caves, next_node))
                 continue
 
-            next_small_caves = deepcopy(small_caves)
-            next_small_caves.pop(small_caves.index(next_node))
+            next_small_caves = small_caves | {next_node}
             queue.append((next_node, next_small_caves, extra_small_cave))
 
     return paths
