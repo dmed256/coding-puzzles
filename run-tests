@@ -16,6 +16,7 @@ slow_tests+=('2017/24.py')
 
 slow_tests+=('2019/25.py')
 
+# No idea how to speed up the recursive gameplay
 slow_tests+=('2020/22.py')
 
 slow_tests+=('2021/12.py')
