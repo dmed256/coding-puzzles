@@ -256,55 +256,6 @@ def zlist(N):
     return [0 for i in range(N)]
 
 
-#---[ Bisect ]--------------------------
-def bisect_left(iterable, value, key=None):
-    if key is None:
-        return bisect.bisect_left(iterable, value)
-
-    value = key(value)
-
-    start = 0
-    end = len(iterable)
-    while start < end:
-        mid = (start + end) // 2
-        if key(iterable[mid]) < value:
-            start = mid + 1
-        else:
-            end = mid
-
-    return start
-
-def bisect_right(iterable, value, key=None):
-    if key is None:
-        return bisect.bisect_right(iterable, value)
-
-    value = key(value)
-
-    start = 0
-    end = len(iterable)
-    while start < end:
-        mid = (start + end) // 2
-        if key(iterable[mid]) <= value:
-            start = mid + 1
-        else:
-            end = mid
-
-    return start
-
-def insort_left(iterable, value, key=None):
-    if key is None:
-        bisect.insort_left(iterable, value)
-
-    idx = bisect_left(iterable, value, key)
-    iterable.insert(idx, value)
-
-def insort_right(iterable, value, key=None):
-    if key is None:
-        bisect.insort_right(iterable, value)
-
-    idx = bisect_right(iterable, value, key)
-    iterable.insert(idx, value)
-
 #---[ Colors ]--------------------------
 def blue(value):
     return colored(value, 'blue')

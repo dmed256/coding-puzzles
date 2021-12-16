@@ -29,7 +29,7 @@ def run(problem, salt):
         if dupes5:
             for c_ptr, c in triples:
                 if c in dupes5 and c_ptr not in keys:
-                    insort(keys, c_ptr)
+                    bisect.insort(keys, c_ptr)
                     triple_matches[c_ptr] = ptr
 
         for i in range(len(h)):
