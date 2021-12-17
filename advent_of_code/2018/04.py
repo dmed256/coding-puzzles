@@ -2,35 +2,106 @@ from repo_utils import *
 
 input_lines = get_input_lines()
 
-def run(problem, lines):
-    guard_sleep = defaultdict(int)
-    max_guard_sleep = defaultdict(int)
+Timestamp = namedtuple(
+    'Timestamp',
+    ['year', 'month', 'day', 'hour', 'minute'],
+)
 
-    current_guard = None
-    sleep_start = None
-    sleep_end = None
+def calc_sleep_time(sleep_range):
+    start, end = sleep_range
+
+    return end.minute - start.minute
+
+def parse_logs(lines):
+    guard_sleep_ranges = defaultdict(list)
+
+    current_guard_id = None
     for line in sorted(lines):
         left, right = line[1:].lower().split('] ')
 
-        day, time = left.split()
+        date, time = left.split()
+
+        year, month, day = [int(x) for x in date.split('-')]
+        hour, minute = [int(x) for x in time.split(':')]
+        timestamp = Timestamp(year, month, day, hour, minute)
+
         info = right.split()
-
         if info[0] == 'guard':
-            current_guard = int(info[1][1:])
+            current_guard_id = int(info[1][1:])
         elif info[0] == 'falls':
-            sleep_start = (day, time)
+            guard_sleep_ranges[current_guard_id].append([timestamp])
         elif info[0] == 'wakes':
-            sleep_end = (day, time)
+            guard_sleep_ranges[current_guard_id][-1].append(timestamp)
 
-    return None
+    return guard_sleep_ranges
 
-# example1 = multiline_lines(r"""
-# """)
+def run(lines):
+    guard_sleep_ranges = parse_logs(lines)
 
-# run(1, example1) | eq()
+    ans = 0
+    max_sleep_time = 0
+    for guard_id, sleep_ranges in guard_sleep_ranges.items():
+        total_sleep_time = sum(
+            calc_sleep_time(sleep_range)
+            for sleep_range in sleep_ranges
+        )
+        if total_sleep_time <= max_sleep_time:
+            continue
 
-# run(1, input_lines) | submit(1)
+        max_sleep_time = total_sleep_time
 
-# run(2, example1) | eq()
+        minute_counter = Counter()
+        for start, end in sleep_ranges:
+            for minute in range(start.minute, end.minute):
+                minute_counter[minute] += 1
 
-# run(2, input_lines) | submit(2)
+        most_common_minute = minute_counter.most_common()[0][0]
+        ans = guard_id * most_common_minute
+
+    return ans
+
+def run2(lines):
+    guard_sleep_ranges = parse_logs(lines)
+
+    ans = 0
+    max_sleep_minutes = 0
+    for guard_id, sleep_ranges in guard_sleep_ranges.items():
+        minute_counter = Counter()
+        for start, end in sleep_ranges:
+            for minute in range(start.minute, end.minute):
+                minute_counter[minute] += 1
+
+        most_common_minute, counts = minute_counter.most_common()[0]
+        if max_sleep_minutes < counts:
+            ans = guard_id * most_common_minute
+            max_sleep_minutes = counts
+
+    return ans
+
+example1 = multiline_lines(r"""
+[1518-11-01 00:00] Guard #10 begins shift
+[1518-11-01 00:05] falls asleep
+[1518-11-01 00:25] wakes up
+[1518-11-01 00:30] falls asleep
+[1518-11-01 00:55] wakes up
+[1518-11-01 23:58] Guard #99 begins shift
+[1518-11-02 00:40] falls asleep
+[1518-11-02 00:50] wakes up
+[1518-11-03 00:05] Guard #10 begins shift
+[1518-11-03 00:24] falls asleep
+[1518-11-03 00:29] wakes up
+[1518-11-04 00:02] Guard #99 begins shift
+[1518-11-04 00:36] falls asleep
+[1518-11-04 00:46] wakes up
+[1518-11-05 00:03] Guard #99 begins shift
+[1518-11-05 00:45] falls asleep
+[1518-11-05 00:55] wakes up
+""")
+
+run(example1) | eq(240)
+
+run(input_lines) | debug('Star 1') | eq(103720)
+
+run2(example1) | eq(4455)
+
+run2(input_lines) | debug('Star 2') | eq(110913)
