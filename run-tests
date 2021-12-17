@@ -12,7 +12,6 @@ files=$(find * -type f | \
 slow_tests+=('2016/11.py')
 slow_tests+=('2017/15.py')
 slow_tests+=('2017/24.py')
-slow_tests+=('2020/22.py')
 
 function epoch-seconds {
     perl -MTime::HiRes=time -e 'printf "%.3f\n", time'
