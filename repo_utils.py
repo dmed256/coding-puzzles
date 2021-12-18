@@ -256,6 +256,9 @@ def invrange(a, b=None):
 def zlist(N):
     return [0 for i in range(N)]
 
+def heapify(lst):
+    heapq.heapify(lst)
+    return lst
 
 #---[ Colors ]--------------------------
 def blue(value):
