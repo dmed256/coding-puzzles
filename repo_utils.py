@@ -605,8 +605,11 @@ def add_tuples(a, b):
 def apply_direction(pos, direction):
     return add_tuples(pos, direction)
 
-def pos_distance(pos):
-    return abs(pos[0]) + abs(pos[1])
+def pos_distance(a, b):
+    return sum(
+        abs(ai + bi)
+        for ai, bi in zip(a, b)
+    )
 
 class Grid:
     def __init__(self, grid, *, default_value=None):

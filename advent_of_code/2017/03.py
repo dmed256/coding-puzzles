@@ -42,7 +42,7 @@ def find_pos(value, problem):
 def run(value, problem):
     if problem == 1:
         idx, pos = find_pos(value - 1, problem)
-        return pos_distance(pos)
+        return pos_distance(pos, (0, 0))
 
     idx, pos = find_pos(value - 1, problem)
     return idx

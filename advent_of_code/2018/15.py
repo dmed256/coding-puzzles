@@ -3,79 +3,98 @@ from repo_utils import *
 input_lines = get_input_lines()
 
 class Character(BaseModel):
-    y: int
     x: int
+    y: int
     type: str
     id: int = 0
     attack: int = 3
     health: int= 200
+
+    @property
+    def pos(self):
+        return (self.x, self.y)
+
+    def distance_to(self, other):
+        return (
+            abs(self.x - other.x)
+            + abs(self.y - other.y)
+        )
 
 enemy_type_map = {
     'G': 'E',
     'E': 'G',
 }
 
-READING_DIRECTIONS = [
-    GRID_UP,
-    GRID_LEFT,
-    GRID_RIGHT,
-    GRID_DOWN,
-]
-
-def find_target(grid, char, characters):
-    enemy_type = enemy_type_map[char.type]
-
-    queue = [(0, char.y, char.x)]
-    paths = {
-        (char.x, char.y): [],
+def find_target(grid, active_char, enemies):
+    enemy_positions = {
+        char.pos: char
+        for char in enemies
     }
-    # TODO: Check here
+
+    queue = [(0, active_char.y, active_char.x, None, None, None, None)]
+    visited = set()
+    target_info = None
     while queue:
-        steps, y, x = heapq.heappop(queue)
+        steps, y, x, _, _, next_step_y, next_step_x = heapq.heappop(queue)
         pos = (x, y)
 
-        for npos in grid.neighbors(pos, READING_DIRECTIONS):
-            if npos in paths:
-                continue
+        if pos in enemy_positions:
+            target_info = (
+                steps,
+                pos,
+                (next_step_x, next_step_y)
+            )
+            break
 
-            nx, ny = npos
+        for npos in grid.neighbors(pos):
+            if npos in visited:
+                continue
+            visited.add(npos)
+
             v = grid[npos]
+            nx, ny = npos
 
-            if v == '#':
+            if next_step_y is None:
+                next_step_x = nx
+                next_step_y = ny
+
+            if v in ['#', active_char.type]:
                 continue
 
-            path = paths[pos] + [npos]
+            heapq.heappush(
+                queue,
+                (
+                    steps + 1,
+                    ny,
+                    nx,
+                    y,
+                    x,
+                    next_step_y,
+                    next_step_x,
+                 )
+            )
 
-            if v == '.':
-                heapq.heappush(queue, (steps + 1, ny, nx))
-                paths[npos] = path
+    if not target_info:
+        return None, None
 
-            if v == enemy_type:
-                return path
+    _, target_pos, next_step_pos = target_info
 
-    return None
+    if next_step_pos == active_char.pos:
+        next_step_pos = None
 
+    target_char = enemy_positions[target_pos]
 
-def find_enemy(grid, char, char_positions):
-    pos = (char.x, char.y)
-
-    direct_enemies = sorted([
-        other
-        for npos in grid.neighbors(pos)
-        if (other := char_positions.get(npos))
-        and other.type != char.type
-    ], key=lambda other: (other.health, other.y, other.x))
-
-    return direct_enemies and direct_enemies[0]
-
+    return target_char, next_step_pos
 
 def run(problem, lines):
     grid = Grid(lines)
 
-    def print_state():
+    def print_state(full_rounds):
         grid.print()
         for char in characters:
-            print(1, char)
+            print(char)
+
+        print(f'Round: {full_rounds}')
 
     characters = [
         Character(
@@ -89,11 +108,6 @@ def run(problem, lines):
     for i, char in enumerate(characters):
         char.id = i
 
-    character_positions = {
-        (char.x, char.y): char
-        for char in characters
-    }
-
     for full_rounds in range(100000000):
         characters = sorted([
             char
@@ -105,144 +119,128 @@ def run(problem, lines):
             if active_char.health <= 0:
                 continue
 
-            has_enemies = any(
+            enemies = [
                 char
                 for char in characters
                 if char.type != active_char.type
-            )
+            ]
 
             # We finished the game!
-            if not has_enemies:
+            if not enemies:
+                print_state(full_rounds)
                 total_health = sum(
-                    max(0, char.health)
+                    char.health
                     for char in characters
                 )
                 return total_health * full_rounds
 
             # First find the target we're aiming for
-            other_characters = [
-                char
-                for char in characters
-                if char.id != active_char.id
-            ]
-            path = find_target(
+            target, next_step = find_target(
                 grid,
                 active_char,
-                other_characters,
+                enemies,
             )
 
             # No way to move or attack
-            if path is None:
+            if not target:
                 continue
 
             # Move towards a unit
-            if path[0] not in character_positions:
-                pos = path.pop(0)
-                char_pos = (active_char.x, active_char.y)
+            if 1 < active_char.distance_to(target):
+                grid[active_char.pos] = '.'
+                grid[next_step] = active_char.type
 
-                grid[char_pos] = '.'
-                grid[pos] = active_char.type
+                active_char.x = next_step[0]
+                active_char.y = next_step[1]
 
-                active_char.x = pos[0]
-                active_char.y = pos[1]
-
-                character_positions = {
-                    (char.x, char.y): char
-                    for char in characters
-                }
-
-            # Check if there's an enemy to attack
-            target = find_enemy(grid, active_char, character_positions)
-            if not target:
+            # Target isn't adjacent
+            if 1 < active_char.distance_to(target):
                 continue
 
             # Attack!
             target.health -= active_char.attack
-            if 0 < target.health:
-                continue
 
-            # Kill 'em!!!!
-            grid[(target.x, target.y)] = '.'
-            characters = [
-                char
-                for char in characters
-                if 0 < char.health
-            ]
-            character_positions = {
-                (char.x, char.y): char
-                for char in characters
-            }
+            # Target is dead
+            if target.health <= 0:
+                grid[target.pos] = '.'
+                characters = [
+                    char
+                    for char in characters
+                    if 0 < char.health
+                ]
 
 
-# example = multiline_lines(r"""
-# #######
-# #.G...#
-# #...EG#
-# #.#.#G#
-# #..G#E#
-# #.....#
-# #######
-# """)
-# run(1, example) | eq(27730)
+example = multiline_lines(r"""
+#######
+#.G...#
+#...EG#
+#.#.#G#
+#..G#E#
+#.....#
+#######
+""")
+#run(1, example) | eq(27730)
 
-# example = multiline_lines(r"""
-# #######
-# #G..#E#
-# #E#E.E#
-# #G.##.#
-# #...#E#
-# #...E.#
-# #######
-# """)
-# run(1, example) | eq(36334)
+example = multiline_lines(r"""
+#######
+#G..#E#
+#E#E.E#
+#G.##.#
+#...#E#
+#...E.#
+#######
+""")
+run(1, example) | eq(36334)
+raise 1
 
-# example = multiline_lines(r"""
-# #######
-# #E..EG#
-# #.#G.E#
-# #E.##E#
-# #G..#.#
-# #..E#.#
-# #######
-# """)
-# run(1, example) | eq(39514)
+example = multiline_lines(r"""
+#######
+#E..EG#
+#.#G.E#
+#E.##E#
+#G..#.#
+#..E#.#
+#######
+""")
+run(1, example) | eq(39514)
 
-# example = multiline_lines(r"""
-# #######
-# #E.G#.#
-# #.#G..#
-# #G.#.G#
-# #G..#.#
-# #...E.#
-# #######
-# """)
-# run(1, example) | eq(27755)
+example = multiline_lines(r"""
+#######
+#E.G#.#
+#.#G..#
+#G.#.G#
+#G..#.#
+#...E.#
+#######
+""")
+run(1, example) | eq(27755)
 
-# example = multiline_lines(r"""
-# #######
-# #.E...#
-# #.#..G#
-# #.###.#
-# #E#G#G#
-# #...#G#
-# #######
-# """)
-# run(1, example) | eq(28944)
+example = multiline_lines(r"""
+#######
+#.E...#
+#.#..G#
+#.###.#
+#E#G#G#
+#...#G#
+#######
+""")
+run(1, example) | eq(28944)
 
-# example = multiline_lines(r"""
-# #########
-# #G......#
-# #.E.#...#
-# #..##..G#
-# #...##..#
-# #...#...#
-# #.G...G.#
-# #.....G.#
-# #########
-# """)
-# run(1, example) | eq(18740)
+example = multiline_lines(r"""
+#########
+#G......#
+#.E.#...#
+#..##..G#
+#...##..#
+#...#...#
+#.G...G.#
+#.....G.#
+#########
+""")
+run(1, example) | eq(18740)
 
-# low: 23820
+# low:  23820
 # high: 198855
 # high: 198855
+# ???:  195372
 run(1, input_lines) | submit(1)
