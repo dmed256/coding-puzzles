@@ -670,6 +670,20 @@ class Grid:
         (x, y) = pos
         return 0 <= x < self.width and 0 <= y < self.height
 
+    def __max__(self):
+        return max(
+            x
+            for row in self.grid
+            for x in row
+        )
+
+    def __min__(self):
+        return min(
+            x
+            for row in self.grid
+            for x in row
+        )
+
     def count(self, value):
         return len([
             1
