@@ -2,11 +2,6 @@ from repo_utils import *
 
 input_lines = get_input_lines()
 
-Node = namedtuple('Node', [
-    'children',
-    'concat_values',
-])
-
 regex_directions = {
     'W': GRID_LEFT,
     'S': GRID_DOWN,
@@ -15,15 +10,14 @@ regex_directions = {
 }
 
 def parse_region(value, ptr):
-    children = ['']
-    concat_values = True
-
+    children = []
+    current_word = []
     while ptr < len(value):
         c = value[ptr]
 
         if c == '(':
             ptr, node = parse_region(value, ptr + 1)
-            children.append(node)
+            current_word.append(node)
             continue
 
         if c == ')':
@@ -31,12 +25,17 @@ def parse_region(value, ptr):
             break
 
         elif c == '|':
-            concat_values = False
-            children.append('')
+            children.append(current_word)
+            current_word = []
         else:
-            children[-1] += c
+            if not current_word or type(current_word[-1]) is not str:
+                current_word.append('')
+            current_word[-1] += c
 
         ptr += 1
+
+    if current_word:
+        children.append(current_word)
 
     children = [
         child
@@ -44,35 +43,29 @@ def parse_region(value, ptr):
         if child
     ]
 
-    return ptr, Node(
-        children=children,
-        concat_values=concat_values,
-    )
+    return ptr, children
 
 def traverse(node, depth, pos, points):
     positions = [pos]
     output = []
-    for child in node.children:
-        if type(child) is str:
-            next_positions = [
-                traverse_string(child, pos, points)
-                for pos in positions
-            ]
-        else:
-            next_positions = [
-                new_pos
-                for pos in positions
-                for new_pos in traverse(child, depth + 1, pos, points)
-            ]
+    for option in node:
+        for value in option:
+            if type(value) is str:
+                next_positions = [
+                    traverse_string(value, pos, points)
+                    for pos in positions
+                ]
+            else:
+                next_positions = [
+                    new_pos
+                    for pos in positions
+                    for new_pos in traverse(value, depth + 1, pos, points)
+                ]
 
-        if node.concat_values:
             positions = next_positions
-        else:
-            output.extend(next_positions)
-            positions = [pos]
 
-    if node.concat_values:
-        return positions
+        output.extend(next_positions)
+        positions = [pos]
 
     return output
 
@@ -82,11 +75,9 @@ def traverse_string(value, pos, points):
 
         pos = apply_direction(pos, direction)
         points.add(pos)
-        print(pos)
 
         pos = apply_direction(pos, direction)
         points.add(pos)
-        print(pos)
 
     return pos
 
@@ -111,11 +102,41 @@ def run(problem, lines):
 
     grid[start_pos] = 'X'
 
-    print(value)
-    print(tree)
-    grid.print()
+    queue = [(0, start_pos)]
+    room_doors = defaultdict(int)
+    visited = {start_pos}
+    while queue:
+        steps, pos = queue.pop()
 
-    return None
+        for npos in grid.neighbors(pos):
+            if npos in visited:
+                continue
+            visited.add(npos)
+
+            v = grid[npos]
+            if v == '#':
+                continue
+
+            npos_steps = steps + 1
+            queue.append((npos_steps, npos))
+
+            # Every odd step is a door
+            # Every even step is a room
+            if npos_steps % 2 == 0:
+                room_doors[npos] = npos_steps // 2
+
+    max_room_doors = max(room_doors.values())
+
+    far_rooms = len([
+        room
+        for room, doors in room_doors.items()
+        if 1000 <= doors
+    ])
+
+    if problem == 1:
+        return max_room_doors
+
+    return far_rooms
 
 example1 = multiline_lines(r"""
 ^WNE$
@@ -126,7 +147,6 @@ example2 = multiline_lines(r"""
 ^ENWWW(NEEE|SSE(EE|N))$
 """)
 run(1, example2) | eq(10)
-raise 1
 
 example3 = multiline_lines(r"""
 ^ENNWSWW(NEWS|)SSSEEN(WNSE|)EE(SWEN|)NNN$
@@ -143,8 +163,6 @@ example5 = multiline_lines(r"""
 """)
 run(1, example5) | eq(31)
 
-run(1, input_lines) | submit(1)
+run(1, input_lines) | debug('Star 1') | eq(3014)
 
-# run(2, example1) | eq()
-
-# run(2, input_lines) | submit(2)
+run(2, input_lines) | debug('Star 2') | eq(8279)
