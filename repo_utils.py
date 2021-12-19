@@ -608,7 +608,7 @@ def apply_direction(pos, direction):
 
 def pos_distance(a, b):
     return sum(
-        abs(ai + bi)
+        abs(ai - bi)
         for ai, bi in zip(a, b)
     )
 
