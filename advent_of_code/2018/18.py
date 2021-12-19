@@ -12,7 +12,7 @@ def run(problem, lines):
     def get_grid_key(grid):
         return ''.join(
             c
-            for row in grid.grid
+            for row in grid.rows
             for c in row
         )
 

@@ -620,11 +620,11 @@ class Grid:
             padding = [default_value] * (self.width - len(row))
             return [v for v in row] + padding
 
-        self.grid = [
+        self.rows = [
             build_row(row)
             for row in grid
         ]
-        self.height = len(self.grid)
+        self.height = len(self.rows)
 
     @staticmethod
     def from_points(points, *, set_value='#', unset_value='.'):
@@ -651,8 +651,15 @@ class Grid:
     def copy(self):
         return Grid([
             [c for c in row]
-            for row in self.grid
+            for row in self.rows
         ])
+
+    def get_counter(self):
+        return Counter((
+            value
+            for row in self.rows
+            for value in row
+        ))
 
     def replace(self, v1, v2):
         for pos, v in self:
@@ -661,17 +668,17 @@ class Grid:
 
     def __getitem__(self, pos):
         (x, y) = pos
-        return self.grid[y][x]
+        return self.rows[y][x]
 
     def __setitem__(self, pos, value):
         (x, y) = pos
-        self.grid[y][x] = value
+        self.rows[y][x] = value
         return value
 
     def __iter__(self):
         for y in range(self.height):
             for x in range(self.width):
-                yield (x, y), self.grid[y][x]
+                yield (x, y), self.rows[y][x]
 
     def __contains__(self, pos):
         (x, y) = pos
@@ -680,14 +687,14 @@ class Grid:
     def __max__(self):
         return max(
             x
-            for row in self.grid
+            for row in self.rows
             for x in row
         )
 
     def __min__(self):
         return min(
             x
-            for row in self.grid
+            for row in self.rows
             for x in row
         )
 
@@ -762,7 +769,7 @@ class Grid:
             output += padding + ' ' + x + '\n'
 
         output += padding[:-1] + '┌' + ('─' * (x_axis_length + 2)) + '┐\n'
-        for (y, row) in enumerate(self.grid):
+        for (y, row) in enumerate(self.rows):
             output += f'{y:>4} │ '
             output += padding_char.join([
                 str(v) for v in row
