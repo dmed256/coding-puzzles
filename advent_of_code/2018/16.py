@@ -1,49 +1,7 @@
 from repo_utils import *
+from utils import *
 
 input_lines = get_input_lines()
-
-def apply_instruction(ins, a, b, c, input_registers):
-    output_registers = list(input_registers)
-
-    ra = input_registers[a]
-    rb = input_registers[b]
-
-    if ins == 'addr':
-        output_registers[c] = ra + rb
-    elif ins == 'addi':
-        output_registers[c] = ra + b
-    elif ins == 'mulr':
-        output_registers[c] = ra * rb
-    elif ins == 'muli':
-        output_registers[c] = ra * b
-    elif ins == 'banr':
-        output_registers[c] = ra & rb
-    elif ins == 'bani':
-        output_registers[c] = ra & b
-    elif ins == 'borr':
-        output_registers[c] = ra | rb
-    elif ins == 'bori':
-        output_registers[c] = ra | b
-    elif ins == 'setr':
-        output_registers[c] = ra
-    elif ins == 'seti':
-        output_registers[c] = a
-    elif ins == 'gtir':
-        output_registers[c] = 1 if rb < a else 0
-    elif ins == 'gtri':
-        output_registers[c] = 1 if b < ra else 0
-    elif ins == 'gtrr':
-        output_registers[c] = 1 if rb < ra else 0
-    elif ins == 'eqir':
-        output_registers[c] = 1 if rb == a else 0
-    elif ins == 'eqri':
-        output_registers[c] = 1 if b == ra else 0
-    elif ins == 'eqrr':
-        output_registers[c] = 1 if rb == ra else 0
-    else:
-        raise 1
-
-    return tuple(output_registers)
 
 def run(problem, lines):
     reading_samples = True
@@ -114,7 +72,9 @@ def run(problem, lines):
             if opcode not in possible_opcodes:
                 continue
 
-            after = apply_instruction(ins, a, b, c, before)
+            after = tuple(
+                apply_instruction(ins, a, b, c, before)
+            )
             if after == expected_after:
                 valid_ins += 1
                 continue
@@ -136,7 +96,7 @@ def run(problem, lines):
                 del possibilities[ins]
                 continue
 
-    registers = (0, 0, 0, 0)
+    registers = [0, 0, 0, 0]
     for opcode, a, b, c in test_program:
         ins = opcode_map[opcode]
         registers = apply_instruction(ins, a, b, c, registers)
