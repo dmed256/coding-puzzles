@@ -82,14 +82,6 @@ def run(lines):
                     continue
                 cache.add((s1, s2))
 
-                # Only transform s2 if s1 is aligned with scanner 0
-                if s1 not in aligned:
-                    continue
-
-                # No need to re-align s2
-                if s2 in aligned:
-                    continue
-
                 scanner1 = scanners[s1]
                 scanner2 = scanners[s2]
 
