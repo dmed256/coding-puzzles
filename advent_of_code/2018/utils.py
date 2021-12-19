@@ -32,17 +32,17 @@ def apply_instruction(ins, a, b, c, input_registers):
     elif ins == 'seti':
         output_registers[c] = a
     elif ins == 'gtir':
-        output_registers[c] = 1 if rb < a else 0
+        output_registers[c] = 1 if a > rb else 0
     elif ins == 'gtri':
-        output_registers[c] = 1 if b < ra else 0
+        output_registers[c] = 1 if a > b else 0
     elif ins == 'gtrr':
-        output_registers[c] = 1 if rb < ra else 0
+        output_registers[c] = 1 if ra > rb else 0
     elif ins == 'eqir':
-        output_registers[c] = 1 if rb == a else 0
+        output_registers[c] = 1 if a == rb else 0
     elif ins == 'eqri':
-        output_registers[c] = 1 if b == ra else 0
+        output_registers[c] = 1 if ra == b else 0
     elif ins == 'eqrr':
-        output_registers[c] = 1 if rb == ra else 0
+        output_registers[c] = 1 if ra == rb else 0
     else:
         raise 1
 
