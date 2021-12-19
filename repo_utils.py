@@ -746,7 +746,7 @@ class Grid:
 
             return ' '
 
-        padding = '     '
+        padding = '      '
         x_axis = [
             padding_char.join([
                 f'{get_digit_value(x, digit)}'
@@ -762,7 +762,7 @@ class Grid:
 
         output += padding[:-1] + '┌' + ('─' * (x_axis_length + 2)) + '┐\n'
         for (y, row) in enumerate(self.grid):
-            output += f'{y:>3} │ '
+            output += f'{y:>4} │ '
             output += padding_char.join([
                 str(v) for v in row
             ])
