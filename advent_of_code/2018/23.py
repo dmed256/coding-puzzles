@@ -4,6 +4,57 @@ input_lines = get_input_lines()
 
 Nanobot = namedtuple('Nanobot', ['pos', 'r'])
 
+def get_largest_groups(nanobots):
+    links = defaultdict(set)
+    for ni1 in range(len(nanobots)):
+        n1 = nanobots[ni1]
+        for ni2 in range(len(nanobots)):
+            n2 = nanobots[ni2]
+            if pos_distance(n1.pos, n2.pos) <= n1.r + n2.r:
+                links[ni1].add(ni2)
+                links[ni2].add(ni1)
+
+    def get_group(p):
+        queue = [p]
+        group = {p}
+        seen = set()
+        while queue:
+            p1 = queue.pop()
+
+            if p1 in seen:
+                continue
+            seen.add(p1)
+
+            if group <= links[p1]:
+                group.add(p1)
+
+            queue += links[p1] - group
+
+        return group
+
+    max_groups = []
+    max_group_size = 0
+
+    visited = set()
+    for ni in range(len(nanobots)):
+        if ni in visited:
+            continue
+
+        group = get_group(ni)
+        visited |= group
+
+        if max_group_size < len(group):
+            max_groups = [group]
+            max_group_size = len(group)
+        elif max_group_size == len(group):
+            max_groups.append(group)
+
+    return max_groups
+
+def get_min_intersection(nanobots, group):
+    # TODO
+    pass
+
 def run(problem, lines):
     nanobots = []
     for line in lines:
@@ -21,16 +72,11 @@ def run(problem, lines):
             if pos_distance(largest_nanobot.pos, n2.pos) <= largest_nanobot.r
         ])
 
-    pass
-    # max_count = 0
-    # for n1 in nanobots:
-    #     max_count = max(max_count, len([
-    #         n2
-    #         for n2 in nanobots
-    #         if pos_distance(n1.pos, n2.pos) <= n1.r
-    #     ]))
+    return min(
+        get_min_intersection(nanobots, group)
+        for group in get_largest_groups(nanobots)
+    )
 
-    # return max_count
 
 example1 = multiline_lines(r"""
 pos=<0,0,0>, r=4
@@ -57,6 +103,6 @@ pos=<50,50,50>, r=200
 pos=<10,10,10>, r=5
 """)
 
-# run(2, example2) | eq(36)
+run(2, example2) | eq(36)
 
-# run(2, input_lines) | submit(2)
+run(2, input_lines) | submit(2)
