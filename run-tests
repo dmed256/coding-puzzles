@@ -33,6 +33,8 @@ YELLOW='\e[33m'
 python3 "2015/01.py" > /dev/null 2>&1
 
 failed_tests=()
+time_taken_outputs=()
+
 script_start_time=`epoch-seconds`
 for file in ${files}; do
     if [[ "${slow_tests[*]}" =~ "${file}" ]]; then
@@ -48,19 +50,32 @@ for file in ${files}; do
     end_time=`epoch-seconds`
 
     time_taken=$(time-taken "${start_time}" "${end_time}")
-    time_taken="(${YELLOW}Time taken: ${time_taken}s${NORM})"
+    time_taken_str="(${YELLOW}Time taken: ${time_taken}s${NORM})"
 
     if [[ "${status_code}" -ne 0 ]]; then
-        printf "${RED}FAILED${NORM} ${time_taken}\n"
+        printf "${RED}FAILED${NORM} ${time_taken_str}\n"
         failed_tests[${#failed_tests[@]}]="${file}"
     else
-        printf "${GREEN}PASSED${NORM} ${time_taken}\n"
+        time_taken_outputs[${#time_taken_outputs[@]}]="${file%.*}: ${time_taken}s"
+        printf "${GREEN}PASSED${NORM} ${time_taken_str}\n"
     fi
 done
 script_end_time=`epoch-seconds`
 time_taken=$(time-taken "${script_start_time}" "${script_end_time}")
 printf "\n${YELLOW}Total time taken: ${time_taken}s${NORM}\n\n"
 
+# Print slowest tests
+printf "${YELLOW}Slowest 10 tests${NORM}:\n"
+
+IFS=$'\n' sort -nrk6 <<< "${time_taken_outputs[*]}" | \
+    head -n 10 | \
+    awk '{ printf "- \033[0;34m" $1 " \033[0;33m" $2 "\n" }'
+
+unset IFS
+
+printf "\n\n"
+
+# Check if any tests failed
 if [[ "${#failed_tests[@]}" -eq 0 ]]; then
     exit 0
 fi
