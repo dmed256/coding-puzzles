@@ -52,7 +52,11 @@ def get_largest_groups(nanobots):
     return max_groups
 
 def get_min_intersection(nanobots, group):
-    # TODO
+    # ???
+    # Find x ranges
+    # Filter y ranges
+    # Filter z ranges
+    # Get min value
     pass
 
 def run(problem, lines):
@@ -105,4 +109,4 @@ pos=<10,10,10>, r=5
 
 run(2, example2) | eq(36)
 
-run(2, input_lines) | submit(2)
+run(2, input_lines) | debug('Star 2')

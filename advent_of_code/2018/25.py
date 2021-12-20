@@ -98,7 +98,3 @@ run(1, example3) | eq(3)
 run(1, example4) | eq(8)
 
 run(1, input_lines) | debug('Star 1') | eq(388)
-
-# run(2, example1) | eq()
-
-# run(2, input_lines) | submit(2)
