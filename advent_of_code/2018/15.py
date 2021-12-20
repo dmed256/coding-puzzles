@@ -2,6 +2,11 @@ from repo_utils import *
 
 input_lines = get_input_lines()
 
+DEBUG = False
+DEBUG_CHARACTERS = False
+DEBUG_ROUNDS = False
+MANUAL_SKIP = False
+
 class Character(BaseModel):
     pos: Any
     type: str
@@ -9,72 +14,185 @@ class Character(BaseModel):
     attack: int = 3
     health: int = 200
 
+    @property
+    def is_dead(self):
+        return self.health <= 0
+
 enemy_type_map = {
     'G': 'E',
     'E': 'G',
 }
 
+def print_skip(grid, characters, active_char):
+    if not DEBUG:
+        return
 
-def move_to_target(grid, active_char, enemies):
+    grid = grid.copy()
+    grid[active_char.pos] = yellow('?')
+
+    grid.print()
+
+    if DEBUG_CHARACTERS:
+        print('Char:')
+        print(active_char)
+
+        print('\nOthers:')
+        for char in characters:
+            if char.id != active_char.id:
+                print(char)
+
+    print('\n')
+    if MANUAL_SKIP:
+        input()
+
+def print_move(grid, characters, active_char, next_pos):
+    if not DEBUG:
+        return
+
+    grid = grid.copy()
+    grid[active_char.pos] = yellow(grid[active_char.pos])
+    grid[next_pos] = red('@')
+
+    grid.print()
+
+    if DEBUG_CHARACTERS:
+        print('Char:')
+        print(active_char)
+
+        print('\nOthers:')
+        for char in characters:
+            if char.id != active_char.id:
+                print(char)
+
+    print('\n')
+    if MANUAL_SKIP:
+        input()
+
+
+def print_attack(grid, characters, active_char, target):
+    if not DEBUG:
+        return
+
+    grid = grid.copy()
+    grid[active_char.pos] = yellow(grid[active_char.pos])
+    grid[target.pos] = red(grid[target.pos])
+
+    grid.print()
+
+    if DEBUG_CHARACTERS:
+        print('Char:')
+        print(active_char)
+
+        print('Target:')
+        print(target)
+
+        print('\nOthers:')
+        for char in characters:
+            if char.id not in [active_char.id, target.id]:
+                print(char)
+
+    print('\n')
+    if MANUAL_SKIP:
+        input()
+
+
+def find_attacking_spot(grid, active_char, characters):
+    enemy_type = enemy_type_map[active_char.type]
+
     x, y = active_char.pos
+    queue = [(0, y, x)]
+    distances = {}
 
-    queue = [(0, y, x, [])]
-    visited = set()
-    attacking_spots = []
+    attacking_spot = None
+    attacking_spot_distance = None
     while queue:
-        steps, y, x, path = heapq.heappop(queue)
+        steps, y, x = heapq.heappop(queue)
         pos = (x, y)
 
-        if pos in visited:
+        cached_dist = distances.get(pos)
+        if cached_dist and cached_dist <= steps:
             continue
-        visited.add(pos)
+        distances[pos] = steps
 
-        if attacking_spots and attacking_spots[0][0] < steps:
+        if attacking_spot_distance and attacking_spot_distance <= steps:
             break
 
-        # Check if there are enemies around
-        neighbors = [
-            npos
-            for npos in grid.neighbors(pos)
-        ]
-        if any(npos in enemies for npos in neighbors):
-            heapq.heappush(
-                attacking_spots,
-                (steps, pos[1], pos[0], path),
-            )
-            continue
-
-        for npos in neighbors:
+        # If no enemies are around, check next steps
+        for npos in grid.neighbors(pos):
             v = grid[npos]
+
+            if v == '.':
+                heapq.heappush(queue, (steps + 1, npos[1], npos[0]))
+                continue
+
             if v in ['#', active_char.type]:
                 continue
 
-            heapq.heappush(
-                queue,
-                (steps + 1, npos[1], npos[0], path + [npos]),
-            )
+            if v == enemy_type:
+                attacking_spot = safe_min(attacking_spot, (y, x))
+                attacking_spot_distance = steps
 
-    # Nothing to do
-    if not attacking_spots:
+    if attacking_spot:
+        y, x = attacking_spot
+        return (x, y)
+
+    return None
+
+
+def move_to_target(grid, active_char, characters):
+    attacking_spot = find_attacking_spot(grid, active_char, characters)
+    if attacking_spot is None:
         return
 
-    print(active_char)
-    print(attacking_spots)
-    min_steps = attacking_spots[0][0]
-    next_stops = {
-        path[0]
-        for steps, _, _, path in attacking_spots
-        if steps == min_steps
-    }
+    def heuristic(steps, pos):
+        return steps + pos_distance(pos, attacking_spot)
 
-    _, _, next_pos = sorted([
-        (pos[1], pos[0], pos)
-        for pos in next_stops
-    ])[0]
+    next_steps = []
+    for next_step in grid.neighbors(active_char.pos):
+        if grid[next_step] != '.':
+            continue
+
+        queue = [
+            (heuristic(0, next_step), 0, next_step[1], next_step[0])
+        ]
+        distances = {}
+        min_steps = None
+        while queue:
+            h, steps, y, x = heapq.heappop(queue)
+            pos = (x, y)
+
+            cached_dist = distances.get(pos)
+            if cached_dist and cached_dist <= steps:
+                continue
+            distances[pos] = steps
+
+            if pos == attacking_spot:
+                min_steps = safe_min(min_steps, steps)
+
+            if min_steps and min_steps <= h:
+                break
+
+            for npos in grid.neighbors(pos):
+                if grid[npos] == '.':
+                    heapq.heappush(
+                        queue,
+                        (heuristic(steps, npos), steps + 1, npos[1], npos[0])
+                    )
+
+        if min_steps is not None:
+            heapq.heappush(
+                next_steps,
+                (min_steps, next_step[1], next_step[0], next_step),
+            )
+
+    next_step = heapq.heappop(next_steps)[3]
+
+    print_move(grid, characters, active_char, next_step)
 
     grid[active_char.pos] = '.'
-    active_char.pos = next_pos
+    active_char.pos = next_step
     grid[active_char.pos] = active_char.type
+
 
 def parse_lines(lines):
     grid = Grid(lines)
@@ -104,15 +222,17 @@ def play_round(grid, characters):
                 for npos in grid.neighbors(char.pos)
                 if npos in enemies
             ],
-            key=lambda char: char.health,
+            key=lambda char: (char.health, char.pos[1], char.pos[0]),
             default=None,
         )
 
     def attack_target(active_char, target):
+        print_attack(grid, characters, active_char, target)
+
         target.health -= active_char.attack
         target.health = max(0, target.health)
 
-        if 0 < target.health:
+        if not target.is_dead:
             return
 
         grid[target.pos] = '.'
@@ -123,8 +243,14 @@ def play_round(grid, characters):
         ][0]
         characters.pop(target_idx)
 
+    def key_positions():
+        return tuple([
+            char.pos
+            for char in sorted(characters, key=lambda char: char.id)
+        ])
+
     for active_char in sorted(characters, key=turn_order_key):
-        if active_char.health <= 0:
+        if active_char.is_dead:
             continue
 
         enemies = {
@@ -140,7 +266,7 @@ def play_round(grid, characters):
             attack_target(active_char, target)
             continue
 
-        move_to_target(grid, active_char, enemies)
+        move_to_target(grid, active_char, characters)
 
         target = find_adjacent_target(active_char, enemies)
         if target is not None:
@@ -149,25 +275,31 @@ def play_round(grid, characters):
     return False
 
 
-def run(problem, lines):
-    raise 1
-    grid, characters = parse_lines(lines)
-    full_rounds = 0
+def run_game(grid, characters, attack_boost):
+    grid = grid.copy()
+    characters = [
+        char.copy()
+        for char in characters
+    ]
 
-    def print_state():
-        grid.print()
-        for char in characters:
-            print(char)
-
-        print(f'Round: {full_rounds}')
-        input()
+    elves = [
+        char
+        for char in characters
+        if char.type == 'E'
+    ]
+    for elf in elves:
+        elf.attack += attack_boost
 
     for full_rounds in range(100000000):
+        if DEBUG_ROUNDS:
+            print(f'Round: {full_rounds}')
+
         finished = play_round(grid, characters)
+        if attack_boost and any(elf.is_dead for elf in elves):
+            return None
+
         if finished:
             break
-
-        print_state()
 
     total_health = sum(
         char.health
@@ -175,19 +307,18 @@ def run(problem, lines):
     )
     return full_rounds * total_health
 
+def run(problem, lines):
+    grid, characters = parse_lines(lines)
 
-example = multiline_lines(r"""
-#######
-#.G...#
-#...EG#
-#.#.#G#
-#..G#E#
-#.....#
-#######
-""")
-# run(1, example) | eq(27730)
+    if problem == 1:
+        return run_game(grid, characters, attack_boost=0)
 
-example = multiline_lines(r"""
+    for attack_boost in range(1, 100000):
+        outcome = run_game(grid, characters, attack_boost=attack_boost)
+        if outcome is not None:
+            return outcome
+
+example1 = multiline_lines(r"""
 #######
 #G..#E#
 #E#E.E#
@@ -196,10 +327,18 @@ example = multiline_lines(r"""
 #...E.#
 #######
 """)
-run(1, example) | eq(36334)
-raise 1
 
-example = multiline_lines(r"""
+example2 = multiline_lines(r"""
+#######
+#.G...#
+#...EG#
+#.#.#G#
+#..G#E#
+#.....#
+#######
+""")
+
+example3 = multiline_lines(r"""
 #######
 #E..EG#
 #.#G.E#
@@ -208,9 +347,8 @@ example = multiline_lines(r"""
 #..E#.#
 #######
 """)
-run(1, example) | eq(39514)
 
-example = multiline_lines(r"""
+example4 = multiline_lines(r"""
 #######
 #E.G#.#
 #.#G..#
@@ -219,9 +357,8 @@ example = multiline_lines(r"""
 #...E.#
 #######
 """)
-run(1, example) | eq(27755)
 
-example = multiline_lines(r"""
+example5 = multiline_lines(r"""
 #######
 #.E...#
 #.#..G#
@@ -230,9 +367,8 @@ example = multiline_lines(r"""
 #...#G#
 #######
 """)
-run(1, example) | eq(28944)
 
-example = multiline_lines(r"""
+example6 = multiline_lines(r"""
 #########
 #G......#
 #.E.#...#
@@ -243,10 +379,20 @@ example = multiline_lines(r"""
 #.....G.#
 #########
 """)
-run(1, example) | eq(18740)
 
-# low:  23820
-# high: 198855
-# high: 198855
-# ???:  195372
-run(1, input_lines) | submit(1)
+run(1, example1) | eq(36334)
+run(1, example2) | eq(27730)
+run(1, example3) | eq(39514)
+run(1, example4) | eq(27755)
+run(1, example5) | eq(28944)
+run(1, example6) | eq(18740)
+
+run(1, input_lines) | debug('Star 1') | eq(198531)
+
+run(2, example2) | eq(4988)
+run(2, example3) | eq(31284)
+run(2, example4) | eq(3478)
+run(2, example5) | eq(6474)
+run(2, example6) | eq(1140)
+
+run(2, input_lines) | debug('Star 2') | eq(90420)
