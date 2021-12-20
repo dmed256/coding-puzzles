@@ -19,7 +19,6 @@ import sympy
 import sys
 import textwrap
 import traceback
-import typing
 import webbrowser
 from bs4 import BeautifulSoup
 from collections import defaultdict, deque, namedtuple, Counter
@@ -28,6 +27,7 @@ from datetime import datetime
 from enum import Enum
 from pydantic import BaseModel
 from termcolor import colored
+from typing import Any
 
 
 PROCESSES = 8
