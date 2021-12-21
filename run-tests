@@ -31,7 +31,7 @@ YELLOW='\e[33m'
 python3 "2015/01.py" > /dev/null 2>&1
 
 failed_tests=()
-time_taken_outputs=()
+time_taken_outputs=''
 
 script_start_time=`epoch-seconds`
 for file in ${files}; do
@@ -54,7 +54,7 @@ for file in ${files}; do
         printf "${RED}FAILED${NORM} ${time_taken_str}\n"
         failed_tests[${#failed_tests[@]}]="${file}"
     else
-        time_taken_outputs[${#time_taken_outputs[@]}]="${file%.*}: ${time_taken}s"
+        time_taken_outputs+="${file%.*}: ${time_taken}s"
         printf "${GREEN}PASSED${NORM} ${time_taken_str}\n"
     fi
 done
@@ -66,11 +66,10 @@ printf "\n${YELLOW}Total time taken: ${time_taken}s${NORM}\n\n"
 SLOWEST_TESTS=30
 printf "${YELLOW}Slowest ${SLOWEST_TESTS} tests${NORM}:\n"
 
-IFS=$'\n' sort -nrk2 <<< "${time_taken_outputs[*]}" | \
+echo -e ${time_taken_outputs} | \
+    sort -nrk2 | \
     head -n "${SLOWEST_TESTS}" | \
     awk '{ printf "- \033[0;34m" $1 " \033[0;33m" $2 "\n" }'
-
-unset IFS
 
 printf "\n\n"
 
