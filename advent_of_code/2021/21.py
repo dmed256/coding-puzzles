@@ -1,76 +1,69 @@
 from repo_utils import *
 
 def run1(p1, p2):
-    p1 -= 1
-    p2 -= 1
+    players = [p1 - 1, p2 - 1]
+    scores = [0, 0]
 
+    turn = 0
     dice = 1
-    p1_score = 0
-    p2_score = 0
     while True:
         move = (3 * dice) + 3
-        p1 = (p1 + move) % 10
-        p1_score += p1 + 1
+        players[turn] = (players[turn] + move) % 10
+        scores[turn] += players[turn] + 1
         dice += 3
-        if p1_score >= 1000:
+
+        if scores[turn] >= 1000:
             break
 
-        move = (3 * dice) + 3
-        p2 = (p2 + move) % 10
-        p2_score += p2 + 1
-        dice += 3
-        if p2_score >= 1000:
-            break
+        turn = (turn + 1) % 2
 
-    return min([p1_score, p2_score]) * (dice - 1)
+    return min(scores) * (dice - 1)
 
 @functools.cache
-def roll(p1, p2, player_turn, rolls_left, roll_amt, p1_score, p2_score):
+def roll(players, scores, turn, rolls):
     w1 = 0
     w2 = 0
-    if rolls_left:
-        for d in range(1, 4):
+    if len(rolls) < 3:
+        for new_roll in range(1, 4):
+            new_rolls = tuple(list(rolls) + [new_roll])
             w1_, w2_ = roll(
-                p1,
-                p2,
-                player_turn,
-                rolls_left - 1,
-                roll_amt + d,
-                p1_score,
-                p2_score,
+                players,
+                scores,
+                turn,
+                new_rolls,
             )
             w1 += w1_
             w2 += w2_
+
         return w1, w2
 
-    if player_turn == 0:
-        p1 = (p1 + roll_amt) % 10
-        p1_score += p1 + 1
-        if 21 <= p1_score:
-            w1 += 1
-            return w1, w2
-    else:
-        p2 = (p2 + roll_amt) % 10
-        p2_score += p2 + 1
-        if 21 <= p2_score:
-            w2 += 1
-            return w1, w2
+    players = list(players)
+    scores = list(scores)
+
+    wins = [w1, w2]
+    players[turn] = (players[turn] + sum(rolls)) % 10
+    scores[turn] += players[turn] + 1
+    if 21 <= scores[turn]:
+        wins[turn] += 1
+        return wins[0], wins[1]
 
     w1_, w2_ = roll(
-        p1,
-        p2,
-        (player_turn + 1) % 2,
-        3,
-        0,
-        p1_score,
-        p2_score,
+        tuple(players),
+        tuple(scores),
+        (turn + 1) % 2,
+        tuple(),
     )
     w1 += w1_
     w2 += w2_
     return w1, w2
 
 def run2(p1, p2):
-    return max(roll(p1 - 1, p2 - 1, 0, 3, 0, 0, 0))
+    return max(roll(
+        (p1 - 1, p2 - 1),
+        (0, 0),
+        0,
+        tuple(),
+    ))
 
 run1(4, 8) | eq(739785)
 
