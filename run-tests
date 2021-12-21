@@ -10,8 +10,6 @@ files=$(find * -type f | \
             sort)
 
 slow_tests+=('2016/11.py')
-slow_tests+=('2017/15.py')
-slow_tests+=('2018/14.py')
 
 function epoch-seconds {
     perl -MTime::HiRes=time -e 'printf "%.3f\n", time'
@@ -65,10 +63,11 @@ time_taken=$(time-taken "${script_start_time}" "${script_end_time}")
 printf "\n${YELLOW}Total time taken: ${time_taken}s${NORM}\n\n"
 
 # Print slowest tests
-printf "${YELLOW}Slowest 10 tests${NORM}:\n"
+SLOWEST_TESTS=30
+printf "${YELLOW}Slowest ${SLOWEST_TESTS} tests${NORM}:\n"
 
-IFS=$'\n' sort -nrk6 <<< "${time_taken_outputs[*]}" | \
-    head -n 10 | \
+IFS=$'\n' sort -nrk2 <<< "${time_taken_outputs[*]}" | \
+    head -n "${SLOWEST_TESTS}" | \
     awk '{ printf "- \033[0;34m" $1 " \033[0;33m" $2 "\n" }'
 
 unset IFS
