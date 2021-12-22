@@ -38,11 +38,12 @@ def apply_algo(lights, algo, iteration):
 
     lights2 = set()
     for pos in positions:
-        value = ''.join([
-            '1' if (npos in lights) == on_value else '0'
-            for npos in neighbors(pos)
-        ])
-        if algo[int(value, 2)] == on_value2:
+        value = 0
+        for i, npos in enumerate(neighbors(pos)):
+            if (npos in lights) == on_value:
+                value += 1 << (8 - i)
+
+        if algo[value] == on_value2:
             lights2.add(pos)
 
     return lights2
