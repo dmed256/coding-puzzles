@@ -1,6 +1,6 @@
 from repo_utils import *
 
-open_chars = 'bcdef'
+open_chars = set('bcdef')
 
 def run(problem, start_value):
     grid = Grid([
@@ -8,11 +8,11 @@ def run(problem, start_value):
         for r in range(4)
     ])
 
-    queue = [(start_value, (0, 0))]
+    queue = deque([(start_value, (0, 0))])
     last_path = ''
 
     while queue:
-        value, pos = queue.pop(0)
+        value, pos = queue.popleft()
 
         up, down, left, right = md5(value)[:4]
 
