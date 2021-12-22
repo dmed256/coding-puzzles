@@ -10,6 +10,7 @@ files=$(find * -type f | \
             sort)
 
 # Tons of md5 hashes
+slow_tests+=('2015/04.py')
 slow_tests+=('2016/05.py')
 slow_tests+=('2016/14.py')
 
