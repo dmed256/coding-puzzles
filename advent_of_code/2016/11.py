@@ -1,110 +1,119 @@
 from repo_utils import *
 
+MICROCHIP = 1
+GENERATOR = 2
+
+
+def get_microchip_materials(items):
+    return {
+        material
+        for material, item_type in items
+        if item_type == MICROCHIP
+    }
+
+
+def get_generator_materials(items):
+    return {
+        material
+        for material, item_type in items
+        if item_type == GENERATOR
+    }
+
+
+def get_next_floors(floors, pos, next_pos):
+    items = floors[pos]
+
+    possible_next_floors = []
+    for item_taken_count in [1, 2]:
+        for items_taken in itertools.combinations(items, item_taken_count):
+            items_taken = set(items_taken)
+
+            pos_items = floors[pos] - items_taken
+            if not is_valid(pos_items):
+                continue
+
+            next_pos_items = floors[next_pos] | items_taken
+            if not is_valid(next_pos_items):
+                continue
+
+            next_floors = deepcopy(floors)
+            next_floors[pos] = pos_items
+            next_floors[next_pos] = next_pos_items
+
+            possible_next_floors.append(next_floors)
+
+    return possible_next_floors
+
+
+def is_valid(items):
+    generators = get_generator_materials(items)
+    if not generators:
+        return True
+
+    microchips = get_microchip_materials(items)
+    return microchips & generators == microchips
+
+
 def run(floors):
-    materials = {
+    materials = list({
         material
         for floor_items in floors
         for material, _ in floor_items
-    }
-    material_bitmap = {
-        material: 1 << (2 * i)
-        for i, material in enumerate(materials)
-    }
+    })
 
-    item_count = len([
-        item
+    floors = [
+        {
+            (
+                materials.index(material),
+                GENERATOR if item_type == 'generator' else MICROCHIP
+            )
+            for material, item_type in floor_items
+        }
         for floor_items in floors
-        for item in floor_items
-    ])
+    ]
 
-    items_mask = 0
-    for i in range(item_count):
-        items_mask += 1 << 2*i
+    def build_queue_entry(stops, pos, floors):
+        # Min moves:
+        # - Go back and forth between left-over floors
+        # - Remove 1 trip for the current floor
+        lower_bound = sum([
+            2 * floor * math.ceil(len(floor_items) / 2)
+            for floor, floor_items in enumerate(reversed(floors))
+        ]) - pos
 
-    # Bits: 01111000
-    #   - 01 -> Has (M1, 'microchip')
-    #   - 11 -> Has (M2, 'generator') + (M2, 'generator')
-    #   - 10 -> Has (M3, 'generator')
-    #   - 00 -> Doesn't have M4
-    for i, floor_items in enumerate(floors):
-        value = 0
-        for material, item_type in floor_items:
-            material_bit = material_bitmap[material]
-            if item_type == 'microchip':
-                value += material_bit
-            else:
-                value += material_bit << 1
+        return (
+            lower_bound + stops,
+            stops,
+            pos,
+            floors,
+        )
 
-        floors[i] = value
+    # If combinations are valid, we only care about the
+    # number of microchips and generators per floor
+    #
+    # Materials are interchangeable
+    def build_cache_key(pos, floors):
+        floors_key = tuple([
+            (
+                len(get_microchip_materials(floor_items)),
+                len(get_generator_materials(floor_items)),
+            )
+            for floor_items in floors
+        ])
+        return (pos, floors_key)
 
-    def print_floors(pos, floors):
-        for floor in [3, 2, 1, 0]:
-            items = floors[floor]
-            E = 'E' if floor == pos else ' '
-
-            floor += 1
-            named_items = []
-            for material, bit in material_bitmap.items():
-                if items & bit:
-                    named_items.append(f'{material} microchip')
-                elif items & (bit << 1):
-                    named_items.append(f'{material} generator')
-
-                item_type = (
-                    'generator'
-                    if items & (bit << 1)
-                    else 'microchip'
-                )
-
-            print(f'F{floor}', E, named_items)
-        print()
-
-    def get_floors_key(pos, floors):
-        return (pos, tuple(floors))
-
-    def is_valid(items):
-        generators = (items >> 1) & items_mask
-        if not generators:
-            return True
-
-        microchips = items & items_mask
-        return microchips & generators == microchips
-
-    def get_next_floors(floors, pos, next_pos):
-        items = [
-            item
-            for i in range(2 * item_count)
-            if (item := floors[pos] & (1 << i))
-        ]
-
-        possibles = []
-        for item_taken_count in [1, 2]:
-            for items_taken in itertools.combinations(items, item_taken_count):
-                items_taken = sum(items_taken)
-
-                pos_items = floors[pos] - items_taken
-                next_pos_items = floors[next_pos] + items_taken
-                if not is_valid(pos_items) or not is_valid(next_pos_items):
-                    continue
-
-                next_floors = list(floors)
-                next_floors[pos] = pos_items
-                next_floors[next_pos] = next_pos_items
-
-                possibles.append(next_floors)
-
-        return possibles
-
-    queue = [(0, floors, 0)]
-    cache = set(get_floors_key(0, floors))
+    queue = [build_queue_entry(0, 0, floors)]
+    cache = set(build_cache_key(0, floors))
+    min_stops = None
     while queue:
-        pos, floors, stops = queue.pop(0)
+        h, stops, pos, floors = heapq.heappop(queue)
+
+        if min_stops and min_stops <= h:
+            break
 
         if pos == 3 and not any(floors[:-1]):
-            return stops
-
-        # if not len(cache) % 100000:
-        #     print(stops, len(cache))
+            min_stops = safe_min(min_stops, stops)
+            continue
 
         next_stops = stops + 1
         for next_pos in [pos - 1, pos + 1]:
@@ -112,17 +121,17 @@ def run(floors):
                 continue
 
             for next_floors in get_next_floors(floors, pos, next_pos):
-                key = get_floors_key(next_pos, next_floors)
+                key = build_cache_key(next_pos, next_floors)
                 if key in cache:
                     continue
-
-                if not sum(floors[:next_pos+1]) and sum(floors[:next_pos+1]):
-                    continue
-
-                queue.append((next_pos, next_floors, next_stops))
                 cache.add(key)
 
-    return None
+                heapq.heappush(
+                    queue,
+                    build_queue_entry(next_stops, next_pos, next_floors),
+                )
+
+    return min_stops
 
 example_floors = [
     {('hydrogen', 'microchip'), ('lithium', 'microchip')},
