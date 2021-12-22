@@ -25,7 +25,7 @@ def run(problem, lines):
     queue = [('start', set(), extra_small_cave)]
     paths = 0
     while queue:
-        node, small_caves, extra_small_cave = queue.pop(0)
+        node, small_caves, extra_small_cave = queue.pop()
 
         for next_node in connections[node]:
             if next_node == 'start':
