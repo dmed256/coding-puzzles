@@ -19,7 +19,7 @@ def get_max_bits(values, bit):
 def run(lines):
     bits = len(lines[0])
     values = [
-        from_binary(line)
+        int(line, 2)
         for line in lines
     ]
     gamma = 0

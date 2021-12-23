@@ -698,6 +698,12 @@ class Grid:
             for x in row
         )
 
+    def __str__(self):
+        return '\n'.join([
+            ''.join(str(v) for v in row)
+            for row in self.rows
+        ])
+
     def count(self, value):
         return len([
             1
@@ -831,13 +837,6 @@ def to_binary(num):
             break
 
     return value[::-1]
-
-def from_binary(s):
-    value = 0
-    for i, bit in enumerate(s[::-1]):
-        if bit == '1':
-            value += 1 << i
-    return value
 
 def int_or(v, default):
     try:
