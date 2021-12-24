@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 #
 # Usage:
-#     ../get-global-leaderboard [USER]
+#     ../get-global-leaderboard YEAR [USER]
 #
 # Should download and cache the appropriate year daily leaderboard and aggregate it
+import argparse
 import random
 import requests
 import time
@@ -17,10 +18,9 @@ from typing import List
 PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
 LEADERBOARD_CACHE_DIR = os.path.join(PROJ_DIR, '.cache/leaderboard')
 
-YEAR = os.path.basename(
-    os.path.abspath(os.getcwd())
-)
-CACHE_DIR = os.path.join(LEADERBOARD_CACHE_DIR, YEAR)
+
+def get_cache_dir(year):
+    return os.path.join(LEADERBOARD_CACHE_DIR, str(year))
 
 
 class Ranking(BaseModel):
@@ -77,21 +77,21 @@ def parse_leaderboard_days(html):
     ])
 
 
-def get_leaderboard_days():
+def get_leaderboard_days(year):
     # Check if the year is over by pulling our day 1 cache
-    html = request_daily_leaderboard(1)
+    html = request_daily_leaderboard(year, 1)
     if parse_leaderboard_days(html) == 25:
         return 25
 
-    url = f'https://adventofcode.com/{YEAR}/leaderboard'
+    url = f'https://adventofcode.com/{year}/leaderboard'
     req = requests.get(url)
 
     return parse_leaderboard_days(req.text)
 
 
-def request_daily_leaderboard(day):
-    url = f'https://adventofcode.com/{YEAR}/leaderboard/day/{day}'
-    filename = f'{CACHE_DIR}/{day}.html'
+def request_daily_leaderboard(year, day):
+    url = f'https://adventofcode.com/{year}/leaderboard/day/{day}'
+    filename = f'{get_cache_dir(year)}/{day}.html'
 
     if os.path.exists(filename):
         with open(filename, 'r') as fd:
@@ -158,21 +158,21 @@ def parse_daily_leaderboard(day, html):
     )
 
 
-def get_daily_leaderboard(day):
-    html = request_daily_leaderboard(day)
+def get_daily_leaderboard(year, day):
+    html = request_daily_leaderboard(year, day)
     return parse_daily_leaderboard(day, html)
 
 
-def get_leaderboards():
-    days = get_leaderboard_days()
+def get_leaderboards(year):
+    days = get_leaderboard_days(year)
     return [
-        get_daily_leaderboard(day + 1)
+        get_daily_leaderboard(year, day + 1)
         for day in range(days)
     ]
 
 
-def get_global_rankings():
-    leaderboards = get_leaderboards()
+def get_global_rankings(year):
+    leaderboards = get_leaderboards(year)
 
     user_points = defaultdict(int)
     for leaderboard in leaderboards:
@@ -190,8 +190,8 @@ def get_global_rankings():
     ]
 
 
-def print_global_leaderboard():
-    global_rankings = get_global_rankings()
+def print_global_leaderboard(year):
+    global_rankings = get_global_rankings(year)
 
     print('\nGlobal leaderboard:\n')
 
@@ -211,18 +211,17 @@ def print_global_leaderboard():
         prev_points = points
 
 
-def print_user_ranking(username):
-    global_rankings = get_global_rankings()
+def print_user_ranking(year, find_username):
+    global_rankings = get_global_rankings(year)
 
     _, _, max_top_100_points = global_rankings[0]
     _, _, min_top_100_points = global_rankings[99]
 
     print(f'Top 100: [{min_top_100_points}, {max_top_100_points}]')
 
-    user = sys.argv[1]
     in_leaderboard = False
     for ranking, username, points in global_rankings:
-        if user == username:
+        if username == find_username:
             in_leaderboard = True
             print(f'  Ranking: {ranking}')
             print(f'  Points : {points}')
@@ -233,7 +232,23 @@ def print_user_ranking(username):
 
 
 if '__main__' == __name__:
-    if len(sys.argv) < 2:
-        print_global_leaderboard()
+    parser = argparse.ArgumentParser(
+        description='Find global leaderboard information'
+    )
+
+    parser.add_argument('year',
+                        metavar='YEAR',
+                        type=int,
+                        help='Leaderboard year')
+
+    parser.add_argument('--user',
+                        metavar='USER',
+                        required=False,
+                        help='If set, find the specific user ranking')
+
+    args = parser.parse_args()
+
+    if args.user:
+        print_user_ranking(args.year, args.user)
     else:
-        print_user_ranking(sys.argv[1])
+        print_global_leaderboard(args.year)
