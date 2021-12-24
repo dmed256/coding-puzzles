@@ -28,7 +28,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --requirement requirements.txt
 
-      - name: "Run tests"
+      - name: "Advent of Code"
         run: |
           export PYTHONPATH="$PWD"
+          cd advent_of_code
           ./run-tests

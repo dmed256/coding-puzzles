@@ -1,0 +1,229 @@
+#!/usr/bin/env python3
+import os
+import subprocess
+import sys
+from collections import namedtuple
+from itertools import groupby
+from datetime import datetime
+from termcolor import colored
+
+SLOW_TEST_LOG_COUNT = 30
+
+slow_tests = [
+    # Tons of md5 hashes
+    (2015, 4),
+    (2016, 5),
+    (2016, 14),
+    # Haven't investigated yet
+    (2016, 18),
+    # Haven't investigated yet
+    (2017, 15),
+    # Haven't investigated yet
+    (2018, 14),
+    # Haven't investigated yet
+    (2019, 18),
+    # Each iteration is too slow, need to think of how to
+    # either process the next moves faster or create the
+    # priority queue in a smarter way
+    (2021, 23),
+    # I had to use C++ to run this quick enough :(
+    (2021, 24),
+]
+
+
+#---[ Constants ]-----------------------
+class TimeTaken:
+    def __init__(self, minutes=0, seconds=0):
+        self.minutes = minutes
+        self.seconds = seconds
+
+    def __str__(self):
+        if self.minutes and self.seconds < 10:
+            seconds_taken = f'0{self.seconds:.3f}'
+        else:
+            seconds_taken = f'{self.seconds:.3f}'
+
+        if self.minutes:
+            return f'{self.minutes}m{seconds_taken}s'
+        else:
+            return f'{seconds_taken}s'
+
+    def __lt__(self, other):
+        s1 = (self.minutes * 60) + self.seconds
+        s2 = (other.minutes * 60) + other.seconds
+        return s1 < s2
+
+    def __add__(self, other):
+        total_seconds = (
+            (self.minutes * 60)
+            + self.seconds
+            + (other.minutes * 60)
+            + other.seconds
+        )
+
+        return TimeTaken(
+            minutes=(total_seconds // 60),
+            seconds=(total_seconds % 60),
+        )
+
+
+class TestLog:
+    def __init__(self, filename, time_taken, passed, output):
+        self.filename = filename
+        self.time_taken = time_taken
+        self.passed = passed
+        self.output = output
+
+    def __lt__(self, other):
+        return self.time_taken < other.time_taken
+
+    def __add__(self, other):
+        return self.time_taken + other.time_taken
+
+
+#---[ Colors ]--------------------------
+def blue(value):
+    return colored(value, 'blue')
+
+def green(value):
+    return colored(value, 'green')
+
+def purple(value):
+    return colored(value, 'magenta')
+
+def red(value):
+    return colored(value, 'red')
+
+def yellow(value):
+    return colored(value, 'yellow')
+
+
+#---[ Timing ]--------------------------
+timestamps = []
+
+def tic():
+    timestamps.append(datetime.now())
+
+def toc(header=''):
+    end = datetime.now()
+    start = timestamps.pop()
+
+    time_taken = (end - start).total_seconds()
+    return TimeTaken(
+        minutes=(int(time_taken) // 60),
+        seconds=(time_taken % 60)
+    )
+
+
+#---[ Test Runner ]---------------------
+def run_test(year, day):
+    filename = f'{year}/{day:02d}.py'
+
+    print(f'''Testing  {blue(filename)}: ''', end='')
+
+    tic()
+    res = subprocess.run(
+        ['python3', filename],
+        capture_output=True,
+    )
+    time_taken = toc()
+
+    passed = (res.returncode == 0)
+    if passed:
+        status = green('PASSED')
+    else:
+        status = red('FAILED')
+
+    time_taken_str = f'(Time taken: {time_taken})'
+    print(f'''{status} {yellow(time_taken_str)}''')
+
+    return TestLog(
+        filename=filename,
+        time_taken=time_taken,
+        passed=passed,
+        output=res.stdout,
+    )
+
+
+def run_tests():
+    aoc_dir = os.path.abspath(
+        os.path.dirname(__file__)
+    )
+
+    tests = []
+    for root, dirs, files in os.walk(aoc_dir):
+        year = os.path.basename(root)
+        if not year.isdigit():
+            continue
+
+        for filename in files:
+            if not filename.endswith('.py'):
+                continue
+
+            day = os.path.splitext(filename)[0]
+            if day.isdigit():
+                tests.append((int(year), int(day)))
+
+    logs = []
+    total_time_taken = TimeTaken()
+
+    def print_header(content, color='magenta'):
+        header = f'#---[ {content} ]'
+        header += '-' * (50 - len(header))
+        print(colored(header, color))
+
+    def print_footer(color='magenta'):
+        print(colored('#' + ('=' * 49) + '\n', color))
+
+    prev_year = None
+    for year, tests in groupby(sorted(tests), lambda test: test[0]):
+        print_header(year)
+
+        for _, day in tests:
+            if (year, day) in slow_tests:
+                print(red(f'Skipping {year}/{day:02d}.py'))
+                continue
+
+            log = run_test(year, day)
+            total_time_taken += log.time_taken
+
+            logs.append(log)
+
+        print_footer()
+
+    print(yellow(f'Total time taken: {total_time_taken}'))
+
+    slowest_test_logs = sorted(
+        logs,
+        key=lambda log: log.time_taken,
+        reverse=True,
+    )[:SLOW_TEST_LOG_COUNT]
+
+    print(yellow(f'\nSlowest {len(slowest_test_logs)} tests:'))
+    for idx, log in enumerate(slowest_test_logs):
+        print(f'''{idx + 1}) {blue(log.filename)}: {yellow(str(log.time_taken))}''')
+
+
+    failed_test_logs = [
+        test
+        for test in logs
+        if not test.passed
+    ]
+    if not failed_test_logs:
+        return 0
+
+    print(red(f'\nFailed tests: {len(failed_test_logs)}'))
+    for log in failed_test_logs:
+        print(red(f'- {log.filename}'))
+
+    print()
+    for log in failed_test_logs:
+        print_header(log.filename, color='red')
+        print(log.output.decode('utf-8'))
+        print_footer(color='red')
+
+    return 1
+
+
+if __name__ == '__main__':
+    sys.exit(run_tests())
