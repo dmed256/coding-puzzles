@@ -106,9 +106,9 @@ def run(floors):
     cache = set(build_cache_key(0, floors))
     min_stops = None
     while queue:
-        h, stops, pos, floors = heapq.heappop(queue)
+        _, stops, pos, floors = heapq.heappop(queue)
 
-        if min_stops and min_stops <= h:
+        if min_stops and min_stops <= stops:
             break
 
         if pos == 3 and not any(floors[:-1]):
