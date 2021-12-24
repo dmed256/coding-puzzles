@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+#
+# Usage:
+#     .run-tests LANGUAGE
+#
+# Run tests for the given language
+import argparse
 import os
 import subprocess
 import sys
@@ -7,31 +13,58 @@ from itertools import groupby
 from datetime import datetime
 from termcolor import colored
 
-SLOW_TEST_LOG_COUNT = 30
-
-slow_tests = [
-    # Tons of md5 hashes
-    (2015, 4),
-    (2016, 5),
-    (2016, 14),
-    # Haven't investigated yet
-    (2016, 18),
-    # Haven't investigated yet
-    (2017, 15),
-    # Haven't investigated yet
-    (2018, 14),
-    # Haven't investigated yet
-    (2019, 18),
-    # Each iteration is too slow, need to think of how to
-    # either process the next moves faster or create the
-    # priority queue in a smarter way
-    (2021, 23),
-    # I had to use C++ to run this quick enough :(
-    (2021, 24),
-]
-
 
 #---[ Constants ]-----------------------
+SLOW_TEST_LOG_COUNT = 30
+
+skip_tests = {
+    'python': [
+        # Tons of md5 hashes
+        (2015, 4),
+        (2016, 5),
+        (2016, 14),
+        # Haven't investigated yet
+        (2016, 18),
+        # Haven't investigated yet
+        (2017, 15),
+        # Haven't investigated yet
+        (2018, 14),
+        # Haven't investigated yet
+        (2019, 18),
+        # Each iteration is too slow, need to think of how to
+        # either process the next moves faster or create the
+        # priority queue in a smarter way
+        (2021, 23),
+        # I had to use C++ to run this quick enough :(
+        (2021, 24),
+    ]
+}
+
+implemented_languages = [
+    'python',
+]
+
+language_info = {
+    'python': (
+        ['python3'],
+        'py',
+    ),
+    'c++': (
+        ['clang++', '-O3', '-std=c++20'],
+        'cpp',
+    ),
+    'rust': (
+        ['rustc'],
+        'rs',
+    ),
+    'go': (
+        ['go'],
+        'go',
+    ),
+}
+
+
+#---[ Helper Types ]--------------------
 class TimeTaken:
     def __init__(self, minutes=0, seconds=0):
         self.minutes = int(minutes)
@@ -101,8 +134,10 @@ def yellow(value):
 #---[ Timing ]--------------------------
 timestamps = []
 
+
 def tic():
     timestamps.append(datetime.now())
+
 
 def toc(header=''):
     end = datetime.now()
@@ -116,14 +151,25 @@ def toc(header=''):
 
 
 #---[ Test Runner ]---------------------
-def run_test(year, day):
-    filename = f'{year}/{day:02d}.py'
+def print_header(content, color='magenta', width=50):
+    header = f'#---[ {content} ]'
+    header += '-' * (width - len(header))
+    print(colored(header, color))
+
+
+def print_footer(color='magenta', width=50):
+    print(colored('#' + ('=' * (width - 1)) + '\n', color))
+
+
+def run_test(language, year, day):
+    command, ext = language_info[language]
+    filename = f'{language}/{year}/{day:02d}.{ext}'
 
     print(f'''Testing  {blue(filename)}: ''', end='')
 
     tic()
     res = subprocess.run(
-        ['python3', filename],
+        [*command, filename],
         capture_output=True,
     )
     time_taken = toc()
@@ -145,7 +191,7 @@ def run_test(year, day):
     )
 
 
-def run_tests():
+def run_tests(language):
     aoc_dir = os.path.abspath(
         os.path.dirname(__file__)
     )
@@ -167,24 +213,16 @@ def run_tests():
     logs = []
     total_time_taken = TimeTaken()
 
-    def print_header(content, color='magenta'):
-        header = f'#---[ {content} ]'
-        header += '-' * (50 - len(header))
-        print(colored(header, color))
-
-    def print_footer(color='magenta'):
-        print(colored('#' + ('=' * 49) + '\n', color))
-
     prev_year = None
     for year, tests in groupby(sorted(tests), lambda test: test[0]):
         print_header(year)
 
         for _, day in tests:
-            if (year, day) in slow_tests:
+            if (year, day) in skip_tests.get(language, []):
                 print(red(f'Skipping {year}/{day:02d}.py'))
                 continue
 
-            log = run_test(year, day)
+            log = run_test(language, year, day)
             total_time_taken += log.time_taken
 
             logs.append(log)
@@ -210,7 +248,7 @@ def run_tests():
         if not test.passed
     ]
     if not failed_test_logs:
-        return 0
+        return True
 
     print(red(f'\nFailed tests: {len(failed_test_logs)}'))
     for log in failed_test_logs:
@@ -222,8 +260,21 @@ def run_tests():
         print(log.output.decode('utf-8'))
         print_footer(color='red')
 
-    return 1
+    return False
 
 
 if __name__ == '__main__':
-    sys.exit(run_tests())
+    parser = argparse.ArgumentParser(
+        description='Run test suite for a given language'
+    )
+
+    parser.add_argument('language',
+                        metavar='LANGUAGE',
+                        choices=implemented_languages,
+                        help='Run the test suite for the given language')
+
+    args = parser.parse_args()
+
+    successful = run_tests(args.language)
+    if not successful:
+        sys.exit(1)
