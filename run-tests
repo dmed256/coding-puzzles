@@ -19,6 +19,9 @@ slow_tests+=('2016/14.py')
 # priority queue in a smarter way
 slow_tests+=('2021/23.py')
 
+# I had to use C++ to run this quick enough :(
+slow_tests+=('2021/24.py')
+
 function epoch-seconds {
     perl -MTime::HiRes=time -e 'printf "%.3f\n", time'
 }
