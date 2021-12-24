@@ -55,7 +55,7 @@ run(input_lines) | debug('Star 1') | eq(4147524)
 def run2(lines):
     bits = len(lines[0])
     original_values = [
-        from_binary(line)
+        int(line, 2)
         for line in lines
     ]
 

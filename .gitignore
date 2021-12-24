@@ -6,6 +6,7 @@
 __pycache__
 *.npy
 *.py.lprof
+a.out
 
 # Debug
 .DS_Store
