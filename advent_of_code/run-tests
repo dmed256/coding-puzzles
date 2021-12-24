@@ -34,7 +34,7 @@ slow_tests = [
 #---[ Constants ]-----------------------
 class TimeTaken:
     def __init__(self, minutes=0, seconds=0):
-        self.minutes = minutes
+        self.minutes = int(minutes)
         self.seconds = seconds
 
     def __str__(self):
@@ -201,7 +201,7 @@ def run_tests():
 
     print(yellow(f'\nSlowest {len(slowest_test_logs)} tests:'))
     for idx, log in enumerate(slowest_test_logs):
-        print(f'''{idx + 1}) {blue(log.filename)}: {yellow(str(log.time_taken))}''')
+        print(f'''{idx + 1:>2}) {blue(log.filename)}: {yellow(str(log.time_taken))}''')
 
 
     failed_test_logs = [
