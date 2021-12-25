@@ -1,12 +1,3 @@
-// multiline_lines
-// multiline_input
-//
-// safe_min
-// safe_max
-// heaps
-//
-// counter
-//
 // grid
 // - From iter<iter<X>>
 // - From (x, y) points
@@ -22,14 +13,3 @@
 // tuples
 // - Add tuples
 // - Manhattan distance between tuples
-//
-// md5
-// sum()
-// mult()
-// get_primes()
-// get_primes_before()
-// inverse_mod()
-
-pub fn hello() {
-    println!("hi")
-}

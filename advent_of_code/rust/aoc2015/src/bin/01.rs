@@ -1,4 +1,10 @@
+use utils::*;
+
 fn main() {
-    utils::hello();
-    println!("2015.01 here!");
+    let x: i32 = 3;
+
+    x.should_be(&3);
+    x.should_be(&4);
+
+    x.debug("Star 1").should_be(&3);
 }
