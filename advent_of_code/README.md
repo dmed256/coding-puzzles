@@ -57,3 +57,14 @@ I wanted to make sure I didn't break previous solutions while refactoring the `r
 ```
 
 Currently only `python` is supported, but `rust` coming soon I hope!
+
+# Leaderboard
+
+## 2021
+
+2021 was my first year "competing", and I ended up with `467` points at ranking `128` (so close!)
+
+I managed to finish most problems the night/dawn of the problem except for `23`, that one stumped me that night 😞
+
+<img src="https://user-images.githubusercontent.com/1812355/147386886-cf457537-ef14-4415-9d19-5fb530c6298f.png" width="400px"></img>
+
