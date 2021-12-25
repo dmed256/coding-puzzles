@@ -62,7 +62,8 @@ Currently only `python` is supported, but `rust` coming soon I hope!
 
 ## 2021
 
-2021 was my first year "competing", and I ended up with `467` points at ranking `128` (so close!)
+This was my first year doing Advent of Code when the problems were being released. 
+It ended with with `467` points at a ranking of `128` (so close!)
 
 I managed to finish most problems the night/dawn of the problem except for `23`, that one stumped me that night 😞
 
