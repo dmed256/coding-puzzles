@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# Usage:
+#    ./run YEAR DAY
+#
+
+if [[ $# -ne 2 ]]; then
+    echo "Missing arguments:"
+    echo "./run YEAR DAY"
+    exit 1
+fi
+
+year=$1
+day=$(echo $2 | awk '{printf "%02d\n", $0;}')
+
+echo cargo run --release -p "aoc${year}" --bin "${day}"
+cargo run --release -p "aoc${year}" --bin "${day}"
