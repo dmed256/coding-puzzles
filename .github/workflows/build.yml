@@ -12,6 +12,7 @@ jobs:
     runs-on: "ubuntu-latest"
 
     env:
+      CXX: g++-11
       PYTHONPATH:
 
     steps:
@@ -22,6 +23,11 @@ jobs:
       - uses: "actions-rs/toolchain@v1"
         with:
             toolchain: "1.57.0"
+
+      - name: "[C++] Install dependencies"
+        run: |
+         sudo apt update
+         sudo apt install gcc-11 g++-11
 
       - name: "[Python] Install dependencies"
         run: |

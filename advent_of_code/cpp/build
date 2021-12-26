@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# Usage:
+#    ./build YEAR DAY
+#
+CPP_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+cd "${CPP_DIR}"
+
+if [[ $# -ne 2 ]]; then
+    echo "Missing arguments:"
+    echo "./build YEAR DAY"
+    exit 1
+fi
+
+year=$1
+day=$(echo $2 | awk '{printf "%02d\n", $0;}')
+
+echo ${CXX-g++} -O3 -std=c++17 "${year}/${day}.cpp" -o "${year}/${day}"
+${CXX-g++} -O3 -std=c++17 "${year}/${day}.cpp" -o "${year}/${day}"
