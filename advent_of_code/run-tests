@@ -42,25 +42,14 @@ skip_tests = {
 
 implemented_languages = [
     'python',
+    'rust',
 ]
 
-language_info = {
-    'python': (
-        ['python3'],
-        'py',
-    ),
-    'c++': (
-        ['clang++', '-O3', '-std=c++20'],
-        'cpp',
-    ),
-    'rust': (
-        ['rustc'],
-        'rs',
-    ),
-    'go': (
-        ['go'],
-        'go',
-    ),
+language_extensions = {
+    'python': 'py',
+    'c++': 'cpp',
+    'rust': 'rs',
+    'go': 'go',
 }
 
 
@@ -161,15 +150,57 @@ def print_footer(color='magenta', width=50):
     print(colored('#' + ('=' * (width - 1)) + '\n', color))
 
 
+def build_test(language, year, day, filename):
+    build_script = f'{language}/build'
+    if not os.path.exists(build_script):
+        return None
+
+    print(f'''Building {blue(filename)}: ''', end='')
+    res = subprocess.run(
+        [build_script, str(year), str(day)],
+        capture_output=True,
+    )
+    if res.returncode == 0:
+        print(f'''Building {blue(filename)}: ''', end='')
+        return None
+
+    return TestLog(
+        filename=filename,
+        time_taken=None,
+        passed=False,
+        output=res.stdout,
+    )
+
+
 def run_test(language, year, day):
-    command, ext = language_info[language]
+    ext = language_extensions[language]
     filename = f'{language}/{year}/{day:02d}.{ext}'
 
-    print(f'''Testing  {blue(filename)}: ''', end='')
+    build_script = f'{language}/build'
+    run_script   = f'{language}/run'
+
+    if os.path.exists(build_script):
+        error_log = run_command(
+            'Compiling',
+            [build_script, year, day],
+            filename
+        )
+        if not error_log.passed:
+            return error_log
+
+    return run_command(
+        'Testing',
+        [run_script, year, day],
+        filename
+    )
+
+
+def run_command(command_type, command, filename):
+    print(f'''{command_type:<10} {blue(filename)}: ''', end='')
 
     tic()
     res = subprocess.run(
-        [*command, filename],
+        [str(arg) for arg in command],
         capture_output=True,
     )
     time_taken = toc()
@@ -192,18 +223,33 @@ def run_test(language, year, day):
 
 
 def run_tests(language):
+    ext = language_extensions[language]
     aoc_dir = os.path.abspath(
         os.path.dirname(__file__)
     )
 
+    first_year = 2015
+    current_year = datetime.now().year
+    year_directories = {
+        dirname: year
+        for year in range(first_year, current_year + 1)
+        for dirname in [str(year), f'aoc{year}']
+    }
+
     tests = []
     for root, dirs, files in os.walk(aoc_dir):
-        year = os.path.basename(root)
-        if not year.isdigit():
+        found_years = [
+            year
+            for part in root.split('/')
+            if (year := year_directories.get(part))
+        ]
+        if not found_years:
             continue
 
+        year = found_years[0]
+
         for filename in files:
-            if not filename.endswith('.py'):
+            if not filename.endswith(ext):
                 continue
 
             day = os.path.splitext(filename)[0]
@@ -219,7 +265,7 @@ def run_tests(language):
 
         for _, day in tests:
             if (year, day) in skip_tests.get(language, []):
-                print(red(f'Skipping {year}/{day:02d}.py'))
+                print(red(f'''{'Skipping':<10} {year}/{day:02d}.py'''))
                 continue
 
             log = run_test(language, year, day)

@@ -1,19 +1,19 @@
 #!/bin/bash
 #
 # Usage:
-#    ./run YEAR DAY
+#    ./build YEAR DAY
 #
 RUST_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 cd "${RUST_DIR}"
 
 if [[ $# -ne 2 ]]; then
     echo "Missing arguments:"
-    echo "./run YEAR DAY"
+    echo "./build YEAR DAY"
     exit 1
 fi
 
 year=$1
 day=$(echo $2 | awk '{printf "%02d\n", $0;}')
 
-echo cargo run --release -p "aoc${year}" --bin "${day}"
-cargo run --release -p "aoc${year}" --bin "${day}"
+echo cargo build --release -p "aoc${year}" --bin "${day}"
+cargo build --release -p "aoc${year}" --bin "${day}"
