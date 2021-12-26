@@ -103,7 +103,9 @@ def run(floors):
         return (pos, floors_key)
 
     queue = [build_queue_entry(0, 0, floors)]
-    cache = set(build_cache_key(0, floors))
+    cached_stops = {
+        build_cache_key(0, floors): 0,
+    }
     min_stops = None
     while queue:
         _, stops, pos, floors = heapq.heappop(queue)
@@ -122,9 +124,10 @@ def run(floors):
 
             for next_floors in get_next_floors(floors, pos, next_pos):
                 key = build_cache_key(next_pos, next_floors)
-                if key in cache:
+                key_stops = cached_stops.get(key, 1e100)
+                if key_stops <= next_stops:
                     continue
-                cache.add(key)
+                cached_stops[key] = next_stops
 
                 heapq.heappush(
                     queue,
