@@ -120,25 +120,6 @@ def yellow(value):
     return colored(value, 'yellow')
 
 
-#---[ Timing ]--------------------------
-timestamps = []
-
-
-def tic():
-    timestamps.append(datetime.now())
-
-
-def toc(header=''):
-    end = datetime.now()
-    start = timestamps.pop()
-
-    time_taken = (end - start).total_seconds()
-    return TimeTaken(
-        minutes=(int(time_taken) // 60),
-        seconds=(time_taken % 60)
-    )
-
-
 #---[ Test Runner ]---------------------
 def print_header(content, color='magenta', width=50):
     header = f'#---[ {content} ]'
@@ -198,12 +179,18 @@ def run_test(language, year, day):
 def run_command(command_type, command, filename):
     print(f'''{command_type:<10} {blue(filename)}: ''', end='')
 
-    tic()
+    start = datetime.now()
     res = subprocess.run(
         [str(arg) for arg in command],
         capture_output=True,
     )
-    time_taken = toc()
+    end = datetime.now()
+
+    time_taken = (end - start).total_seconds()
+    time_taken = TimeTaken(
+        minutes=(int(time_taken) // 60),
+        seconds=(time_taken % 60)
+    )
 
     passed = (res.returncode == 0)
     if passed:
