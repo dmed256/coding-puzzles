@@ -23,7 +23,7 @@ jobs:
         with:
             toolchain: "1.57.0"
 
-      - name: "Install dependencies"
+      - name: "[Python] Install dependencies"
         run: |
           set -xe
           python -VV
@@ -31,13 +31,13 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --requirement requirements.txt
 
+      - name: "Advent of Code [Rust]"
+        run: |
+          cd advent_of_code
+          ./run-tests rust
+
       - name: "Advent of Code [Python]"
         run: |
           export PYTHONPATH="$PWD"
           cd advent_of_code
           ./run-tests python
-
-      - name: "Advent of Code [Rust]"
-        run: |
-          cd advent_of_code
-          ./run-tests rust
