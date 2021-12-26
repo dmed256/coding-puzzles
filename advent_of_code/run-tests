@@ -43,11 +43,12 @@ skip_tests = {
 implemented_languages = [
     'python',
     'rust',
+    'cpp',
 ]
 
 language_extensions = {
     'python': 'py',
-    'c++': 'cpp',
+    'cpp': 'cpp',
     'rust': 'rs',
     'go': 'go',
 }

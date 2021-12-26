@@ -5,15 +5,15 @@ I've loved the fun and challenging puzzles found in [Advent of Code](https://adv
 I use Python for trying to "compete" for the leaderboard, although I haven't been too successful yet 😅, but getting there!
 
 I'll be adding other languages to pick them up, currently thinking of:
-1. Rust
-2. Go
-3. C++
+1. C++
+2. Rust
+3. Go
 
 ## Scripts
 
 ### Extended global leaderboard
 
-Since I couldn't make the top 100 leaderboard, I was curious which position I was at. I made a script that will sleep, fetch, and cache daily leaderboards. 
+Since I couldn't make the top 100 leaderboard, I was curious which position I was at. I made a script that will sleep, fetch, and cache daily leaderboards.
 This way I could aggregate and find what position I was in
 
 ```sh
@@ -56,16 +56,13 @@ I wanted to make sure I didn't break previous solutions while refactoring the `r
 ./run-tests python
 ```
 
-Currently only `python` is supported, but `rust` coming soon I hope!
-
 # Leaderboard
 
 ## 2021
 
-This was my first year doing Advent of Code when the problems were being released. 
+This was my first year doing Advent of Code when the problems were being released.
 It ended with with `467` points at a ranking of `128` (so close!)
 
 I managed to finish most problems the night/dawn of the problem except for `23`, that one stumped me that night 😞
 
 <img src="https://user-images.githubusercontent.com/1812355/147386886-cf457537-ef14-4415-9d19-5fb530c6298f.png" width="400px"></img>
-
