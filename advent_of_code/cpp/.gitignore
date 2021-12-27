@@ -1,4 +1,4 @@
-# Ignore everything bug cpp files
+# Ignore everything but cpp and input files
 */*
 !*/*.*
 !*/*_input
