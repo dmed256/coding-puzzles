@@ -30,13 +30,56 @@ vector<T>& makeUnique(vector<T> &vec) {
 
 //---[ Main ]-------------------------------------
 void solve_test() {
+  int n;
+  vector<i64> p;
+  string s;
+
+  cin >> n;
+
+  for (int i = 0; i < n; ++i) {
+    i64 pi;
+    cin >> pi;
+    p.emplace_back(pi);
+  }
+
+  cin >> s;
+
+  vector<i64> liked;
+  vector<i64> disliked;
+  for (int i = 0; i < n; ++i) {
+    if (s[i] == '1') {
+      liked.emplace_back(p[i]);
+    } else {
+      disliked.emplace_back(p[i]);
+    }
+  }
+  sort(all(liked));
+  sort(all(disliked));
+
+  for (int i = 0; i < n; ++i) {
+    i64 pi = p[i];
+
+    if (s[i] == '1') {
+      i64 liked_idx = 1 + distance(liked.begin(), lower_bound(all(liked), pi));
+      i64 qi = n - sz(liked) + liked_idx;
+      cout << qi;
+    } else {
+      i64 disliked_idx = 1 + distance(disliked.begin(), lower_bound(all(disliked), pi));
+      i64 qi = disliked_idx;
+      cout << qi;
+    }
+    if (i < (n - 1)) {
+      cout << ' ';
+    }
+  }
+  cout << '\n';
 }
 
 int main() {
   ios_base::sync_with_stdio(false);
   cin.tie(0);
 
-  int T;
+  i32 T;
   cin >> T;
 
   for (int t = 0; t < T; ++t) {

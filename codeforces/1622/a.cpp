@@ -30,13 +30,26 @@ vector<T>& makeUnique(vector<T> &vec) {
 
 //---[ Main ]-------------------------------------
 void solve_test() {
+  i64 a, b, c;
+  cin >> a >> b >> c;
+
+  if ((a + b == c) ||
+      (a + c == b) ||
+      (b + c == a) ||
+      (a == b && !(c % 2)) ||
+      (a == c && !(b % 2)) ||
+      (b == c && !(a % 2))) {
+    cout << "YES\n";
+  } else {
+    cout << "NO\n";
+  }
 }
 
 int main() {
   ios_base::sync_with_stdio(false);
   cin.tie(0);
 
-  int T;
+  i32 T;
   cin >> T;
 
   for (int t = 0; t < T; ++t) {
