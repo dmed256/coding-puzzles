@@ -1,3 +1,4 @@
 # Ignore everything bug cpp files
 */*
 !*/*.*
+!*/*_input
