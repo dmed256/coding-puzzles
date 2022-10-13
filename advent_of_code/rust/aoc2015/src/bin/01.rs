@@ -23,15 +23,15 @@ fn main() {
 (())
 ");
 
-    run(1, &example1).should_be(&0);
-    run(1, &input_lines).debug("Star 1").should_be(&138);
+    run(1, &example1).should_be(0);
+    run(1, &input_lines).debug("Star 1").should_be(138);
 
     let example2 = multiline_lines("
 ()())
 ");
 
-    run(2, &example2).should_be(&5);
-    run(2, &input_lines).debug("Star 2").should_be(&1771);
+    run(2, &example2).should_be(5);
+    run(2, &input_lines).debug("Star 2").should_be(1771);
 
     aoc_exit();
 }

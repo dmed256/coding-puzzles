@@ -14,64 +14,64 @@ use std::process::{Command, Stdio};
 static mut TESTS_FAILED: i32 = 0;
 
 pub trait Answer {
-    fn should_be(&self, ans: &Self) -> &Self;
-    fn debug(&self, header: &str) -> &Self;
-    fn clipboard(&self) -> &Self;
+    fn should_be(self, ans: Self) -> Self;
+    fn debug<H: Into<String>>(self, header: H) -> Self;
+    fn clipboard(self) -> Self;
 }
 
 impl Answer for i32 {
-    fn should_be(&self, ans: &i32) -> &i32 {
-        run_should_be(&self, &ans);
+    fn should_be(self, ans: i32) -> i32 {
+        run_should_be(self, ans);
         self
     }
 
-    fn debug(&self, header: &str) -> &i32 {
-        run_debug(&self, &header);
+    fn debug<H: Into<String>>(self, header: H) -> i32 {
+        run_debug(self, header);
         self
     }
 
-    fn clipboard(&self) -> &i32 {
-        run_clipboard(&self);
+    fn clipboard(self) -> i32 {
+        run_clipboard(self);
         self
     }
 }
 
 impl Answer for i64 {
-    fn should_be(&self, ans: &i64) -> &i64 {
-        run_should_be(&self, &ans);
+    fn should_be(self, ans: i64) -> i64 {
+        run_should_be(self, ans);
         self
     }
 
-    fn debug(&self, header: &str) -> &i64 {
-        run_debug(&self, &header);
+    fn debug<H: Into<String>>(self, header: H) -> i64 {
+        run_debug(self, header);
         self
     }
 
-    fn clipboard(&self) -> &i64 {
-        run_clipboard(&self);
+    fn clipboard(self) -> i64 {
+        run_clipboard(self);
         self
     }
 }
 
-impl Answer for str {
-    fn should_be(&self, ans: &str) -> &str {
-        run_should_be(&self, &ans);
+impl Answer for String {
+    fn should_be(self, ans: String) -> String {
+        run_should_be(self.clone(), ans);
         self
     }
 
-    fn debug(&self, header: &str) -> &str {
-        run_debug(&self, &header);
+    fn debug<H: Into<String>>(self, header: H) -> String {
+        run_debug(self.clone(), header);
         self
     }
 
-    fn clipboard(&self) -> &str {
-        run_clipboard(&self);
+    fn clipboard(self) -> String {
+        run_clipboard(self.clone());
         self
     }
 }
 
 /// assert_eq without the panic and helper print
-fn run_should_be<T: Eq>(value: &T, ans: &T)
+fn run_should_be<T: Eq>(value: T, ans: T)
 where
     T: std::fmt::Display,
 {
@@ -97,14 +97,14 @@ where
 }
 
 /// Print out value with header
-fn run_debug<T>(value: T, header: &str)
+fn run_debug<T, H: Into<String>>(value: T, header: H)
 where
     T: std::fmt::Display,
 {
     println!(
         "\n{}
 -> [{}]",
-        header.blue(),
+        header.into().blue(),
         value.to_string().blue(),
     )
 }
